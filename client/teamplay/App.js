@@ -5,11 +5,14 @@ import Work from './src/screens/Work';
 import Notice from './src/screens/Notice';
 import Calender from './src/screens/Calender';
 import Message from './src/screens/Message';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import TeamList from './src/screens/TeamList';
 
 const App = () => {
-  const Stack = createNativeStackNavigator();
+  const stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
-  const NavigationBar = () => {
+  const Navigator = () => {
     return (
       <Tab.Navigator>
         <Tab.Screen name="Work" component={Work} />
@@ -22,7 +25,7 @@ const App = () => {
   }
   return (
     <View>
-      <Text>App</Text>
+      <TeamList />
     </View>
   )
 }
