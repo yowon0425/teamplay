@@ -1,22 +1,35 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
 
 const Main = () => {
-  const login = async () => {
-    await axios
-      .get('http://localhost:4000/login')
-      .then(res => console.log(res.data))
-      .catch(err => {
-        console.log('error');
-      });
+  const [idToken, setIdToken] = useState(undefined);
+  const googleConfig = GoogleSignin.configure({
+    webClientId:
+      '790378980309-58chnk7o3c9fes7r1e4vbpnp69dn1ta2.apps.googleusercontent.com',
+  });
+
+  /* ---------- 구글 로그인 ---------- */
+  const onPressLogin = async () => {
+    await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
+    const {idToken} = await GoogleSignin.signIn();
+    console.log('idToekn : ', idToken);
+    if (idToken) {
+      setIdToken(idToken);
+    }
+    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+    const res = await auth().signInWithCredential(googleCredential);
+    console.log('ok');
   };
+
   return (
     <LinearGradient style={styles.background} colors={['#033495', '#AEE4FF']}>
       <View style={styles.container}>
         <Text style={styles.title}>TeamPlay</Text>
-        <TouchableOpacity onPress={login}>
+        <TouchableOpacity onPress={onPressLogin}>
           <View style={styles.button}>
             <Image
               source={require('../../assets/images/google.png')}

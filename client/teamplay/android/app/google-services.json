@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "790378980309-uuimi08q4nvbco2m0olsail9o6ko5ot3.apps.googleusercontent.com",
+          "client_id": "790378980309-rq2ola78r9p92u3jqbco2vto9l8j4721.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teamplay",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "790378980309-58chnk7o3c9fes7r1e4vbpnp69dn1ta2.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,8 +35,15 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "790378980309-uuimi08q4nvbco2m0olsail9o6ko5ot3.apps.googleusercontent.com",
+              "client_id": "790378980309-58chnk7o3c9fes7r1e4vbpnp69dn1ta2.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "790378980309-ue6f2faib43u6lcmhn57i6qdftpguqe5.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.teamplay"
+              }
             }
           ]
         }
