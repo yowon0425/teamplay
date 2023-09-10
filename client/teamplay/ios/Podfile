@@ -25,6 +25,8 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
+
 target 'teamplay' do
   config = use_native_modules!
 

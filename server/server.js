@@ -13,7 +13,8 @@ const GOOGLE_REDIRECT_URI = "http://localhost:4000/login/redirect";
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+// app.use(cors());
+app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
 
 // 인덱스 페이지 응답 반환
 app.get("/", (req, res) => {

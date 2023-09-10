@@ -1,13 +1,22 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
+import axios from 'axios';
 
 const Main = () => {
+  const login = async () => {
+    await axios
+      .get('http://localhost:4000/login')
+      .then(res => console.log(res.data))
+      .catch(err => {
+        console.log('error');
+      });
+  };
   return (
     <LinearGradient style={styles.background} colors={['#033495', '#AEE4FF']}>
       <View style={styles.container}>
         <Text style={styles.title}>TeamPlay</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={login}>
           <View style={styles.button}>
             <Image
               source={require('../../assets/images/google.png')}

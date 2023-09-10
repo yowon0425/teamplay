@@ -1,13 +1,14 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import {View, Text} from 'react-native';
+import React from 'react';
 import Home from './src/screens/Home';
 import Work from './src/screens/Work';
 import Notice from './src/screens/Notice';
 import Calender from './src/screens/Calender';
 import Message from './src/screens/Message';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import TeamList from './src/screens/TeamList';
+import Main from './src/screens/Main';
 
 const App = () => {
   const stack = createNativeStackNavigator();
@@ -21,13 +22,14 @@ const App = () => {
         <Tab.Screen name="Calender" component={Calender} />
         <Tab.Screen name="Message" component={Message} />
       </Tab.Navigator>
-    )
-  }
+    );
+  };
   return (
     <View>
-      <TeamList />
+      <Main />
+      {/* <TeamList /> */}
     </View>
-  )
-}
+  );
+};
 
 export default App;

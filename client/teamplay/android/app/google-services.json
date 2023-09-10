@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "790378980309",
+    "project_id": "teamplay-a0079",
+    "storage_bucket": "teamplay-a0079.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790378980309:android:f54f10e6eed5955e89135c",
+        "android_client_info": {
+          "package_name": "com.teamplay"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "790378980309-uuimi08q4nvbco2m0olsail9o6ko5ot3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBI5djYq-NPSL8ZNwVs5czXm70e_IWPiXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "790378980309-uuimi08q4nvbco2m0olsail9o6ko5ot3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
