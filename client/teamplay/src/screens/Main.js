@@ -1,5 +1,5 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
@@ -7,10 +7,13 @@ import auth from '@react-native-firebase/auth';
 
 const Main = () => {
   const [idToken, setIdToken] = useState(undefined);
-  const googleConfig = GoogleSignin.configure({
-    webClientId:
-      '790378980309-58chnk7o3c9fes7r1e4vbpnp69dn1ta2.apps.googleusercontent.com',
-  });
+
+  useEffect(() => {
+    googleConfig = GoogleSignin.configure({
+      webClientId:
+        '790378980309-58chnk7o3c9fes7r1e4vbpnp69dn1ta2.apps.googleusercontent.com',
+    });
+  }, []);
 
   /* ---------- 구글 로그인 ---------- */
   const onPressLogin = async () => {
