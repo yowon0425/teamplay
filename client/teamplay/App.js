@@ -7,6 +7,9 @@ import Calender from './src/screens/Calender';
 import Message from './src/screens/Message';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import StartJoin from './src/screens/StartJoin';
+import LogIn from './src/screens/LogIn';
+import Main from './src/screens/Main';
 import TeamList from './src/screens/TeamList';
 
 const App = () => {
@@ -25,7 +28,7 @@ const App = () => {
   }
   return (
     <View>
-      <TeamList />
+      <StartJoin />
     </View>
   )
 }
