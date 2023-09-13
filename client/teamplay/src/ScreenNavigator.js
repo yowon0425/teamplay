@@ -42,6 +42,11 @@ const ScreenNavigator = () => {
           options={{headerShown: false}}
         />
         <Stack.Screen
+          name="TeamList"
+          component={TeamList}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
           name="HomeTabs"
           component={HomeTabs}
           options={{headerShown: false}}
