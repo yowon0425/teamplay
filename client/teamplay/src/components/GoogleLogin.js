@@ -30,7 +30,7 @@ const GoogleLogin = () => {
   const navigation = useNavigation();
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
-  const [isNewUser, setIsNewUser] = useState(true);
+  const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
     googleConfig = GoogleSignin.configure({
@@ -62,7 +62,7 @@ const GoogleLogin = () => {
         navigation.navigate('TeamList');
       }
     }
-  }, [loggedIn]);
+  }, []);
 
   /* ---------- 구글 로그인 ---------- */
   const onPressLogin = async () => {
@@ -70,7 +70,7 @@ const GoogleLogin = () => {
     const {idToken} = await GoogleSignin.signIn();
     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
     const res = await auth().signInWithCredential(googleCredential);
-    // setIsNewUser(res.additionalUserInfo.isNewUser); // 새로 가입한 유저인지 체크
+    setIsNewUser(res.additionalUserInfo.isNewUser); // 새로 가입한 유저인지 체크
     // console.log('isNew?', res.additionalUserInfo.isNewUser);
   };
 

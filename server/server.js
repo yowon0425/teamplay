@@ -1,7 +1,6 @@
 // 필요한 모듈 가져오기
 const express = require("express");
 const cors = require("cors");
-// const config = require("./config");
 const axios = require("axios");
 const db = require("./firebase");
 

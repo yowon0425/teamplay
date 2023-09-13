@@ -20,7 +20,7 @@ const LogIn = () => {
     if (signedUp) {
       navigator.navigate('TeamList');
     }
-  }, [signedUp]);
+  }, []);
 
   /* ---------- 회원 가입 함수 ---------- */
   const onClickSignUp = async () => {
