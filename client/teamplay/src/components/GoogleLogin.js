@@ -58,7 +58,7 @@ const GoogleLogin = () => {
       if (isNewUser) {
         navigation.navigate('LogIn');
       } else {
-        navigation.navigate('HomeTabs');
+        navigation.navigate('TeamList');
       }
     }
   }, [user]);
