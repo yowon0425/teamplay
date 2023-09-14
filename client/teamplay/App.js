@@ -7,7 +7,7 @@ import ScreenNavigator from './src/ScreenNavigator';
 import StartNew from './src/screens/StartNew';
 
 const App = () => {
-  return <StartNew />;
+  return <ScreenNavigator />;
 };
 
 export default App;
