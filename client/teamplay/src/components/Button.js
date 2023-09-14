@@ -13,14 +13,19 @@ const Button = ({text, light, onPress}) => {
     <View>
       {light ? (
         <Shadow style={styles.shadow}>
-          <TouchableOpacity style={styles.button} onPress={onPress}>
+          <TouchableOpacity
+            style={[styles.button, {backgroundColor: '#FAE6E2'}]}
+            onPress={onPress}>
             <Text style={styles.text}>{text}</Text>
           </TouchableOpacity>
         </Shadow>
       ) : (
-        <TouchableOpacity>
-          <Text>{text}</Text>
-        </TouchableOpacity>
+        <Shadow style={styles.shadow}>
+          <TouchableOpacity
+            style={[styles.button, {backgroundColor: '#F1F1F1'}]}>
+            <Text style={styles.text}>{text}</Text>
+          </TouchableOpacity>
+        </Shadow>
       )}
     </View>
   );
@@ -32,7 +37,6 @@ const styles = StyleSheet.create({
   button: {
     width: 160,
     height: 45,
-    backgroundColor: '#FAE6E2',
     borderRadius: 20,
     borderColor: 'black',
     borderWidth: 1,
