@@ -25,8 +25,13 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
+
 target 'teamplay' do
   config = use_native_modules!
+  pod 'GoogleUtilities', :modular_headers => true  #추가
+  use_frameworks! :linkage => :static
+  $RNFirebaseAsStaticFramework = true
 
   # Flags change depending on the env values.
   flags = get_default_flags()
