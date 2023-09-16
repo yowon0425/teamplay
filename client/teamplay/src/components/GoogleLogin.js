@@ -41,7 +41,7 @@ const GoogleLogin = () => {
 
   /* ---------- 로그인 여부 확인 ---------- */
   useEffect(() => {
-    // auth().signOut();
+    auth().signOut();
     // setUser(null);
     auth().onAuthStateChanged(user => {
       if (user) {
@@ -62,7 +62,7 @@ const GoogleLogin = () => {
         navigation.navigate('TeamList');
       }
     }
-  }, []);
+  }, [loggedIn]);
 
   /* ---------- 구글 로그인 ---------- */
   const onPressLogin = async () => {
@@ -71,7 +71,6 @@ const GoogleLogin = () => {
     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
     const res = await auth().signInWithCredential(googleCredential);
     setIsNewUser(res.additionalUserInfo.isNewUser); // 새로 가입한 유저인지 체크
-    // console.log('isNew?', res.additionalUserInfo.isNewUser);
   };
 
   return (
