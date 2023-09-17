@@ -8,7 +8,7 @@ import StartNew from './src/screens/StartNew';
 import StartJoin from './src/screens/StartJoin';
 
 const App = () => {
-  return <StartJoin />;
+  return <ScreenNavigator />;
 };
 
 export default App;
