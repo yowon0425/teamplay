@@ -29,7 +29,6 @@ import {useNavigation} from '@react-navigation/native';
 const GoogleLogin = () => {
   const navigation = useNavigation();
   const [loggedIn, setLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
   const [isNewUser, setIsNewUser] = useState(false);
 
   useEffect(() => {
@@ -41,11 +40,10 @@ const GoogleLogin = () => {
 
   /* ---------- 로그인 여부 확인 ---------- */
   useEffect(() => {
-    auth().signOut();
-    // setUser(null);
+    // auth().signOut();
     auth().onAuthStateChanged(user => {
       if (user) {
-        setUser(user);
+        console.log(user);
         setLoggedIn(true);
       } else {
         setLoggedIn(false);
@@ -56,13 +54,14 @@ const GoogleLogin = () => {
   /* ---------- 신규 or 기존 유저 여부에 따라 redirect ---------- */
   useEffect(() => {
     if (loggedIn) {
+      console.log(isNewUser);
       if (isNewUser) {
         navigation.navigate('LogIn');
       } else {
         navigation.navigate('TeamList');
       }
     }
-  }, [loggedIn]);
+  }, [isNewUser]);
 
   /* ---------- 구글 로그인 ---------- */
   const onPressLogin = async () => {
