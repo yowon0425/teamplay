@@ -121,8 +121,6 @@ const styles = StyleSheet.create({
     width: '75%',
     height: '70%',
     margin: 50,
-    borderColor: 'red',
-    borderWidth: 1,
   },
   map: {
     flexDirection: 'row',
