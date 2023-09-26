@@ -4,6 +4,21 @@ const cors = require("cors");
 const axios = require("axios");
 const db = require("./firebase");
 
+/* ------- API 요청법 --------
+await axios.post('/api/API이름', {
+        전달할 데이터를 이곳에 객체 형식으로
+      })
+      .then(res => {
+        if (res.data.응답값) {
+          // 성공 시 할 작업
+        } else {
+          // 실패 시 할 작업
+        }
+      })
+      .catch(err => 에러 시 할 작업);
+
+*/
+
 const PORT = 4000;
 
 const app = express();
@@ -52,6 +67,38 @@ app.post("/api/signup", async (req, res) => {
     res.send({ isSaved: true });
   } catch (err) {
     res.send({ isSaved: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 팀플 생성 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    name: 팀플 이름
+    leture: 수업 이름
+    numOfMember: 팀원 수
+    description: 팀플 설명
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
+app.post("/api/createTeam", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { name, lecture, nunOfMember, description } = req.body;
+
+  try {
+    // firestore에 저장
+    await db.collection("teamlist").doc().set({
+      name,
+      lecture,
+      nunOfMember,
+      description,
+    });
+    res.send({ isCompleted: true });
+  } catch (err) {
+    res.send({ isCompleted: false });
     console.log(err);
   }
 });
