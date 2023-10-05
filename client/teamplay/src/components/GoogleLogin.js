@@ -61,7 +61,7 @@ const GoogleLogin = () => {
         navigation.navigate('TeamList');
       }
     }
-  }, [isNewUser]);
+  }, [isNewUser, loggedIn]);
 
   /* ---------- 구글 로그인 ---------- */
   const onPressLogin = async () => {

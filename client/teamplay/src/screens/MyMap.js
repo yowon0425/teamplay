@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
@@ -7,9 +7,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import Button from '../components/Button';
 import Entypo from 'react-native-vector-icons/Entypo';
 
-const MemberMap = () => {
+const MyMap = () => {
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.top}>
         <View>
           <Text style={styles.title}>프로젝트 계획</Text>
@@ -75,16 +75,14 @@ const MemberMap = () => {
       <NavigationContainer>
         <MenuBar />
       </NavigationContainer>
-    </View>
+    </ScrollView>
   );
 };
 
-export default MemberMap;
+export default MyMap;
 
 const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-  },
+  container: {},
   top: {
     width: '100%',
     alignItems: 'center',
