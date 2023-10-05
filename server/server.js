@@ -4,6 +4,21 @@ const cors = require("cors");
 const axios = require("axios");
 const db = require("./firebase");
 
+/* ------- API 요청법 --------
+await axios.post('/api/API이름', {
+        전달할 데이터를 이곳에 객체 형식으로
+      })
+      .then(res => {
+        if (res.data.응답값) {
+          // 성공 시 할 작업
+        } else {
+          // 실패 시 할 작업
+        }
+      })
+      .catch(err => 에러 시 할 작업);
+
+*/
+
 const PORT = 4000;
 
 const app = express();
@@ -52,6 +67,107 @@ app.post("/api/signup", async (req, res) => {
     res.send({ isSaved: true });
   } catch (err) {
     res.send({ isSaved: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 팀플 생성 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id (랜덤 생성)
+    name: 팀플 이름
+    leture: 수업 이름
+    numOfMember: 팀원 수
+    description: 팀플 설명
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
+app.post("/api/createTeam", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { name, lecture, nunOfMember, description } = req.body;
+
+  try {
+    // firestore에 저장
+    await db.collection("teamlist").doc(teamId).set({
+      name,
+      lecture,
+      nunOfMember,
+      description,
+    });
+    res.send({ isCompleted: true });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 팀플 참가 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: 유저 id
+    teamId: 팀플 id
+  }
+
+  // 응답 형식
+  성공 -> isJoined: true
+  실패 -> isJoined: false
+*/
+app.post("/api/joinTeam", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId } = req.body;
+
+  try {
+    // user 정보 -> teamList에 팀플 추가
+    await db
+      .collection("user")
+      .doc(uid)
+      .update({
+        teamList: FieldValue.arrayUnion(teamId),
+      });
+    res.send({ isJoined: true });
+  } catch (err) {
+    res.send({ isJoined: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 팀플 데이터 API (개별) -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+  }
+
+  // 응답 형식
+  성공 -> res.data.teamData
+  {
+    teamId: 팀플 id
+    name: 팀플 이름
+    leture: 수업 이름
+    numOfMember: 팀원 수
+    description: 팀플 설명
+  }
+  실패 -> isCompleted: false
+*/
+app.post("/api/teamData", async (req, res) => {
+  // 요청 데이터 받아오기
+  const teamId = req.body.teamId;
+
+  try {
+    // firestore에 저장
+    await db
+      .collection("teamlist")
+      .doc(teamId)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var teamData = snapshot.data();
+        return res.json(teamData);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
     console.log(err);
   }
 });
