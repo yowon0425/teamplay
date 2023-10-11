@@ -2,7 +2,10 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const db = require("./firebase");
+const { db, bucket } = require("./firebase");
+const multer = require("multer");
+const { Storage } = require("@google-cloud/storage");
+const upload = multer({ dest: "api/uploads/" });
 
 /* ------- API 요청법 --------
 await axios.post('/api/API이름', {
@@ -179,5 +182,35 @@ app.post("/api/teamData", async (req, res) => {
   } catch (err) {
     res.send({ isCompleted: false });
     console.log(err);
+  }
+});
+
+/* ------------- 파일 업로드 API -------------
+  // req로 받아야하는 데이터 = formData 
+  {
+    file url
+    file name
+    file type
+    uid
+  }
+
+  // 응답 형식
+  성공 -> uploaded: true
+  실패 -> uploaded: false
+*/
+app.post("/api/upload", upload.single("file"), async (req, res) => {
+  const { formData, uid } = req;
+
+  try {
+    // Firebase Storage에 파일 업로드
+    const storagePath = `${uid}` + formData.name;
+    await bucket.upload(formData.uri, {
+      destination: storagePath,
+    });
+
+    res.send({ uploaded: true });
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    res.send({ uploaded: false });
   }
 });
