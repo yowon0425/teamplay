@@ -7,10 +7,10 @@ import StartNew from './src/screens/StartNew';
 import StartJoin from './src/screens/StartJoin';
 import Home from './src/screens/Home';
 import MemberMap from './src/screens/MemberMap';
-import Notice from './src/screens/Notice';
+import Calender from './src/screens/Calender';
 
 const App = () => {
-  return <Home />;
+  return <ScreenNavigator/>;
 };
 
 export default App;
