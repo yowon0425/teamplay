@@ -12,17 +12,17 @@ LocaleConfig.locales['fr'] = {
 };
 LocaleConfig.defaultLocale = 'fr';
 
-class Calendars extends Component {
+class Calender extends Component {
   render() {
      return (
       <View style={{ paddingTop: 50, flex: 1 }}>
         <Calendar
         // Initially visible month. Default = Date()
-        current={'2020-06-07'}
+        current={'2023-10-17'}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
         minDate={'2020-01-01'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
-        maxDate={'2020-12-31'}
+        maxDate={'2024-12-31'}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day) => {console.log('selected day', day)}}
         // Handler which gets executed on day long press. Default = undefined
@@ -64,4 +64,4 @@ class Calendars extends Component {
    }
  }
 
-export default Calendars;
+export default Calender;
