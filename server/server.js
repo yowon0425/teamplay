@@ -63,6 +63,7 @@ app.post("/api/signup", async (req, res) => {
       studentId,
       major,
       organization,
+      teamList: [],
     });
     res.send({ isSaved: true });
   } catch (err) {
@@ -96,6 +97,7 @@ app.post("/api/createTeam", async (req, res) => {
       lecture,
       nunOfMember,
       description,
+      memberList: [],
     });
     res.send({ isCompleted: true });
   } catch (err) {
@@ -126,6 +128,14 @@ app.post("/api/joinTeam", async (req, res) => {
       .doc(uid)
       .update({
         teamList: FieldValue.arrayUnion(teamId),
+      });
+
+    // 팀플 DB에 유저(팀플 멤버) id 추가
+    await db
+      .collection("teamlist")
+      .doc(teamId)
+      .update({
+        memberList: FieldValue.arrayUnion(uid),
       });
     res.send({ isJoined: true });
   } catch (err) {

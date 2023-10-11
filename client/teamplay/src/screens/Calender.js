@@ -1,21 +1,55 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react';
 import {View} from 'react-native';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import {LocaleConfig} from 'react-native-calendars';
 
 LocaleConfig.locales['fr'] = {
-  monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-  monthNamesShort: ['Janv.','Févr.','Mars','Avril','Mai','Juin','Juil.','Août','Sept.','Oct.','Nov.','Déc.'],
-  dayNames: ['일요일','월요일', '화요일','수요일','목요일','금요일','토요일'],
-  dayNamesShort: ['일', '월','화','수','목','금','토'],
-  today: 'Aujourd\'hui'
+  monthNames: [
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
+  ],
+  monthNamesShort: [
+    'Janv.',
+    'Févr.',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juil.',
+    'Août',
+    'Sept.',
+    'Oct.',
+    'Nov.',
+    'Déc.',
+  ],
+  dayNames: [
+    '일요일',
+    '월요일',
+    '화요일',
+    '수요일',
+    '목요일',
+    '금요일',
+    '토요일',
+  ],
+  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+  today: "Aujourd'hui",
 };
 LocaleConfig.defaultLocale = 'fr';
 
 class Calender extends Component {
   render() {
-     return (
-      <View style={{ paddingTop: 50, flex: 1 }}>
+    return (
+      <View style={{paddingTop: 50, flex: 1}}>
         <Calendar
         // Initially visible month. Default = Date()
         current={'2023-10-17'}
@@ -60,8 +94,8 @@ class Calender extends Component {
         //renderHeader={(date) => {/*Return JSX*/}}
         />
       </View>
-     )
-   }
- }
+    );
+  }
+}
 
 export default Calender;
