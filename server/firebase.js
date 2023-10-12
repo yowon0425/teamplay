@@ -11,11 +11,16 @@ const serviceAccount = require("./firebaseAdminSDK.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
+  storageBucket: "gs://teamplay-a0079.appspot.com",
 });
 
 const db = firestore.getFirestore();
+const bucket = admin.storage().bucket();
 
-module.exports = db;
+module.exports = {
+  db,
+  bucket,
+};
 
 async function test() {
   db.collection("cities").doc("LA2").set({

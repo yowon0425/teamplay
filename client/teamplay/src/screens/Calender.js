@@ -1,28 +1,62 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react';
 import {View} from 'react-native';
 import {Calendar, CalendarList, Agenda} from 'react-native-calendars';
 import {LocaleConfig} from 'react-native-calendars';
 
 LocaleConfig.locales['fr'] = {
-  monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-  monthNamesShort: ['Janv.','Févr.','Mars','Avril','Mai','Juin','Juil.','Août','Sept.','Oct.','Nov.','Déc.'],
-  dayNames: ['일요일','월요일', '화요일','수요일','목요일','금요일','토요일'],
-  dayNamesShort: ['일', '월','화','수','목','금','토'],
-  today: 'Aujourd\'hui'
+  monthNames: [
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
+  ],
+  monthNamesShort: [
+    'Janv.',
+    'Févr.',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juil.',
+    'Août',
+    'Sept.',
+    'Oct.',
+    'Nov.',
+    'Déc.',
+  ],
+  dayNames: [
+    '일요일',
+    '월요일',
+    '화요일',
+    '수요일',
+    '목요일',
+    '금요일',
+    '토요일',
+  ],
+  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+  today: "Aujourd'hui",
 };
 LocaleConfig.defaultLocale = 'fr';
 
-class Calendars extends Component {
+class Calender extends Component {
   render() {
-     return (
-      <View style={{ paddingTop: 50, flex: 1 }}>
+    return (
+      <View style={{paddingTop: 50, flex: 1}}>
         <Calendar
         // Initially visible month. Default = Date()
-        current={'2020-06-07'}
+        current={'2023-10-17'}
         // Minimum date that can be selected, dates before minDate will be grayed out. Default = undefined
         minDate={'2020-01-01'}
         // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
-        maxDate={'2020-12-31'}
+        maxDate={'2024-12-31'}
         // Handler which gets executed on day press. Default = undefined
         onDayPress={(day) => {console.log('selected day', day)}}
         // Handler which gets executed on day long press. Default = undefined
@@ -60,8 +94,8 @@ class Calendars extends Component {
         //renderHeader={(date) => {/*Return JSX*/}}
         />
       </View>
-     )
-   }
- }
+    );
+  }
+}
 
-export default Calendars;
+export default Calender;

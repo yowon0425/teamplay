@@ -12,6 +12,9 @@ const TeamList = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>나의 팀</Text>
+      </View>
       <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.linearGradient}>
         <View style={styles.textContainer}>
           <Text style={styles.teamName}>
@@ -22,8 +25,24 @@ const TeamList = () => {
           팀 소개
         </Text>
       </LinearGradient>
-      <TouchableOpacity onPress={toggleOptions} style={styles.buttonContainer}>
-        <Button style={[styles.input, { width: '90%' }]} text="+" light={false} />
+      <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.white}></LinearGradient>
+      <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.linearGradient}>
+        <View style={styles.textContainer}>
+          <Text style={styles.teamName}>
+            팀 이름
+          </Text>
+        </View>
+        <Text style={styles.teamDescription}>
+          팀 소개
+        </Text>
+      </LinearGradient>
+      <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.white}></LinearGradient>
+      <TouchableOpacity onPress={toggleOptions} style={{ width: '100%', alignItems: 'center' }}>
+        <LinearGradient colors={['#EAEAEA', '#EAEAEA']} style={styles.button}>
+          <View style={styles.textContainer}>
+            <Text style={styles.plusText}>+</Text>
+          </View>
+        </LinearGradient>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -35,12 +54,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  header: {
+    width: '100%',
+    height: 80, // 높이를 조절하여 여백을 생성
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'black',
+  },
   linearGradient: {
     width: '90%',
     height: '15%',
-    borderRadius: 25,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  white: {
+    height: 10,
   },
   textContainer: {
     alignItems: 'center',
@@ -62,6 +95,16 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 16,
+    color: 'black',
+  },
+  button: {
+    width: '90%',
+    height: '25%',
+    borderRadius: 10,
+  },
+  plusText: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: 'black',
   },
 });
