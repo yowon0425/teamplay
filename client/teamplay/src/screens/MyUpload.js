@@ -6,14 +6,12 @@ import {
   Image,
   TextInput,
 } from 'react-native';
-import React from 'react';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import Button from '../components/Button';
 import React, {useState} from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import axios from 'axios';
-
 
 const MyUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -136,11 +134,12 @@ const MyUpload = () => {
           </View>
         </View>
       </ScrollView>
-    <View>
-      <Text>MyUpload</Text>
-      <Button title="Select File" onPress={handleFileSelect} />
-      {selectedFile && <Text>선택한 파일: {selectedFile.name}</Text>}
-      <Button title="Upload File" onPress={handleFileUpload} />
+      <View>
+        <Text>MyUpload</Text>
+        <Button title="Select File" onPress={handleFileSelect} />
+        {selectedFile && <Text>선택한 파일: {selectedFile.name}</Text>}
+        <Button title="Upload File" onPress={handleFileUpload} />
+      </View>
     </View>
   );
 };
