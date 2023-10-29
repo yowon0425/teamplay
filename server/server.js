@@ -4,8 +4,10 @@ const cors = require("cors");
 const axios = require("axios");
 const { db, bucket } = require("./firebase");
 const multer = require("multer");
-const { Storage } = require("@google-cloud/storage");
-const upload = multer({ dest: "api/uploads/" });
+
+const upload = multer({ storage: multer.memoryStorage() });
+const fs = require("fs").promises;
+// const rnFetchBlob = require("react-native-fetch-blob");
 
 /* ------- API 요청법 --------
 await axios.post('/api/API이름', {
@@ -188,7 +190,7 @@ app.post("/api/teamData", async (req, res) => {
 /* ------------- 파일 업로드 API -------------
   // req로 받아야하는 데이터 = formData 
   {
-    file url
+    file uri
     file name
     file type
     uid
@@ -199,13 +201,26 @@ app.post("/api/teamData", async (req, res) => {
   실패 -> uploaded: false
 */
 app.post("/api/upload", upload.single("file"), async (req, res) => {
-  const { formData, uid } = req;
+  const { uid } = req.body;
+  console.log("file-> ", req.file);
 
   try {
-    // Firebase Storage에 파일 업로드
-    const storagePath = `${uid}` + formData.name;
-    await bucket.upload(formData.uri, {
-      destination: storagePath,
+    const metadata = {
+      metadata: {
+        // This line is very important. It's to create a download token.
+        firebaseStorageDownloadTokens: "12",
+      },
+      contentType: req.file.mimetype,
+      cacheControl: "public, max-age=31536000",
+    };
+    const tempFilePath = `/tmp/${uid}-${req.file.originalname}`;
+    await fs.writeFile(tempFilePath, req.file.buffer);
+
+    await bucket.upload(tempFilePath, {
+      // Support for HTTP requests made with `Accept-Encoding: gzip`
+      gzip: true,
+      destination: uid + "/" + req.file.originalname,
+      metadata: metadata,
     });
 
     res.send({ uploaded: true });
