@@ -7,6 +7,7 @@
 
 const admin = require("firebase-admin");
 const firestore = require("firebase-admin/firestore");
+const fstorage = require("firebase-admin/storage");
 const serviceAccount = require("./firebaseAdminSDK.json");
 
 admin.initializeApp({
@@ -21,11 +22,3 @@ module.exports = {
   db,
   bucket,
 };
-
-async function test() {
-  db.collection("cities").doc("LA2").set({
-    name: "Los Angeles 2",
-    state: "CA 2",
-    country: "USA 2",
-  });
-}
