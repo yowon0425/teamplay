@@ -2,8 +2,9 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const { db, bucket } = require("./firebase");
+const { db, bucket, admin } = require("./firebase");
 const multer = require("multer");
+const { FieldValue } = admin.firestore;
 
 const upload = multer({ storage: multer.memoryStorage() });
 const fs = require("fs").promises;
@@ -70,6 +71,7 @@ app.post("/api/signup", async (req, res) => {
       organization,
       teamList: [],
     });
+
     res.send({ isSaved: true });
   } catch (err) {
     res.send({ isSaved: false });
@@ -200,28 +202,40 @@ app.post("/api/teamData", async (req, res) => {
   성공 -> uploaded: true
   실패 -> uploaded: false
 */
-app.post("/api/upload", upload.single("file"), async (req, res) => {
-  const { uid } = req.body;
-  console.log("file-> ", req.file);
+app.post("/api/upload", upload.any(), async (req, res) => {
+  const { uid, fileInfo } = req.body;
+  const file = req.files[0];
 
   try {
+    // 필요한 메타데이터 정의
     const metadata = {
       metadata: {
         // This line is very important. It's to create a download token.
-        firebaseStorageDownloadTokens: "12",
+        firebaseStorageDownloadTokens: uid,
       },
-      contentType: req.file.mimetype,
+      contentType: file.mimetype,
       cacheControl: "public, max-age=31536000",
     };
-    const tempFilePath = `/tmp/${uid}-${req.file.originalname}`;
-    await fs.writeFile(tempFilePath, req.file.buffer);
 
+    // file 읽기
+    const tempFilePath = `/tmp/${uid}-${file.originalname}`;
+    await fs.writeFile(tempFilePath, file.buffer);
+
+    // firebase storage에 업로드 하기
     await bucket.upload(tempFilePath, {
       // Support for HTTP requests made with `Accept-Encoding: gzip`
       gzip: true,
-      destination: uid + "/" + req.file.originalname,
+      destination: uid + "/" + file.originalname,
       metadata: metadata,
     });
+
+    // firestore에 파일 정보 저장
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .update({
+        files: FieldValue.arrayUnion(fileInfo),
+      });
 
     res.send({ uploaded: true });
   } catch (error) {

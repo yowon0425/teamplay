@@ -46,6 +46,13 @@ const MyUpload = () => {
         name: selectedFile.name,
       });
 
+      const {uid} = auth().currentUser;
+      // const blob = new Blob([JSON.stringify({uid, selectedFile})], {
+      //   type: 'application/json',
+      // });
+      formData.append('uid', uid);
+      formData.append('fileInfo', JSON.stringify(selectedFile));
+
       try {
         const response = await axios.post('/api/upload', formData, {
           headers: {

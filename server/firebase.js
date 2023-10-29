@@ -21,4 +21,5 @@ const bucket = admin.storage().bucket();
 module.exports = {
   db,
   bucket,
+  admin,
 };
