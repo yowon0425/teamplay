@@ -11,7 +11,7 @@ import Calender from './src/screens/Calender';
 import MyUpload from './src/screens/MyUpload';
 
 const App = () => {
-  return <MyUpload />;
+  return <Calender />;
 };
 
 export default App;
