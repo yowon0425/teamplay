@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native'; // Import TouchableOpacity
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LocaleConfig } from 'react-native-calendars';
+import Modal from 'react-native-modal';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
@@ -47,6 +48,14 @@ LocaleConfig.locales['fr'] = {
 LocaleConfig.defaultLocale = 'fr';
 
 class Calender extends Component {
+  state = {
+    isModalVisible: false,
+  };
+
+  toggleModal = () => {
+    this.setState({ isModalVisible: !this.state.isModalVisible });
+  };
+
   render() {
     const currentDate = new Date();
     const currentDateString = currentDate.toISOString().split('T')[0];
@@ -59,24 +68,53 @@ class Calender extends Component {
         />
         <View style={{ position: 'absolute', top: 450, right: 10 }}>
           <TouchableOpacity
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: 'gray',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-            onPress={() => {
-              // Handle the button press here
-            }}
+            style={styles.addButton}
+            onPress={this.toggleModal}
           >
             <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
           </TouchableOpacity>
         </View>
+        <Modal isVisible={this.state.isModalVisible}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={() => this.toggleModal()}>
+              <Text style={styles.optionText}>일정 추가</Text>
+            </TouchableOpacity>
+            <View style={styles.separator}></View>
+            <TouchableOpacity onPress={() => this.toggleModal()}>
+              <Text style={styles.optionText}>일정 삭제</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </View>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  addButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'gray',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 4,
+  },
+  separator: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'black',
+    marginVertical: 10,
+  },
+  optionText: {
+    fontSize: 18, // Adjust the font size as needed
+    marginVertical: 8, // Add some vertical spacing between options
+  },
+});
 
 export default Calender;
