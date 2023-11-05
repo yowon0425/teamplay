@@ -8,7 +8,6 @@ const { FieldValue } = admin.firestore;
 
 const upload = multer({ storage: multer.memoryStorage() });
 const fs = require("fs").promises;
-// const rnFetchBlob = require("react-native-fetch-blob");
 
 /* ------- API 요청법 --------
 await axios.post('/api/API이름', {
@@ -70,6 +69,11 @@ app.post("/api/signup", async (req, res) => {
       major,
       organization,
       teamList: [],
+    });
+
+    // fileList에 문서 생성
+    await db.collection("fileList").doc(uid).set({
+      files: [],
     });
 
     res.send({ isSaved: true });
