@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Button from '../components/Button';
-import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  SafeAreaView,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import axios from 'axios';
+import auth from '@react-native-firebase/auth';
 
 const TeamList = () => {
   const [showOptions, setShowOptions] = useState(false);
@@ -10,34 +18,59 @@ const TeamList = () => {
     setShowOptions(!showOptions);
   };
 
+  useEffect(() => {
+    const {uid} = auth().currentUser;
+
+    const getTeams = async () => {
+      await axios
+        .post('/api/teamList', {uid})
+        .then(res => {
+          if (res.data) {
+            console.log(res.data);
+            /* 응답 형식
+              {
+                teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
+              }
+            */
+          }
+          ㄴ;
+        })
+        .catch(err => console.log(err));
+    };
+
+    getTeams();
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>나의 팀</Text>
       </View>
-      <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.linearGradient}>
+      <LinearGradient
+        colors={['#FFB8D0', '#FEE5E1']}
+        style={styles.linearGradient}>
         <View style={styles.textContainer}>
-          <Text style={styles.teamName}>
-            팀 이름
-          </Text>
+          <Text style={styles.teamName}>팀 이름</Text>
         </View>
-        <Text style={styles.teamDescription}>
-          팀 소개
-        </Text>
+        <Text style={styles.teamDescription}>팀 소개</Text>
       </LinearGradient>
-      <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.white}></LinearGradient>
-      <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.linearGradient}>
+      <LinearGradient
+        colors={['#FFB8D0', '#FEE5E1']}
+        style={styles.white}></LinearGradient>
+      <LinearGradient
+        colors={['#FFB8D0', '#FEE5E1']}
+        style={styles.linearGradient}>
         <View style={styles.textContainer}>
-          <Text style={styles.teamName}>
-            팀 이름
-          </Text>
+          <Text style={styles.teamName}>팀 이름</Text>
         </View>
-        <Text style={styles.teamDescription}>
-          팀 소개
-        </Text>
+        <Text style={styles.teamDescription}>팀 소개</Text>
       </LinearGradient>
-      <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.white}></LinearGradient>
-      <TouchableOpacity onPress={toggleOptions} style={{ width: '100%', alignItems: 'center' }}>
+      <LinearGradient
+        colors={['#FFB8D0', '#FEE5E1']}
+        style={styles.white}></LinearGradient>
+      <TouchableOpacity
+        onPress={toggleOptions}
+        style={{width: '100%', alignItems: 'center'}}>
         <LinearGradient colors={['#EAEAEA', '#EAEAEA']} style={styles.button}>
           <View style={styles.textContainer}>
             <Text style={styles.plusText}>+</Text>
@@ -46,7 +79,7 @@ const TeamList = () => {
       </TouchableOpacity>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

@@ -110,6 +110,20 @@ app.post("/api/createTeam", async (req, res) => {
       description,
       memberList: [],
     });
+
+    let teamObj = new Map([
+      ["teamId", teamId],
+      ["name", name],
+      ["description", description],
+    ]);
+    // user 정보 -> teamList에 팀플 추가
+    await db
+      .collection("user")
+      .doc(uid)
+      .update({
+        teamList: FieldValue.arrayUnion(teamObj),
+      });
+
     res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
@@ -133,15 +147,21 @@ app.post("/api/joinTeam", async (req, res) => {
   const { uid, teamId } = req.body;
 
   try {
+    let teamObj = new Map([
+      ["teamId", teamId],
+      ["name", name],
+      ["description", description],
+    ]);
     // user 정보 -> teamList에 팀플 추가
     await db
       .collection("user")
       .doc(uid)
       .update({
-        teamList: FieldValue.arrayUnion(teamId),
+        teamList: FieldValue.arrayUnion(teamObj),
       });
 
     // 팀플 DB에 유저(팀플 멤버) id 추가
+
     await db
       .collection("teamlist")
       .doc(teamId)
@@ -164,8 +184,8 @@ app.post("/api/joinTeam", async (req, res) => {
   // 응답 형식
   성공 -> res.data
   {
-    teamList[]: 팀플 리스트
-  }
+    teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
+  } 
   실패 -> isCompleted: false
 */
 app.post("/api/teamList", async (req, res) => {
@@ -175,8 +195,8 @@ app.post("/api/teamList", async (req, res) => {
   try {
     // firestore에서 가져오기
     await db
-      .collection("user")
-      .doc(uid)
+      .collection("users")
+      .doc(`${uid}`)
       .get()
       .then((snapshot) => {
         // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
