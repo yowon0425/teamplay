@@ -56,9 +56,6 @@ const Home = ({teamName, goal}) => {
       <View style={{alignItems: 'center', margin: 20}}>
         <Button text="내 작업 페이지로" light={true} />
       </View>
-      <NavigationContainer style={{alignItems: 'flex-end'}}>
-        <MenuBar />
-      </NavigationContainer>
     </View>
   );
 };

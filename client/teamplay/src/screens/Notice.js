@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   },
   noticeIcon: {
     left: 120,
+    fontSize: 24,
   },
   category: {
     width: '100%',

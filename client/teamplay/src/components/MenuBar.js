@@ -10,17 +10,15 @@ import Message from '../screens/Message';
 import Ionic from 'react-native-vector-icons/Ionicons';
 
 const MenuBar = () => {
-  const Stack = createNativeStackNavigator();
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
+        initialRouteName: 'home',
         tabBarHideOnKeyboard: true,
         tabBarShowLabel: false,
         headerShown: false,
-        tabBarStyle: {
-          height: 70,
-        },
+        tabBarStyle: {},
         tabBarIcon: ({focused, size}) => {
           let iconName;
           let color;
