@@ -155,6 +155,40 @@ app.post("/api/joinTeam", async (req, res) => {
   }
 });
 
+/* ------------- 팀플 리스트 API (특정 유저의 팀플 리스트) -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: 유저 id
+  }
+
+  // 응답 형식
+  성공 -> res.data
+  {
+    teamList[]: 팀플 리스트
+  }
+  실패 -> isCompleted: false
+*/
+app.post("/api/teamList", async (req, res) => {
+  // 요청 데이터 받아오기
+  const uid = req.body.uid;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("user")
+      .doc(uid)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var userData = snapshot.data();
+        return res.json(userData.teamList);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
 /* ------------- 팀플 데이터 API (개별) -------------
   // req로 받아야하는 데이터 형식
   {
@@ -162,7 +196,7 @@ app.post("/api/joinTeam", async (req, res) => {
   }
 
   // 응답 형식
-  성공 -> res.data.teamData
+  성공 -> res.data
   {
     teamId: 팀플 id
     name: 팀플 이름
@@ -177,7 +211,7 @@ app.post("/api/teamData", async (req, res) => {
   const teamId = req.body.teamId;
 
   try {
-    // firestore에 저장
+    // firestore에서 가져오기
     await db
       .collection("teamlist")
       .doc(teamId)
