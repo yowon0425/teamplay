@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LocaleConfig } from 'react-native-calendars';
-import Modal from 'react-native-modal';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
@@ -49,11 +48,32 @@ LocaleConfig.defaultLocale = 'fr';
 
 class Calender extends Component {
   state = {
-    isModalVisible: false,
+    selectedDate: '',
+    isTextInputVisible: false,
+    eventText: '',
+    events: {},
   };
 
-  toggleModal = () => {
-    this.setState({ isModalVisible: !this.state.isModalVisible });
+  handleDayPress = (day) => {
+    this.setState({ selectedDate: day.dateString, isTextInputVisible: true });
+  };
+
+  handleAddEvent = () => {
+    const { selectedDate, eventText, events } = this.state;
+
+    if (selectedDate && eventText) {
+      const updatedEvents = { ...events };
+      if (!updatedEvents[selectedDate]) {
+        updatedEvents[selectedDate] = [];
+      }
+      updatedEvents[selectedDate].push(eventText);
+
+      this.setState({
+        events: updatedEvents,
+        eventText: '',
+        isTextInputVisible: false,
+      });
+    }
   };
 
   render() {
@@ -61,36 +81,60 @@ class Calender extends Component {
     const currentDateString = currentDate.toISOString().split('T')[0];
 
     return (
-      <View style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
-        <Calendar
-          current={currentDateString}
-          monthFormat={'yyyy년 MM월'}
-        />
-        <View style={{ position: 'absolute', top: 450, right: 10 }}>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={this.toggleModal}
-          >
-            <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
-          </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        enabled
+      >
+        <View style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
+          <Calendar
+            current={currentDateString}
+            monthFormat={'yyyy년 MM월'}
+            onDayPress={this.handleDayPress}
+            markedDates={{
+              [this.state.selectedDate]: { selected: true, selectedColor: 'lightblue' },
+            }}
+          />
+          {this.state.isTextInputVisible && (
+            <View style={styles.textInputContainer}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="일정을 입력하세요..."
+                value={this.state.eventText}
+                onChangeText={(text) => this.setState({ eventText: text })}
+                autoCorrect={false}
+                autoCapitalize="none"
+                keyboardType="default"
+              />
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={this.handleAddEvent}
+              >
+                <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          <EventList events={this.state.events} />
         </View>
-        <Modal isVisible={this.state.isModalVisible}>
-          <View style={styles.modalContent}>
-            <TouchableOpacity onPress={() => this.toggleModal()}>
-              <Text style={styles.optionText}>일정 추가</Text>
-            </TouchableOpacity>
-            <View style={styles.separator}></View>
-            <TouchableOpacity onPress={() => this.toggleModal()}>
-              <Text style={styles.optionText}>일정 삭제</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  textInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 10,
+  },
+  textInput: {
+    flex: 1,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 10,
+  },
   addButton: {
     width: 40,
     height: 40,
@@ -98,23 +142,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'gray',
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: 10,
   },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 22,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 4,
-  },
-  separator: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'black',
-    marginVertical: 10,
-  },
-  optionText: {
-    fontSize: 18, // Adjust the font size as needed
-    marginVertical: 8, // Add some vertical spacing between options
+  eventListContainer: {
+    marginHorizontal: 20,
   },
 });
+
+const EventList = ({ events }) => (
+  <ScrollView style={styles.eventListContainer}>
+    {Object.keys(events).map((date) => (
+      <View key={date}>
+        <Text>날짜: {date}</Text>
+        {events[date].map((event, index) => (
+          <Text key={index}>일정: {event}</Text>
+        ))}
+      </View>
+    ))}
+  </ScrollView>
+);
 
 export default Calender;
