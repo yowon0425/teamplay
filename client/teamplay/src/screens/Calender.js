@@ -2,55 +2,28 @@ import React, { Component } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LocaleConfig } from 'react-native-calendars';
+import Modal from 'react-native-modal';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
+    '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월',
   ],
   monthNamesShort: [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
+    '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월',
   ],
-  dayNames: [
-    '일요일',
-    '월요일',
-    '화요일',
-    '수요일',
-    '목요일',
-    '금요일',
-    '토요일',
-  ],
+  dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
   dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
   today: "오늘",
 };
 LocaleConfig.defaultLocale = 'fr';
 
-class Calender extends Component {
+class CalendarScreen extends Component {
   state = {
     selectedDate: '',
     isTextInputVisible: false,
+    isTimePickerVisible: false,
     eventText: '',
+    selectedTime: '12:00', // Default time
     events: {},
   };
 
@@ -59,21 +32,31 @@ class Calender extends Component {
   };
 
   handleAddEvent = () => {
-    const { selectedDate, eventText, events } = this.state;
+    const { selectedDate, selectedTime, eventText, events } = this.state;
 
     if (selectedDate && eventText) {
       const updatedEvents = { ...events };
-      if (!updatedEvents[selectedDate]) {
-        updatedEvents[selectedDate] = [];
+      const dateTime = `${selectedDate} ${selectedTime}`;
+      if (!updatedEvents[dateTime]) {
+        updatedEvents[dateTime] = [];
       }
-      updatedEvents[selectedDate].push(eventText);
+      updatedEvents[dateTime].push(eventText);
 
       this.setState({
         events: updatedEvents,
         eventText: '',
         isTextInputVisible: false,
+        selectedTime: '12:00', // Reset time after adding the event
       });
     }
+  };
+
+  toggleTimePicker = () => {
+    this.setState({ isTimePickerVisible: !this.state.isTimePickerVisible });
+  };
+
+  handleTimeConfirm = (time) => {
+    this.setState({ selectedTime: time, isTimePickerVisible: false });
   };
 
   render() {
@@ -114,6 +97,32 @@ class Calender extends Component {
               </TouchableOpacity>
             </View>
           )}
+          <View style={styles.selectedDateTimeContainer}>
+            <Text style={styles.selectedDateTime}>{`선택된 날짜: ${this.state.selectedDate}`}</Text>
+            <TouchableOpacity onPress={this.toggleTimePicker}>
+              <Text style={styles.selectedDateTime}>{`선택된 시간: ${this.state.selectedTime}`}</Text>
+            </TouchableOpacity>
+          </View>
+          <Modal
+            isVisible={this.state.isTimePickerVisible}
+            onBackdropPress={() => this.setState({ isTimePickerVisible: false })}
+          >
+            <View style={styles.modalContainer}>
+              <View>
+                <Text style={styles.modalTitle}>시간 선택</Text>
+              </View>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="HH:mm"
+                keyboardType="numeric"
+                value={this.state.selectedTime}
+                onChangeText={(text) => this.setState({ selectedTime: text })}
+              />
+              <TouchableOpacity onPress={() => this.handleTimeConfirm(this.state.selectedTime)}>
+                <Text style={styles.modalButton}>확인</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
           <EventList events={this.state.events} />
         </View>
       </KeyboardAvoidingView>
@@ -147,14 +156,47 @@ const styles = StyleSheet.create({
   eventListContainer: {
     marginHorizontal: 20,
   },
+  modalContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  modalInput: {
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+  modalButton: {
+    color: 'blue',
+    textAlign: 'center',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: 'blue',
+    borderRadius: 5,
+  },
+  selectedDateTimeContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  selectedDateTime: {
+    fontSize: 16,
+    marginBottom: 10,
+  },
 });
 
 const EventList = ({ events }) => (
   <ScrollView style={styles.eventListContainer}>
-    {Object.keys(events).map((date) => (
-      <View key={date}>
-        <Text>날짜: {date}</Text>
-        {events[date].map((event, index) => (
+    {Object.keys(events).map((dateTime) => (
+      <View key={dateTime}>
+        <Text>날짜/시간: {dateTime}</Text>
+        {events[dateTime].map((event, index) => (
           <Text key={index}>일정: {event}</Text>
         ))}
       </View>
@@ -162,4 +204,4 @@ const EventList = ({ events }) => (
   </ScrollView>
 );
 
-export default Calender;
+export default CalendarScreen;

@@ -14,7 +14,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import MenuBar from './src/components/MenuBar';
 
 const App = () => {
-  return <StackNavigator />;
+  return <Calender />;
 };
 
 export default App;
