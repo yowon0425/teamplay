@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
-// import Button from '../components/Button';
 import auth from '@react-native-firebase/auth';
 import React, {useState} from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import axios from 'axios';
+import MainButton from './../components/MainButton';
 
 const MyUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -65,10 +65,13 @@ const MyUpload = () => {
 
   return (
     <View>
-      {/* <View style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.top}>
-          <Text style={styles.todo}>오픈소스 사례 정리하기</Text>
-          <Text style={styles.time}>8/20 20:00</Text>
+          <Text style={styles.task}>Today's Task</Text>
+          <View style={styles.todoLine}>
+            <Text style={styles.todo}>오픈소스 사례 정리하기</Text>
+            <Text style={styles.time}>8/20 20:00</Text>
+          </View>
         </View>
         <View style={styles.line}></View>
         <ScrollView style={styles.upload}>
@@ -90,11 +93,19 @@ const MyUpload = () => {
                 <View style={styles.line}></View>
               </ScrollView>
             </LinearGradient>
-            <Button
-              style={styles.uploadButton}
-              text="파일 업로드하기"
-              light={true}
-            />
+            {selectedFile == null ? (
+              <MainButton
+                text="파일 선택하기"
+                light={true}
+                onPress={handleFileSelect}
+              />
+            ) : (
+              <MainButton
+                text="파일 업로드하기"
+                light={true}
+                onPress={handleFileUpload}
+              />
+            )}
             <View style={styles.comment}>
               <Text style={styles.title}>코멘트</Text>
               <View style={styles.bubbles}>
@@ -143,13 +154,7 @@ const MyUpload = () => {
           </View>
         </ScrollView>
       </View>
-      <View> */}
-      <Text>MyUpload</Text>
-      <Button title="Select File" onPress={handleFileSelect} />
-      {selectedFile && <Text>선택한 파일: {selectedFile.name}</Text>}
-      <Button title="Upload File" onPress={handleFileUpload} />
     </View>
-    // </View>
   );
 };
 
@@ -160,14 +165,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   top: {
-    width: '95%',
+    width: '100%',
+  },
+  task: {
+    paddingLeft: 15,
+    paddingTop: 10,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  todoLine: {
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
-    margin: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   todo: {
-    fontSize: 20,
+    fontSize: 12,
     color: 'black',
     fontWeight: '900',
   },
@@ -179,6 +194,7 @@ const styles = StyleSheet.create({
     width: '95%',
     height: 1,
     backgroundColor: 'black',
+    alignSelf: 'center',
   },
   uploadContainer: {
     alignItems: 'center',
@@ -208,11 +224,12 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 12,
     color: 'black',
+    width: '70%',
   },
   comment: {
     alignItems: 'center',
     height: '45%',
-    marginTop: 40,
+    marginVertical: 40,
   },
   bubbles: {},
   commentLine: {
