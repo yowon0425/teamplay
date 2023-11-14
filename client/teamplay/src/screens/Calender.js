@@ -1,5 +1,14 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LocaleConfig } from 'react-native-calendars';
 import Modal from 'react-native-modal';
@@ -13,7 +22,7 @@ LocaleConfig.locales['fr'] = {
   ],
   dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
   dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
-  today: "오늘",
+  today: '오늘',
 };
 LocaleConfig.defaultLocale = 'fr';
 
@@ -57,6 +66,22 @@ class CalendarScreen extends Component {
 
   handleTimeConfirm = (time) => {
     this.setState({ selectedTime: time, isTimePickerVisible: false });
+  };
+
+  handleDeleteEvent = (dateTime, index) => {
+    const updatedEvents = { ...this.state.events };
+    const eventsOnDateTime = updatedEvents[dateTime];
+
+    if (eventsOnDateTime && eventsOnDateTime.length > index) {
+      eventsOnDateTime.splice(index, 1);
+
+      // Remove the date-time key if there are no more events on that date-time
+      if (eventsOnDateTime.length === 0) {
+        delete updatedEvents[dateTime];
+      }
+
+      this.setState({ events: updatedEvents });
+    }
   };
 
   render() {
@@ -123,7 +148,10 @@ class CalendarScreen extends Component {
               </TouchableOpacity>
             </View>
           </Modal>
-          <EventList events={this.state.events} />
+          <EventList
+            events={this.state.events}
+            onDeleteEvent={this.handleDeleteEvent}
+          />
         </View>
       </KeyboardAvoidingView>
     );
@@ -189,19 +217,40 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
   },
+  eventContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  deleteText: {
+    color: 'gray',
+  },
 });
 
-const EventList = ({ events }) => (
-  <ScrollView style={styles.eventListContainer}>
-    {Object.keys(events).map((dateTime) => (
-      <View key={dateTime}>
-        <Text>날짜/시간: {dateTime}</Text>
-        {events[dateTime].map((event, index) => (
-          <Text key={index}>일정: {event}</Text>
-        ))}
-      </View>
-    ))}
-  </ScrollView>
-);
+const EventList = ({ events, onDeleteEvent }) => {
+  const sortedDateTimes = Object.keys(events).sort();
+
+  return (
+    <ScrollView style={styles.eventListContainer}>
+      {sortedDateTimes.map((dateTime) => (
+        <View key={dateTime}>
+          <Text>날짜/시간: {dateTime}</Text>
+          {events[dateTime].map((event, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => onDeleteEvent(dateTime, index)}
+            >
+              <View style={styles.eventContainer}>
+                <Text>일정: {event}</Text>
+                <Text style={styles.deleteText}>X</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ))}
+    </ScrollView>
+  );
+};
 
 export default CalendarScreen;
