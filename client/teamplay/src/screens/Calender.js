@@ -8,10 +8,11 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LocaleConfig } from 'react-native-calendars';
-import Modal from 'react-native-modal';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
@@ -30,14 +31,18 @@ class CalendarScreen extends Component {
   state = {
     selectedDate: '',
     isTextInputVisible: false,
-    isTimePickerVisible: false,
     eventText: '',
-    selectedTime: '12:00', // Default time
+    selectedTime: new Date(), // Default time
     events: {},
+    showTimePicker: false,
   };
 
   handleDayPress = (day) => {
-    this.setState({ selectedDate: day.dateString, isTextInputVisible: true });
+    this.setState({
+      selectedDate: day.dateString,
+      isTextInputVisible: true,
+      showTimePicker: true,
+    });
   };
 
   handleAddEvent = () => {
@@ -45,27 +50,27 @@ class CalendarScreen extends Component {
 
     if (selectedDate && eventText) {
       const updatedEvents = { ...events };
-      const dateTime = `${selectedDate} ${selectedTime}`;
+      const dateTime = `${selectedDate} ${selectedTime.toLocaleTimeString()}`;
       if (!updatedEvents[dateTime]) {
         updatedEvents[dateTime] = [];
       }
-      updatedEvents[dateTime].push(eventText);
+      updatedEvents[dateTime].push({ text: eventText, time: selectedTime });
 
       this.setState({
         events: updatedEvents,
         eventText: '',
         isTextInputVisible: false,
-        selectedTime: '12:00', // Reset time after adding the event
+        showTimePicker: false,
       });
     }
   };
 
-  toggleTimePicker = () => {
-    this.setState({ isTimePickerVisible: !this.state.isTimePickerVisible });
-  };
-
-  handleTimeConfirm = (time) => {
-    this.setState({ selectedTime: time, isTimePickerVisible: false });
+  handleTimeChange = (event, selectedTime) => {
+    if (event.type === 'set') {
+      this.setState({ selectedTime, showTimePicker: false });
+    } else {
+      this.setState({ showTimePicker: false });
+    }
   };
 
   handleDeleteEvent = (dateTime, index) => {
@@ -75,7 +80,6 @@ class CalendarScreen extends Component {
     if (eventsOnDateTime && eventsOnDateTime.length > index) {
       eventsOnDateTime.splice(index, 1);
 
-      // Remove the date-time key if there are no more events on that date-time
       if (eventsOnDateTime.length === 0) {
         delete updatedEvents[dateTime];
       }
@@ -88,6 +92,12 @@ class CalendarScreen extends Component {
     const currentDate = new Date();
     const currentDateString = currentDate.toISOString().split('T')[0];
 
+    const markedDates = {};
+    Object.keys(this.state.events).forEach((dateTime) => {
+      const [date] = dateTime.split(' ');
+      markedDates[date] = { marked: true, dotColor: 'lightblue' };
+    });
+
     return (
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -99,9 +109,7 @@ class CalendarScreen extends Component {
             current={currentDateString}
             monthFormat={'yyyy년 MM월'}
             onDayPress={this.handleDayPress}
-            markedDates={{
-              [this.state.selectedDate]: { selected: true, selectedColor: 'lightblue' },
-            }}
+            markedDates={markedDates}
           />
           {this.state.isTextInputVisible && (
             <View style={styles.textInputContainer}>
@@ -122,36 +130,21 @@ class CalendarScreen extends Component {
               </TouchableOpacity>
             </View>
           )}
-          <View style={styles.selectedDateTimeContainer}>
-            <Text style={styles.selectedDateTime}>{`선택된 날짜: ${this.state.selectedDate}`}</Text>
-            <TouchableOpacity onPress={this.toggleTimePicker}>
-              <Text style={styles.selectedDateTime}>{`선택된 시간: ${this.state.selectedTime}`}</Text>
-            </TouchableOpacity>
-          </View>
-          <Modal
-            isVisible={this.state.isTimePickerVisible}
-            onBackdropPress={() => this.setState({ isTimePickerVisible: false })}
-          >
-            <View style={styles.modalContainer}>
-              <View>
-                <Text style={styles.modalTitle}>시간 선택</Text>
-              </View>
-              <TextInput
-                style={styles.modalInput}
-                placeholder="HH:mm"
-                keyboardType="numeric"
-                value={this.state.selectedTime}
-                onChangeText={(text) => this.setState({ selectedTime: text })}
-              />
-              <TouchableOpacity onPress={() => this.handleTimeConfirm(this.state.selectedTime)}>
-                <Text style={styles.modalButton}>확인</Text>
-              </TouchableOpacity>
-            </View>
-          </Modal>
-          <EventList
-            events={this.state.events}
-            onDeleteEvent={this.handleDeleteEvent}
-          />
+          {this.state.showTimePicker && (
+            <DateTimePicker
+              value={this.state.selectedTime}
+              mode="time"
+              is24Hour={false}
+              display="spinner"
+              onChange={this.handleTimeChange}
+            />
+          )}
+          <ScrollView style={{ flex: 1 }}>
+            <EventList
+              events={this.state.events}
+              onDeleteEvent={this.handleDeleteEvent}
+            />
+          </ScrollView>
         </View>
       </KeyboardAvoidingView>
     );
@@ -184,47 +177,19 @@ const styles = StyleSheet.create({
   eventListContainer: {
     marginHorizontal: 20,
   },
-  modalContainer: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  modalInput: {
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  },
-  modalButton: {
-    color: 'blue',
-    textAlign: 'center',
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'blue',
-    borderRadius: 5,
-  },
-  selectedDateTimeContainer: {
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  selectedDateTime: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
   eventContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 5,
+    borderColor: 'lightgray',
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginVertical: 5,
   },
   deleteText: {
     color: 'gray',
+    fontSize: 18,
   },
 });
 
@@ -232,24 +197,21 @@ const EventList = ({ events, onDeleteEvent }) => {
   const sortedDateTimes = Object.keys(events).sort();
 
   return (
-    <ScrollView style={styles.eventListContainer}>
+    <View style={styles.eventListContainer}>
       {sortedDateTimes.map((dateTime) => (
         <View key={dateTime}>
-          <Text>날짜/시간: {dateTime}</Text>
+          <Text>{`날짜/시간: ${dateTime}`}</Text>
           {events[dateTime].map((event, index) => (
-            <TouchableOpacity
-              key={index}
-              onPress={() => onDeleteEvent(dateTime, index)}
-            >
-              <View style={styles.eventContainer}>
-                <Text>일정: {event}</Text>
+            <View key={index} style={styles.eventContainer}>
+              <Text>{`일정: ${event.text}`}</Text>
+              <TouchableOpacity onPress={() => onDeleteEvent(dateTime, index)}>
                 <Text style={styles.deleteText}>X</Text>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
       ))}
-    </ScrollView>
+    </View>
   );
 };
 
