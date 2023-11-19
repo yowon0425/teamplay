@@ -10,13 +10,15 @@ import {
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import axios from 'axios';
 import MainButton from './../components/MainButton';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const MyUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState([]);
 
   const handleFileSelect = async () => {
     try {
@@ -44,6 +46,7 @@ const MyUpload = () => {
         uri: selectedFile.uri,
         type: selectedFile.type,
         name: selectedFile.name,
+        date: new Date(),
       });
 
       const {uid} = auth().currentUser;
@@ -63,8 +66,34 @@ const MyUpload = () => {
     }
   };
 
+  const handleAddEvent = () => {
+    const date = new Date();
+    const localTime = date.toLocaleDateString();
+    const uploadTime =
+      date.getMonth() +
+      1 +
+      '/' +
+      date.getDate() +
+      ' ' +
+      localTime.substring(0, 5);
+  };
+
+  const FileList = () => (
+    <ScrollView style={styles.fileList}>
+      {uploadedFile.map(file => (
+        <View>
+          <View style={styles.file}>
+            <Text style={styles.fileName}>{file.name}</Text>
+            <Text style={styles.time}>{file.uploadTime}</Text>
+          </View>
+          <View style={styles.line}></View>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
   return (
-    <View>
+    <SafeAreaView>
       <View style={styles.container}>
         <View style={styles.top}>
           <Text style={styles.task}>Today's Task</Text>
@@ -80,6 +109,7 @@ const MyUpload = () => {
             <LinearGradient
               style={styles.uploadBox}
               colors={['#B9E3FC', '#FFFFFF']}>
+              <FileList />
               <ScrollView style={styles.fileList}>
                 <View style={styles.file}>
                   <Text style={styles.fileName}>오픈소스 사례-챗봇.hwp</Text>
@@ -154,7 +184,7 @@ const MyUpload = () => {
           </View>
         </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
