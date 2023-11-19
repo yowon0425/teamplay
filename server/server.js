@@ -86,6 +86,8 @@ app.post("/api/signup", async (req, res) => {
 /* ------------- 팀플 생성 API -------------
   // req로 받아야하는 데이터 형식
   {
+    uid: user id
+    userName: user name
     teamId: 팀플 id (랜덤 생성)
     name: 팀플 이름
     leture: 수업 이름
@@ -99,17 +101,25 @@ app.post("/api/signup", async (req, res) => {
 */
 app.post("/api/createTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { name, lecture, nunOfMember, description } = req.body;
+  const { uid, userName, name, lecture, nunOfMember, description } = req.body;
 
   try {
+    let userObj = new Map([
+      ["uid", uid],
+      ["name", userName],
+    ]);
     // firestore에 저장
-    await db.collection("teamlist").doc(teamId).set({
-      name,
-      lecture,
-      nunOfMember,
-      description,
-      memberList: [],
-    });
+    await db
+      .collection("teamlist")
+      .doc(teamId)
+      .set({
+        name,
+        lecture,
+        teamId,
+        nunOfMember,
+        description,
+        member: [userObj],
+      });
 
     let teamObj = new Map([
       ["teamId", teamId],
@@ -135,6 +145,7 @@ app.post("/api/createTeam", async (req, res) => {
   // req로 받아야하는 데이터 형식
   {
     uid: 유저 id
+    userName: 유저 이름
     teamId: 팀플 id
   }
 
@@ -146,12 +157,16 @@ app.post("/api/joinTeam", async (req, res) => {
   // 요청 데이터 받아오기
   const { uid, teamId } = req.body;
 
+  const {name, description} = await axios.post('/api/teamData', {teamId});
+  })
+
   try {
     let teamObj = new Map([
       ["teamId", teamId],
       ["name", name],
       ["description", description],
     ]);
+
     // user 정보 -> teamList에 팀플 추가
     await db
       .collection("user")
@@ -160,13 +175,17 @@ app.post("/api/joinTeam", async (req, res) => {
         teamList: FieldValue.arrayUnion(teamObj),
       });
 
-    // 팀플 DB에 유저(팀플 멤버) id 추가
+      let userObj = new Map([
+        ["uid", uid],
+        ["userName", userName],
+      ]);
 
+    // 팀플 DB에 유저(팀플 멤버) id 추가
     await db
       .collection("teamlist")
       .doc(teamId)
       .update({
-        memberList: FieldValue.arrayUnion(uid),
+        member: FieldValue.arrayUnion(userObj),
       });
     res.send({ isJoined: true });
   } catch (err) {
@@ -223,6 +242,7 @@ app.post("/api/teamList", async (req, res) => {
     leture: 수업 이름
     numOfMember: 팀원 수
     description: 팀플 설명
+    member: [{name: oo, uid: oo}, {...}]
   }
   실패 -> isCompleted: false
 */
