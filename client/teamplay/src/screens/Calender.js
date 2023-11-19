@@ -8,7 +8,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LocaleConfig } from 'react-native-calendars';
@@ -32,7 +31,7 @@ class CalendarScreen extends Component {
     selectedDate: '',
     isTextInputVisible: false,
     eventText: '',
-    selectedTime: new Date(), // Default time
+    selectedTime: new Date(),
     events: {},
     showTimePicker: false,
   };
@@ -40,7 +39,7 @@ class CalendarScreen extends Component {
   handleDayPress = (day) => {
     this.setState({
       selectedDate: day.dateString,
-      isTextInputVisible: true,
+      isTextInputVisible: false, // Resetting the text input visibility
       showTimePicker: true,
     });
   };
@@ -50,7 +49,7 @@ class CalendarScreen extends Component {
 
     if (selectedDate && eventText) {
       const updatedEvents = { ...events };
-      const dateTime = `${selectedDate} ${selectedTime.toLocaleTimeString()}`;
+      const dateTime = `${selectedDate} ${selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
       if (!updatedEvents[dateTime]) {
         updatedEvents[dateTime] = [];
       }
@@ -67,7 +66,11 @@ class CalendarScreen extends Component {
 
   handleTimeChange = (event, selectedTime) => {
     if (event.type === 'set') {
-      this.setState({ selectedTime, showTimePicker: false });
+      this.setState({
+        selectedTime,
+        showTimePicker: false,
+        isTextInputVisible: true, // Show text input after selecting the time
+      });
     } else {
       this.setState({ showTimePicker: false });
     }
@@ -88,15 +91,33 @@ class CalendarScreen extends Component {
     }
   };
 
+  renderDay = (date, item) => {
+    const eventsOnDate = this.state.events[date.dateString];
+    return (
+      <View>
+        <Text style={{ textAlign: 'center', color: '#FFB8D0' }}>{date.day}</Text>
+        {eventsOnDate && eventsOnDate.map((event, index) => (
+          <View key={index} style={styles.eventContainer}>
+            <Text>{`일정: ${event.text}`}</Text>
+            <Text>{`시간: ${event.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}</Text>
+            <TouchableOpacity onPress={() => this.handleDeleteEvent(date.dateString, index)}>
+              <Text style={styles.deleteText}>X</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   render() {
     const currentDate = new Date();
     const currentDateString = currentDate.toISOString().split('T')[0];
 
-    const markedDates = {};
-    Object.keys(this.state.events).forEach((dateTime) => {
+    const markedDates = Object.keys(this.state.events).reduce((acc, dateTime) => {
       const [date] = dateTime.split(' ');
-      markedDates[date] = { marked: true, dotColor: 'lightblue' };
-    });
+      acc[date] = { marked: false, selected: true, dotColor: '#FFB8D0', selectedColor: '#FFB8D0' };
+      return acc;
+    }, {});
 
     return (
       <KeyboardAvoidingView
@@ -110,7 +131,13 @@ class CalendarScreen extends Component {
             monthFormat={'yyyy년 MM월'}
             onDayPress={this.handleDayPress}
             markedDates={markedDates}
+            theme={{
+              arrowColor: 'gray',
+              todayTextColor: '#FFB8D0',
+            }}
+            renderDay={this.renderDay}
           />
+
           {this.state.isTextInputVisible && (
             <View style={styles.textInputContainer}>
               <TextInput
@@ -200,7 +227,7 @@ const EventList = ({ events, onDeleteEvent }) => {
     <View style={styles.eventListContainer}>
       {sortedDateTimes.map((dateTime) => (
         <View key={dateTime}>
-          <Text>{`날짜/시간: ${dateTime}`}</Text>
+          <Text>{`${dateTime}`}</Text>
           {events[dateTime].map((event, index) => (
             <View key={index} style={styles.eventContainer}>
               <Text>{`일정: ${event.text}`}</Text>
