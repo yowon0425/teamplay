@@ -269,9 +269,7 @@ app.post("/api/teamData", async (req, res) => {
 /* ------------- 파일 업로드 API -------------
   // req로 받아야하는 데이터 = formData 
   {
-    file uri
-    file name
-    file type
+    file info
     uid
   }
 

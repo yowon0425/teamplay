@@ -46,9 +46,15 @@ const MyUpload = () => {
         name: selectedFile.name,
       });
 
+      const fileInfo = new Map([
+        ['name', selectedFile.name],
+        ['data', new Date.now()],
+        ['uri', selectedFile.uri],
+      ]);
+
       const {uid} = auth().currentUser;
       formData.append('uid', uid);
-      formData.append('fileInfo', JSON.stringify(selectedFile));
+      formData.append('fileInfo', fileInfo);
 
       try {
         const response = await axios.post('/api/upload', formData, {
