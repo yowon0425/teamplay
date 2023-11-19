@@ -157,8 +157,7 @@ app.post("/api/joinTeam", async (req, res) => {
   // 요청 데이터 받아오기
   const { uid, teamId } = req.body;
 
-  const {name, description} = await axios.post('/api/teamData', {teamId});
-  })
+  const { name, description } = await axios.post("/api/teamData", { teamId });
 
   try {
     let teamObj = new Map([
@@ -175,10 +174,10 @@ app.post("/api/joinTeam", async (req, res) => {
         teamList: FieldValue.arrayUnion(teamObj),
       });
 
-      let userObj = new Map([
-        ["uid", uid],
-        ["userName", userName],
-      ]);
+    let userObj = new Map([
+      ["uid", uid],
+      ["userName", userName],
+    ]);
 
     // 팀플 DB에 유저(팀플 멤버) id 추가
     await db
