@@ -2,16 +2,16 @@ import React, { Component } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
-import { Calendar } from 'react-native-calendars';
-import { LocaleConfig } from 'react-native-calendars';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { LinearGradient } from 'react-native-svg';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
@@ -39,7 +39,7 @@ class CalendarScreen extends Component {
   handleDayPress = (day) => {
     this.setState({
       selectedDate: day.dateString,
-      isTextInputVisible: false, // Resetting the text input visibility
+      isTextInputVisible: false,
       showTimePicker: true,
     });
   };
@@ -49,11 +49,15 @@ class CalendarScreen extends Component {
 
     if (selectedDate && eventText) {
       const updatedEvents = { ...events };
-      const dateTime = `${selectedDate} ${selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      const dateTime = `${selectedDate}`;
       if (!updatedEvents[dateTime]) {
         updatedEvents[dateTime] = [];
       }
-      updatedEvents[dateTime].push({ text: eventText, time: selectedTime });
+
+      const formattedTime = selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const formattedEvent = `${formattedTime} ${eventText}`;
+
+      updatedEvents[dateTime].push({ text: formattedEvent, time: selectedTime });
 
       this.setState({
         events: updatedEvents,
@@ -69,7 +73,7 @@ class CalendarScreen extends Component {
       this.setState({
         selectedTime,
         showTimePicker: false,
-        isTextInputVisible: true, // Show text input after selecting the time
+        isTextInputVisible: true,
       });
     } else {
       this.setState({ showTimePicker: false });
@@ -93,19 +97,29 @@ class CalendarScreen extends Component {
 
   renderDay = (date, item) => {
     const eventsOnDate = this.state.events[date.dateString];
+    const isSelectedDate = this.state.selectedDate === date.dateString;
+  
     return (
-      <View>
-        <Text style={{ textAlign: 'center', color: '#FFB8D0' }}>{date.day}</Text>
+      <TouchableOpacity onPress={() => this.handleDayPress(date)}>
+        <View style={styles.circleContainer}>
+          <LinearGradient
+            colors={isSelectedDate ? ['#6A9CFD', '#FEE5E1'] : ['#FFB8D0', '#FF69B4']}
+            style={styles.circle}
+          />
+          <Text style={styles.dayText}>{date.day}</Text>
+        </View>
         {eventsOnDate && eventsOnDate.map((event, index) => (
-          <View key={index} style={styles.eventContainer}>
-            <Text>{`일정: ${event.text}`}</Text>
-            <Text>{`시간: ${event.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}</Text>
+          <View key={index}>
             <TouchableOpacity onPress={() => this.handleDeleteEvent(date.dateString, index)}>
               <Text style={styles.deleteText}>X</Text>
             </TouchableOpacity>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ flex: 1 }}>{`${event.text.split(' ')[0]}`}</Text>
+              <Text>{`${event.text.split(' ')[1]}`}</Text>
+            </View>
           </View>
         ))}
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -206,17 +220,26 @@ const styles = StyleSheet.create({
   },
   eventContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     borderColor: 'lightgray',
     borderWidth: 1,
-    borderRadius: 5,
     padding: 10,
     marginVertical: 5,
   },
   deleteText: {
     color: 'gray',
     fontSize: 18,
+  },
+  circle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 5,
+  },
+  dayText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 
@@ -230,10 +253,14 @@ const EventList = ({ events, onDeleteEvent }) => {
           <Text>{`${dateTime}`}</Text>
           {events[dateTime].map((event, index) => (
             <View key={index} style={styles.eventContainer}>
-              <Text>{`일정: ${event.text}`}</Text>
-              <TouchableOpacity onPress={() => onDeleteEvent(dateTime, index)}>
-                <Text style={styles.deleteText}>X</Text>
-              </TouchableOpacity>
+              <View style={{ flex: 1 }}>
+                <Text>{`${event.text}`}</Text>
+              </View>
+              <View style={{ marginLeft: 10 }}>
+                <TouchableOpacity onPress={() => onDeleteEvent(dateTime, index)}>
+                  <Text style={styles.deleteText}>X</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
