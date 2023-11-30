@@ -7,15 +7,31 @@ import {
   SafeAreaView,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
+import {Shadow} from 'react-native-shadow-2';
+import MenuBar from '../components/TabNavigator';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 const TeamList = () => {
   const [showOptions, setShowOptions] = useState(false);
+  const [teamInfo, setTeamInfo] = useState({});
+  const [teamBlock, setTeamBlock] = useState();
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
+  };
+
+  const navigation = useNavigation();
+
+  const openHome = () => {
+    console.log('이벤트 처리');
+    navigation.navigate('MenuBar', {
+      screen: 'Home',
+    });
   };
 
   useEffect(() => {
@@ -27,56 +43,65 @@ const TeamList = () => {
         .then(res => {
           if (res.data) {
             console.log(res.data);
+            setTeamInfo(res.data);
+            console.log('teamInfo : ' + teamInfo);
             /* 응답 형식
               {
                 teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
               }
             */
+            const result = teamInfo.map(team => {
+              return (
+                <TouchableOpacity style={styles.teamBlock} onPress={openHome}>
+                  <Shadow style={styles.shadow} distance={1} offset={[3, 3]}>
+                    <LinearGradient
+                      colors={['#FFB8D0', '#FEE5E1']}
+                      style={styles.linearGradient}>
+                      <View style={styles.textContainer}>
+                        <Text style={styles.teamName}>{team.name}</Text>
+                      </View>
+                      <Text style={styles.teamDescription}>
+                        {team.description}
+                      </Text>
+                    </LinearGradient>
+                  </Shadow>
+                </TouchableOpacity>
+              );
+            });
+            setTeamBlock(result);
           }
-          ㄴ;
         })
         .catch(err => console.log(err));
     };
-
     getTeams();
-  });
+  }, []);
+  console.log('teamInfo : ' + teamInfo);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>나의 팀</Text>
       </View>
-      <LinearGradient
-        colors={['#FFB8D0', '#FEE5E1']}
-        style={styles.linearGradient}>
-        <View style={styles.textContainer}>
-          <Text style={styles.teamName}>팀 이름</Text>
+      <ScrollView style={styles.teamListContainer}>
+        <View style={styles.teamList}>
+          {teamBlock}
+          <TouchableOpacity onPress={toggleOptions} style={styles.teamBlock}>
+            <Shadow
+              style={styles.shadow}
+              distance={1}
+              offset={[3, 3]}
+              paintInside={true}>
+              <LinearGradient
+                colors={['#EAEAEA', '#EAEAEA']}
+                style={styles.linearGradient}>
+                <View>
+                  <Text style={styles.plusText}>+</Text>
+                </View>
+              </LinearGradient>
+            </Shadow>
+          </TouchableOpacity>
         </View>
-        <Text style={styles.teamDescription}>팀 소개</Text>
-      </LinearGradient>
-      <LinearGradient
-        colors={['#FFB8D0', '#FEE5E1']}
-        style={styles.white}></LinearGradient>
-      <LinearGradient
-        colors={['#FFB8D0', '#FEE5E1']}
-        style={styles.linearGradient}>
-        <View style={styles.textContainer}>
-          <Text style={styles.teamName}>팀 이름</Text>
-        </View>
-        <Text style={styles.teamDescription}>팀 소개</Text>
-      </LinearGradient>
-      <LinearGradient
-        colors={['#FFB8D0', '#FEE5E1']}
-        style={styles.white}></LinearGradient>
-      <TouchableOpacity
-        onPress={toggleOptions}
-        style={{width: '100%', alignItems: 'center'}}>
-        <LinearGradient colors={['#EAEAEA', '#EAEAEA']} style={styles.button}>
-          <View style={styles.textContainer}>
-            <Text style={styles.plusText}>+</Text>
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -89,21 +114,35 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    height: 80, // 높이를 조절하여 여백을 생성
     alignItems: 'center',
     justifyContent: 'center',
+    margin: 10,
   },
   headerText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
   },
+  teamListContainer: {
+    width: '100%',
+  },
+  teamList: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
+  teamBlock: {
+    width: '95%',
+    margin: 5,
+  },
   linearGradient: {
-    width: '90%',
-    height: '15%',
+    width: '100%',
     borderRadius: 10,
+    borderColor: 'black',
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 15,
   },
   white: {
     height: 10,
@@ -112,7 +151,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   teamName: {
-    fontSize: 30,
+    fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
   },
@@ -127,18 +166,23 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   optionText: {
-    fontSize: 16,
+    fontSize: 12,
     color: 'black',
   },
   button: {
-    width: '90%',
-    height: '25%',
+    height: 50,
     borderRadius: 10,
+    borderColor: 'black',
+    borderWidth: 1,
+    justifyContent: 'center',
+    marginTop: 5,
   },
   plusText: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 36,
     color: 'black',
+  },
+  shadow: {
+    width: '100%',
   },
 });
 

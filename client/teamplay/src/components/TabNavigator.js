@@ -9,7 +9,7 @@ import Calender from '../screens/Calender';
 import Message from '../screens/Message';
 import Ionic from 'react-native-vector-icons/Ionicons';
 
-const MenuBar = () => {
+const MenuBar = ({teamId}) => {
   const Tab = createBottomTabNavigator();
   return (
     <Tab.Navigator
@@ -44,7 +44,7 @@ const MenuBar = () => {
       })}>
       <Tab.Screen name="Work" component={Work} />
       <Tab.Screen name="Notice" component={Notice} />
-      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Home" component={Home} id={teamId} />
       <Tab.Screen name="Calender" component={Calender} />
       <Tab.Screen name="Message" component={Message} />
     </Tab.Navigator>

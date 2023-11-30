@@ -11,10 +11,11 @@ import MyUpload from './src/screens/MyUpload';
 import SendNotice from './src/screens/SendNotice';
 import StackNavigator from './src/components/StackNavigator';
 import {NavigationContainer} from '@react-navigation/native';
-import MenuBar from './src/components/MenuBar';
+import MenuBar from './src/components/TabNavigator';
+import TeamList from './src/screens/TeamList';
 
 const App = () => {
-  return <Calender />;
+  return <StackNavigator />;
 };
 
 export default App;

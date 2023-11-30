@@ -1,6 +1,6 @@
 import {View, Text, ProgressBarAndroidBase, StyleSheet} from 'react-native';
 import React from 'react';
-import MenuBar from '../components/MenuBar';
+import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
