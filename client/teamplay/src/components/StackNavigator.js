@@ -6,15 +6,29 @@ import LogIn from '../screens/LogIn';
 import TeamList from '../screens/TeamList';
 import {NavigationContainer} from '@react-navigation/native';
 import Main from '../screens/Main';
-import MenuBar from './MenuBar';
+import MenuBar from './TabNavigator';
 
 /* 메인화면-로그인-팀리스트까지의 stackNavigator */
+
+/*
+페이지 구조
+Stack Navigator
+  - Main
+  - LogIn
+  - TeamList
+  - Tab Navigator
+    - Home
+    - Notice
+    - Calender
+    - Map
+    - Message
+*/
 
 const Stack = createNativeStackNavigator();
 
 // 하드웨어 뒤로가기 제어
 const StackNavigator = () => {
-  useEffect(() => {
+  /*useEffect(() => {
     const backAction = () => {
       return true;
     };
@@ -24,7 +38,7 @@ const StackNavigator = () => {
     );
 
     return () => backHandler.remove();
-  }, []);
+  }, []);*/
 
   return (
     <NavigationContainer>

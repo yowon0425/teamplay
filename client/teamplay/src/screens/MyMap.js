@@ -2,7 +2,7 @@ import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
-import MenuBar from '../components/MenuBar';
+import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import Button from '../components/Button';
 import Entypo from 'react-native-vector-icons/Entypo';

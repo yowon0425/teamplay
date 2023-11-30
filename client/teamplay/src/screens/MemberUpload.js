@@ -9,7 +9,7 @@ import {
 import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
-import MenuBar from '../components/MenuBar';
+import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 
 const MemberUpload = () => {
