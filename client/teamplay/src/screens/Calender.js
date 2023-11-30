@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { LinearGradient } from 'react-native-svg';
+import LinearGradient from 'react-native-linear-gradient';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
@@ -95,30 +95,28 @@ class CalendarScreen extends Component {
     }
   };
 
-  renderDay = (date, item) => {
+  renderDay = (date) => {
     const eventsOnDate = this.state.events[date.dateString];
-    const isSelectedDate = this.state.selectedDate === date.dateString;
-  
+    
     return (
       <TouchableOpacity onPress={() => this.handleDayPress(date)}>
-        <View style={styles.circleContainer}>
-          <LinearGradient
-            colors={isSelectedDate ? ['#6A9CFD', '#FEE5E1'] : ['#FFB8D0', '#FF69B4']}
-            style={styles.circle}
-          />
-          <Text style={styles.dayText}>{date.day}</Text>
-        </View>
-        {eventsOnDate && eventsOnDate.map((event, index) => (
-          <View key={index}>
-            <TouchableOpacity onPress={() => this.handleDeleteEvent(date.dateString, index)}>
-              <Text style={styles.deleteText}>X</Text>
-            </TouchableOpacity>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ flex: 1 }}>{`${event.text.split(' ')[0]}`}</Text>
-              <Text>{`${event.text.split(' ')[1]}`}</Text>
-            </View>
+        <LinearGradient
+          colors={['#FFB8D0', '#FEE5E1']}
+          style={styles.circleContainer}
+        >
+          <View style={styles.circle}>
+            <Text style={styles.dayText}>{date.day}</Text>
           </View>
-        ))}
+        </LinearGradient>
+        {eventsOnDate &&
+          eventsOnDate.map((event, index) => (
+            <View key={index} style={styles.eventContainer}>
+              <TouchableOpacity onPress={() => this.handleDeleteEvent(date.dateString, index)}>
+                <Text style={styles.deleteText}>X</Text>
+              </TouchableOpacity>
+              <Text style={styles.eventText}>{`${event.text}`}</Text>
+            </View>
+          ))}
       </TouchableOpacity>
     );
   };
@@ -227,40 +225,45 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: 'gray',
-    fontSize: 18,
+    fontSize: 14,
+    right: '10%'
+  },
+  circleContainer: {
+    width: '90%', 
+    aspectRatio: 1, 
+    borderRadius: 50, 
+    overflow: 'hidden', 
   },
   circle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    justifyContent: 'center',
+    flex: 1,
     alignItems: 'center',
-    marginBottom: 5,
-  },
+    justifyContent: 'center',
+  },  
   dayText: {
-    color: 'white',
-    fontSize: 16,
+    fontSize: 18,
   },
+  Text1 :{
+    fontSize: 14,
+    left: '20%'
+  },
+  Text2 : {
+    fontSize: 14,
+    left: '60%'
+  }
 });
 
-const EventList = ({ events, onDeleteEvent }) => {
+const EventList = ({ events }) => {
   const sortedDateTimes = Object.keys(events).sort();
 
   return (
     <View style={styles.eventListContainer}>
       {sortedDateTimes.map((dateTime) => (
         <View key={dateTime}>
-          <Text>{`${dateTime}`}</Text>
+          <Text style={styles.dayText}>{`${dateTime}`}</Text>
           {events[dateTime].map((event, index) => (
             <View key={index} style={styles.eventContainer}>
-              <View style={{ flex: 1 }}>
-                <Text>{`${event.text}`}</Text>
-              </View>
-              <View style={{ marginLeft: 10 }}>
-                <TouchableOpacity onPress={() => onDeleteEvent(dateTime, index)}>
-                  <Text style={styles.deleteText}>X</Text>
-                </TouchableOpacity>
-              </View>
+              <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
+              <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
             </View>
           ))}
         </View>
