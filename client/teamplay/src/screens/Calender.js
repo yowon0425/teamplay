@@ -103,7 +103,7 @@ class CalendarScreen extends Component {
     const eventsOnDate = this.state.events[date.dateString];
 
     // Use toLocaleDateString to format the date string
-    const formattedDate = new Date(date.dateString).toLocaleDateString('en-US', {
+    const formattedDate = new Date(date.dateString).toLocaleDateString({
       weekday: 'long',
       day: 'numeric',
     });
@@ -149,18 +149,16 @@ class CalendarScreen extends Component {
       >
         <View style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
         <Calendar
-  current={currentDateString}
-  monthFormat={'MMMM'}
-  onDayPress={this.handleDayPress}
-  markedDates={markedDates}
-  theme={{
-    arrowColor: 'gray',
-    todayTextColor: '#FFB8D0',
-  }}
-  renderDay={this.renderDay}
-/>
-
-
+          current={currentDateString}
+          monthFormat={'MMMM'}
+          onDayPress={this.handleDayPress}
+          markedDates={markedDates}
+          theme={{
+            arrowColor: 'gray',
+            todayTextColor: 'black',
+          }}
+          renderDay={this.renderDay}
+        />
 
           {this.state.isTextInputVisible && (
             <View style={styles.textInputContainer}>
@@ -234,11 +232,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginVertical: 5,
   },
-  deleteText: {
-    color: 'gray',
-    fontSize: 14,
-    right: '10%'
-  },
   circleContainer: {
     width: '90%', 
     aspectRatio: 1, 
@@ -266,9 +259,23 @@ const styles = StyleSheet.create({
     backgroundColor: 'lightgray',
     marginVertical: 5,
   },
+  deleteText: {
+    color: 'gray',
+    fontSize: 14,
+    position: 'absolute',
+    right: '90%',
+  },
+  eventTextContainer: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  deleteButton: {
+    marginLeft: 'auto',
+  },
+  
 });
 
-const EventList = ({ events }) => {
+const EventList = ({ events, onDeleteEvent }) => {
   const sortedDateTimes = Object.keys(events).sort();
 
   return (
@@ -280,12 +287,16 @@ const EventList = ({ events }) => {
             day: 'numeric',
           })}</Text>
           {events[dateTime].map((event, eventIndex) => (
-            <View key={eventIndex} style={styles.eventContainer}>
-              <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
-              <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
+            <View key={`${dateTime}_${eventIndex}`} style={styles.eventContainer}>
+              <View style={styles.eventTextContainer}>
+                <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
+                <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
+              </View>
+              <TouchableOpacity onPress={() => onDeleteEvent(dateTime, eventIndex)} style={styles.deleteButton}>
+                <Text style={styles.deleteText}>X</Text>
+              </TouchableOpacity>
             </View>
           ))}
-          {/* Add a separator after each date, except for the last one */}
           {index !== sortedDateTimes.length - 1 && <View style={styles.separator} />}
         </View>
       ))}
