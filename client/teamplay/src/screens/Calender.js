@@ -137,7 +137,7 @@ class CalendarScreen extends Component {
 
     const markedDates = Object.keys(this.state.events).reduce((acc, dateTime) => {
       const [date] = dateTime.split(' ');
-      acc[date] = { marked: false, selected: true, dotColor: '#FFB8D0', selectedColor: '#FFB8D0' };
+      acc[date] = { marked: true, dotColor: '#FFB8D0', selectedColor: '#FFB8D0' };
       return acc;
     }, {});
 
