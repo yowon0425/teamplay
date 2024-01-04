@@ -21,8 +21,12 @@ LocaleConfig.locales['fr'] = {
     '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월',
   ],
   dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
-  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
+  dayNamesShort: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
   today: '오늘',
+  monthNames: [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ],
 };
 LocaleConfig.defaultLocale = 'fr';
 
@@ -97,7 +101,13 @@ class CalendarScreen extends Component {
 
   renderDay = (date) => {
     const eventsOnDate = this.state.events[date.dateString];
-    
+
+    // Use toLocaleDateString to format the date string
+    const formattedDate = new Date(date.dateString).toLocaleDateString({
+      weekday: 'long',
+      day: 'numeric',
+    });
+
     return (
       <TouchableOpacity onPress={() => this.handleDayPress(date)}>
         <LinearGradient
@@ -105,7 +115,7 @@ class CalendarScreen extends Component {
           style={styles.circleContainer}
         >
           <View style={styles.circle}>
-            <Text style={styles.dayText}>{date.day}</Text>
+            <Text style={styles.dayText}>{formattedDate}</Text>
           </View>
         </LinearGradient>
         {eventsOnDate &&
@@ -127,7 +137,7 @@ class CalendarScreen extends Component {
 
     const markedDates = Object.keys(this.state.events).reduce((acc, dateTime) => {
       const [date] = dateTime.split(' ');
-      acc[date] = { marked: false, selected: true, dotColor: '#FFB8D0', selectedColor: '#FFB8D0' };
+      acc[date] = { marked: true, dotColor: '#FFB8D0', selectedColor: '#FFB8D0' };
       return acc;
     }, {});
 
@@ -138,17 +148,17 @@ class CalendarScreen extends Component {
         enabled
       >
         <View style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
-          <Calendar
-            current={currentDateString}
-            monthFormat={'yyyy년 MM월'}
-            onDayPress={this.handleDayPress}
-            markedDates={markedDates}
-            theme={{
-              arrowColor: 'gray',
-              todayTextColor: '#FFB8D0',
-            }}
-            renderDay={this.renderDay}
-          />
+        <Calendar
+          current={currentDateString}
+          monthFormat={'MMMM'}
+          onDayPress={this.handleDayPress}
+          markedDates={markedDates}
+          theme={{
+            arrowColor: 'gray',
+            todayTextColor: 'black',
+          }}
+          renderDay={this.renderDay}
+        />
 
           {this.state.isTextInputVisible && (
             <View style={styles.textInputContainer}>
@@ -219,14 +229,8 @@ const styles = StyleSheet.create({
   eventContainer: {
     flexDirection: 'row',
     borderColor: 'lightgray',
-    borderWidth: 1,
     padding: 10,
     marginVertical: 5,
-  },
-  deleteText: {
-    color: 'gray',
-    fontSize: 14,
-    right: '10%'
   },
   circleContainer: {
     width: '90%', 
@@ -240,7 +244,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },  
   dayText: {
-    fontSize: 18,
+    fontSize: 14,
   },
   Text1 :{
     fontSize: 14,
@@ -249,23 +253,51 @@ const styles = StyleSheet.create({
   Text2 : {
     fontSize: 14,
     left: '60%'
-  }
+  },
+  separator: {
+    height: 1,
+    backgroundColor: 'lightgray',
+    marginVertical: 5,
+  },
+  deleteText: {
+    color: 'gray',
+    fontSize: 14,
+    position: 'absolute',
+    right: '90%',
+  },
+  eventTextContainer: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+  deleteButton: {
+    marginLeft: 'auto',
+  },
+  
 });
 
-const EventList = ({ events }) => {
+const EventList = ({ events, onDeleteEvent }) => {
   const sortedDateTimes = Object.keys(events).sort();
 
   return (
     <View style={styles.eventListContainer}>
-      {sortedDateTimes.map((dateTime) => (
+      {sortedDateTimes.map((dateTime, index) => (
         <View key={dateTime}>
-          <Text style={styles.dayText}>{`${dateTime}`}</Text>
-          {events[dateTime].map((event, index) => (
-            <View key={index} style={styles.eventContainer}>
-              <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
-              <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
+          <Text style={styles.dayText}>{new Date(dateTime).toLocaleDateString('en', {
+            weekday: 'long',
+            day: 'numeric',
+          })}</Text>
+          {events[dateTime].map((event, eventIndex) => (
+            <View key={`${dateTime}_${eventIndex}`} style={styles.eventContainer}>
+              <View style={styles.eventTextContainer}>
+                <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
+                <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
+              </View>
+              <TouchableOpacity onPress={() => onDeleteEvent(dateTime, eventIndex)} style={styles.deleteButton}>
+                <Text style={styles.deleteText}>X</Text>
+              </TouchableOpacity>
             </View>
           ))}
+          {index !== sortedDateTimes.length - 1 && <View style={styles.separator} />}
         </View>
       ))}
     </View>
