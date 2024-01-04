@@ -51,7 +51,7 @@ const MyUpload = () => {
 
       const fileInfo = new Map([
         ['name', selectedFile.name],
-        ['data', new Date.now()],
+        ['uploadTime', handleAddEvent()],
         ['uri', selectedFile.uri],
       ]);
 
@@ -82,6 +82,23 @@ const MyUpload = () => {
       date.getDate() +
       ' ' +
       localTime.substring(0, 5);
+    return uploadTime;
+  };
+
+  useEffect(() => {
+    getFileInfo();
+  }, []);
+
+  const getFileInfo = async () => {
+    // const {uid} = auth().currentUser;
+    const uid = jnpUeRCXKtOEsr7NDFXW4qJybgW2;
+    try {
+      await axios
+        .post('/api/fileList', {uid})
+        .then(res => console.log('fileList-> ', res.data));
+    } catch (error) {
+      console.error('Error uploading file to server:', error);
+    }
   };
 
   const FileList = () => (
