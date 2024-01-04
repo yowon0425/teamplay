@@ -57,7 +57,7 @@ const MemberUpload = () => {
                 style={styles.chatbox}
                 colors={['#E9E9EB', '#FFFFFF']}>
                 <Text style={styles.chatboxText}>
-                  챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
+                  사례에 대한 대중의 반응도 있었으면 좋겠어
                 </Text>
               </LinearGradient>
             </View>

@@ -15,11 +15,11 @@ import {Shadow} from 'react-native-shadow-2';
 import MenuBar from '../components/TabNavigator';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import TeamCard from '../components/TeamCard';
 
 const TeamList = () => {
   const [showOptions, setShowOptions] = useState(false);
-  const [teamInfo, setTeamInfo] = useState({});
-  const [teamBlock, setTeamBlock] = useState();
+  const [teamInfo, setTeamInfo] = useState();
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
@@ -28,54 +28,37 @@ const TeamList = () => {
   const navigation = useNavigation();
 
   const openHome = () => {
-    console.log('이벤트 처리');
+    console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Home',
     });
   };
+  console.log('1teamInfo : ' + teamInfo);
 
-  useEffect(() => {
-    const {uid} = auth().currentUser;
-
-    const getTeams = async () => {
-      await axios
-        .post('/api/teamList', {uid})
-        .then(res => {
-          if (res.data) {
-            console.log(res.data);
-            setTeamInfo(res.data);
-            console.log('teamInfo : ' + teamInfo);
-            /* 응답 형식
+  const getTeams = async () => {
+    await axios
+      .post('/api/teamList', {uid: 'jnpUeRCXKtOEsr7NDFXW4qJybgW2'})
+      .then(res => {
+        if (res.data) {
+          const data = JSON.stringify(res.data);
+          console.log('data : ' + data);
+          setTeamInfo(res.data);
+          console.log('if 안 teamInfo : ' + teamInfo);
+          /* 응답 형식
               {
                 teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
               }
             */
-            const result = teamInfo.map(team => {
-              return (
-                <TouchableOpacity style={styles.teamBlock} onPress={openHome}>
-                  <Shadow style={styles.shadow} distance={1} offset={[3, 3]}>
-                    <LinearGradient
-                      colors={['#FFB8D0', '#FEE5E1']}
-                      style={styles.linearGradient}>
-                      <View style={styles.textContainer}>
-                        <Text style={styles.teamName}>{team.name}</Text>
-                      </View>
-                      <Text style={styles.teamDescription}>
-                        {team.description}
-                      </Text>
-                    </LinearGradient>
-                  </Shadow>
-                </TouchableOpacity>
-              );
-            });
-            setTeamBlock(result);
-          }
-        })
-        .catch(err => console.log(err));
-    };
+        }
+      })
+      .catch(err => console.log(err));
+  };
+
+  useEffect(() => {
+    const {uid} = auth().currentUser;
     getTeams();
   }, []);
-  console.log('teamInfo : ' + teamInfo);
+  console.log('2teamInfo : ' + teamInfo);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -84,7 +67,10 @@ const TeamList = () => {
       </View>
       <ScrollView style={styles.teamListContainer}>
         <View style={styles.teamList}>
-          {teamBlock}
+          {teamInfo &&
+            teamInfo.map(data => {
+              return <TeamCard key={data.teamId} team={data} />;
+            })}
           <TouchableOpacity onPress={toggleOptions} style={styles.teamBlock}>
             <Shadow
               style={styles.shadow}
