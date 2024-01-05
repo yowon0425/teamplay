@@ -13,6 +13,10 @@ import StackNavigator from './src/components/StackNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import MenuBar from './src/components/TabNavigator';
 import TeamList from './src/screens/TeamList';
+import LogIn from './src/screens/LogIn';
+import Notice from './src/screens/Notice';
+import MyMap from './src/screens/MyMap';
+import MemberUpload from './src/screens/MemberUpload';
 
 const App = () => {
   return <StackNavigator />;
