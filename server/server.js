@@ -319,7 +319,7 @@ app.post("/api/upload", upload.any(), async (req, res) => {
   }
 });
 
-/* ------------- 팀플 리스트 API (특정 유저의 팀플 리스트) -------------
+/* ------------- 파일 리스트 API -------------
   // req로 받아야하는 데이터 형식
   {
     uid: 유저 id
@@ -332,7 +332,7 @@ app.post("/api/upload", upload.any(), async (req, res) => {
   } 
   실패 -> isCompleted: false
 */
-app.post("/api/fileInfo", async (req, res) => {
+app.post("/api/fileList", async (req, res) => {
   // 요청 데이터 받아오기
   const uid = req.body.uid;
 

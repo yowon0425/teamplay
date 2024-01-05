@@ -9,12 +9,12 @@ import MaskedView from '@react-native-masked-view/masked-view';
 
 const Home = ({teamName, goal}) => {
   // 텍스트 테두리 필요
-  const percent = 100;
+  const percent = 0;
   return (
     <View>
       <View style={styles.top}>
-        <Text style={styles.teamName}>{teamName}팀이름</Text>
-        <Text style={styles.goal}>{goal}목표는 세계정복</Text>
+        <Text style={styles.teamName}>{teamName}객체 텀프</Text>
+        <Text style={styles.goal}>{goal}객체 A+ 받자!!</Text>
       </View>
       <View style={styles.teamProgress}>
         <MaskedView
@@ -40,15 +40,22 @@ const Home = ({teamName, goal}) => {
       <View style={styles.members}>
         <View style={styles.member}>
           <View style={styles.memberInfo}>
-            <Text>이름(역할)</Text>
-            <Text>퍼센트</Text>
+            <Text>김은영(자료조사)</Text>
+            <Text>0%</Text>
           </View>
           <Progress.Bar style={styles.memberBar} />
         </View>
         <View style={styles.member}>
           <View style={styles.memberInfo}>
-            <Text>이름(역할)</Text>
-            <Text>퍼센트</Text>
+            <Text>류지민(ppt)</Text>
+            <Text>0%</Text>
+          </View>
+          <Progress.Bar style={styles.memberBar} />
+        </View>
+        <View style={styles.member}>
+          <View style={styles.memberInfo}>
+            <Text>채요원(발표)</Text>
+            <Text>0%</Text>
           </View>
           <Progress.Bar style={styles.memberBar} />
         </View>
