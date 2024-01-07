@@ -1,18 +1,22 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput } from 'react-native';
 import Button from '../components/Button';
+import { v4 as uuidv4 } from 'uuid';
+import { getRandomBase64 } from 'react-native-get-random-values';
 
 const StartNew = () => {
   const [teamName, setTeamName] = useState(''); // 팀플 이름을 저장
   const [className, setClassName] = useState(''); // 수업 이름을 저장
-  const [member, setMember] = useState(''); // 인원수를 저장
+  const [nunOfMember, setNunOfMember] = useState(''); // 인원수를 저장
   const [teamExplain, setTeamExplain] = useState(''); // 팀플 설명을 저장
   const [displayText, setDisplayText] = useState('');
   const [submitted, setSubmitted] = useState(false); // 제출 여부를 저장할 상태 변수
+  const [teamId, setTeamId] = useState('');
 
   const handleButtonPress = () => {
-    // 여기에서 팀플 ID를 서버에 제출하거나 처리할 작업을 수행합니다.
-    // 이 예제에서는 단순히 submitted 상태를 변경합니다.
+    const newTeamId = uuidv4({ random: getRandomBase64 });
+    const truncatedTeamId = newTeamId.slice(0, 10);
+    setTeamId(truncatedTeamId);
     setSubmitted(true);
   };
 
@@ -22,6 +26,8 @@ const StartNew = () => {
         <Text style={styles.headerText}>
           새로운 팀플 개설이 {"\n"}
           완료되었습니다! {"\n"}
+          {"\n"}
+          팀 ID: {teamId} {"\n"}
           {"\n"}
         </Text>
       ) : (
@@ -45,8 +51,8 @@ const StartNew = () => {
       <TextInput
         style={styles.input}
         placeholder="            팀원수 입력            "
-        value={member}
-        onChangeText={(text) => setMember(text)}
+        value={nunOfMember}
+        onChangeText={(text) => setNunOfMember(text)}
       />
       <TextInput
         style={styles.input}
@@ -68,6 +74,7 @@ const StartNew = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
@@ -75,13 +82,14 @@ const styles = StyleSheet.create({
     top: '10%',
   },
   headerText: {
+    top: '50%',
     fontSize: 30,
     fontWeight: 'bold',
     color: 'black',
     textAlign: 'center',
   },
    input: {
-    width: '100%', // 넓이를 100%로 설정하여 화면 전체 너비를 차지하도록 합니다.
+    width: '100%',
     height: 40,
     borderWidth: 1,
     borderColor: 'gray',
