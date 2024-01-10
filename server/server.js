@@ -119,6 +119,7 @@ app.post("/api/createTeam", async (req, res) => {
         nunOfMember,
         description,
         member: [userObj],
+        teamGoal: "팀플 목표를 설정해보세요.",
       });
 
     let teamObj = new Map([
@@ -242,6 +243,7 @@ app.post("/api/teamList", async (req, res) => {
     numOfMember: 팀원 수
     description: 팀플 설명
     member: [{name: oo, uid: oo}, {...}]
+    teamGoal: 팀플 목표
   }
   실패 -> isCompleted: false
 */
@@ -347,6 +349,34 @@ app.post("/api/fileList", async (req, res) => {
         var data = snapshot.data();
         return res.json(data);
       });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 팀플 목표 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+    goal: 목표 (string 형태)
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
+app.post("/api/teamGoal", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { teamId, teamGoal } = req.body;
+
+  try {
+    // firestore에 목표 업데이트
+    await db.collection("teamlist").doc(teamId).update({
+      teamGoal: teamGoal,
+    });
+
+    res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
     console.log(err);
