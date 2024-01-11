@@ -8,9 +8,11 @@ import Home from '../screens/Home';
 import Calender from '../screens/Calender';
 import Message from '../screens/Message';
 import Ionic from 'react-native-vector-icons/Ionicons';
+import MyMap from '../screens/MyMap';
 
-const MenuBar = ({teamId}) => {
+const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
+  console.log(route);
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -25,7 +27,7 @@ const MenuBar = ({teamId}) => {
           if (route.name === 'Home') {
             iconName = 'home';
             color = focused ? '#484848' : '#CCCCCC';
-          } else if (route.name === 'Work') {
+          } else if (route.name === 'MyMap') {
             iconName = 'list';
             color = focused ? '#484848' : '#CCCCCC';
           } else if (route.name === 'Notice') {
@@ -42,9 +44,11 @@ const MenuBar = ({teamId}) => {
           return <Ionic name={iconName} size={size} color={color} />;
         },
       })}>
-      <Tab.Screen name="Work" component={Work} />
+      <Tab.Screen name="MyMap" component={MyMap} />
       <Tab.Screen name="Notice" component={Notice} />
-      <Tab.Screen name="Home" component={Home} id={teamId} />
+      <Tab.Screen name="Home">
+        {() => <Home teamId={route.params.teamId} />}
+      </Tab.Screen>
       <Tab.Screen name="Calender" component={Calender} />
       <Tab.Screen name="Message" component={Message} />
     </Tab.Navigator>

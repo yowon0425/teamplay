@@ -347,7 +347,7 @@ app.post("/api/fileList", async (req, res) => {
       .then((snapshot) => {
         // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
         var data = snapshot.data();
-        return res.json(data);
+        return res.send(data);
       });
   } catch (err) {
     res.send({ isCompleted: false });

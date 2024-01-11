@@ -91,11 +91,12 @@ const MyUpload = () => {
 
   const getFileInfo = async () => {
     // const {uid} = auth().currentUser;
-    const uid = jnpUeRCXKtOEsr7NDFXW4qJybgW2;
+    const uid = 'jnpUeRCXKtOEsr7NDFXW4qJybgW2';
     try {
-      await axios
-        .post('/api/fileList', {uid})
-        .then(res => console.log('fileList-> ', res.data));
+      await axios.post('/api/fileList', {uid}).then(res => {
+        console.log('fileList-> ', res.data);
+        console.log(res.data.files[0]);
+      });
     } catch (error) {
       console.error('Error uploading file to server:', error);
     }

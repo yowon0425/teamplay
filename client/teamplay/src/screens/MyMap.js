@@ -6,8 +6,11 @@ import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import Button from '../components/Button';
 import Entypo from 'react-native-vector-icons/Entypo';
+import auth from '@react-native-firebase/auth';
 
 const MyMap = () => {
+  const {uid} = auth().currentUser;
+  console.log('map user: ' + uid);
   return (
     <ScrollView style={styles.container}>
       <View style={styles.top}>
@@ -72,9 +75,6 @@ const MyMap = () => {
       <View style={styles.button}>
         <Button text="작업 완료" light={false} />
       </View>
-      <NavigationContainer>
-        <MenuBar />
-      </NavigationContainer>
     </ScrollView>
   );
 };

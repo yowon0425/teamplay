@@ -2,13 +2,16 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {Shadow} from 'react-native-shadow-2';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation} from '@react-navigation/native';
 
 const TeamCard = ({team}) => {
   console.log(team);
+  const navigation = useNavigation();
   const openHome = () => {
     console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Home',
+      teamId: team.teamId,
     });
   };
   return (
