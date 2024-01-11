@@ -19,31 +19,21 @@ import TeamCard from '../components/TeamCard';
 
 const TeamList = () => {
   const [showOptions, setShowOptions] = useState(false);
-  const [teamInfo, setTeamInfo] = useState();
+  const [teams, setTeams] = useState();
 
   const toggleOptions = () => {
     setShowOptions(!showOptions);
   };
-
-  const navigation = useNavigation();
-
-  const openHome = () => {
-    console.log('네비게이터');
-    navigation.navigate('MenuBar', {
-      screen: 'Home',
-    });
-  };
-  console.log('1teamInfo : ' + teamInfo);
-
+  const {uid} = auth().currentUser;
   const getTeams = async () => {
     await axios
-      .post('/api/teamList', {uid: 'jnpUeRCXKtOEsr7NDFXW4qJybgW2'})
+      .post('/api/teamList', {uid})
       .then(res => {
         if (res.data) {
           const data = JSON.stringify(res.data);
           console.log('data : ' + data);
-          setTeamInfo(res.data);
-          console.log('if 안 teamInfo : ' + teamInfo);
+          setTeams(res.data);
+          console.log('if 안 teams : ' + teams);
           /* 응답 형식
               {
                 teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
@@ -55,10 +45,9 @@ const TeamList = () => {
   };
 
   useEffect(() => {
-    const {uid} = auth().currentUser;
     getTeams();
   }, []);
-  console.log('2teamInfo : ' + teamInfo);
+  console.log('2teams : ' + teams);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -67,8 +56,8 @@ const TeamList = () => {
       </View>
       <ScrollView style={styles.teamListContainer}>
         <View style={styles.teamList}>
-          {teamInfo &&
-            teamInfo.map(data => {
+          {teams &&
+            teams.map(data => {
               return <TeamCard key={data.teamId} team={data} />;
             })}
           <TouchableOpacity onPress={toggleOptions} style={styles.teamBlock}>

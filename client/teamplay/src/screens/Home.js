@@ -1,20 +1,69 @@
-import {View, Text, ProgressBarAndroidBase, StyleSheet} from 'react-native';
-import React from 'react';
+import {
+  View,
+  Text,
+  ProgressBarAndroidBase,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import MenuBar from '../components/TabNavigator';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
 import Button from '../components/Button';
 import MaskedView from '@react-native-masked-view/masked-view';
+import axios from 'axios';
+import auth from '@react-native-firebase/auth';
 
-const Home = ({teamName, goal}) => {
+const Home = ({teamId}) => {
   // 텍스트 테두리 필요
+  // 팀 목표 입력 페이지 만들기
   const percent = 0;
+  const [teamInfo, setTeamInfo] = useState([]);
+  const {uid} = auth().currentUser;
+  console.log('home id: ' + teamId);
+  console.log('home user: ' + uid);
+
+  /*내 작업 페이지로 이동하는 이벤트*/
+  const navigation = useNavigation();
+  const goMyPage = () => {
+    console.log('네비게이터');
+    navigation.navigate('MyMap', {});
+  };
+
+  const getTeamInfo = async () => {
+    await axios
+      .post('/api/teamData', {teamId})
+      .then(res => {
+        if (res.data) {
+          /* 응답 형식
+          {
+            teamId: 팀플 id
+            name: 팀플 이름
+            leture: 수업 이름
+            numOfMember: 팀원 수
+            description: 팀플 설명
+            member: [{userName: oo, uid: oo}, {...}]
+          }
+          */
+          const data = JSON.stringify(res.data);
+          console.log('Home data : ' + data);
+          setTeamInfo(res.data);
+        }
+      })
+      .catch(err => console.log(err));
+  };
+
+  useEffect(() => {
+    getTeamInfo();
+  }, []);
+  console.log('teamInfo: ' + teamInfo);
+
   return (
-    <View>
+    <View style={styles.container}>
       <View style={styles.top}>
-        <Text style={styles.teamName}>{teamName}객체 텀프</Text>
-        <Text style={styles.goal}>{goal}객체 A+ 받자!!</Text>
+        <Text style={styles.teamName}>{teamInfo.name}</Text>
+        <Text style={styles.goal}>{teamInfo.description}객체 A+ 받자!!</Text>
       </View>
       <View style={styles.teamProgress}>
         <MaskedView
@@ -37,7 +86,19 @@ const Home = ({teamName, goal}) => {
         <Progress.Bar style={styles.mainBar} />
         <Text style={styles.progressText}>Project Progress...</Text>
       </View>
-      <View style={styles.members}>
+      <ScrollView style={styles.members}>
+        {teamInfo.member &&
+          teamInfo.member.map(data => {
+            return (
+              <View style={styles.member}>
+                <View style={styles.memberInfo}>
+                  <Text>{data.userName}</Text>
+                  <Text>0%</Text>
+                </View>
+                <Progress.Bar style={styles.memberBar} />
+              </View>
+            );
+          })}
         <View style={styles.member}>
           <View style={styles.memberInfo}>
             <Text>김은영(자료조사)</Text>
@@ -45,23 +106,9 @@ const Home = ({teamName, goal}) => {
           </View>
           <Progress.Bar style={styles.memberBar} />
         </View>
-        <View style={styles.member}>
-          <View style={styles.memberInfo}>
-            <Text>류지민(ppt)</Text>
-            <Text>0%</Text>
-          </View>
-          <Progress.Bar style={styles.memberBar} />
-        </View>
-        <View style={styles.member}>
-          <View style={styles.memberInfo}>
-            <Text>채요원(발표)</Text>
-            <Text>0%</Text>
-          </View>
-          <Progress.Bar style={styles.memberBar} />
-        </View>
-      </View>
+      </ScrollView>
       <View style={{alignItems: 'center', margin: 20}}>
-        <Button text="내 작업 페이지로" light={true} />
+        <Button text="내 작업 페이지로" light={true} onPress={goMyPage} />
       </View>
     </View>
   );
@@ -70,6 +117,7 @@ const Home = ({teamName, goal}) => {
 export default Home;
 
 const styles = StyleSheet.create({
+  container: {},
   top: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -137,21 +185,19 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   members: {
-    alignItems: 'center',
-    margin: 40,
-    width: '100%',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    height: '30%',
   },
   member: {
-    width: '100%',
     margin: 10,
   },
   memberInfo: {
     flexDirection: 'row',
-    width: '80%',
     justifyContent: 'space-between',
   },
   memberBar: {
-    width: '80%',
+    width: '100%',
     height: 10,
     borderRadius: 20,
     borderColor: 'black',
