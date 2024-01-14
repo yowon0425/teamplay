@@ -178,6 +178,7 @@ app.post("/api/joinTeam", async (req, res) => {
     let userObj = new Map([
       ["uid", uid],
       ["userName", userName],
+      ["todo", []],
     ]);
 
     // 팀플 DB에 유저(팀플 멤버) id 추가
@@ -242,7 +243,20 @@ app.post("/api/teamList", async (req, res) => {
     leture: 수업 이름
     numOfMember: 팀원 수
     description: 팀플 설명
-    member: [{name: oo, uid: oo}, {...}]
+    member: [
+      {
+        name: oo,
+        uid: oo,
+        todo: [
+          {
+            number: 1,
+            content: "자료조사",
+            deadline: "2024.1.1",
+            isCompleted: false,
+          },
+        ]
+      },
+    ]
     teamGoal: 팀플 목표
   }
   실패 -> isCompleted: false
@@ -328,10 +342,7 @@ app.post("/api/upload", upload.any(), async (req, res) => {
   }
 
   // 응답 형식
-  성공 -> res.data
-  {
-    teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
-  } 
+  성공 -> isCompleted: true
   실패 -> isCompleted: false
 */
 app.post("/api/fileList", async (req, res) => {
@@ -349,6 +360,7 @@ app.post("/api/fileList", async (req, res) => {
         var data = snapshot.data();
         return res.send(data);
       });
+    res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
     console.log(err);
@@ -379,6 +391,56 @@ app.post("/api/teamGoal", async (req, res) => {
     res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 프로젝트 계획 추가 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+    memberId: 멤버 id
+    todoData: 계획 데이터 -> 객체 형태
+      -> {
+        number: 1,
+        content: "자료조사",
+        deadline: "2024.1.1",
+        isCompleted: false,
+      }
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false, error: "msg"
+*/
+app.post("/api/todo", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { teamId, memberId, todoData } = req.body;
+
+  try {
+    // firestore에서 팀 정보 가져오기
+    const teamDoc = await db.collection("teamlist").doc(teamId).get();
+    const teamData = teamDoc.data();
+
+    // 계획을 추가할 멤버 데이터 찾기
+    const index = teamData.member.findIndex(
+      (member) => member.uid === memberId
+    );
+
+    // 찾았다면, 계획 데이터 추가
+    if (index !== -1) {
+      teamData.member[index].todo.push(todoData);
+
+      // 업데이트
+      await db.collection("teamlist").doc(teamId).update({
+        member: teamData.member,
+      });
+      res.send({ isCompleted: true });
+    } else {
+      res.send({ isCompleted: false, error: "Member not found" });
+    }
+  } catch (err) {
+    res.send({ isCompleted: false, error: "error" });
     console.log(err);
   }
 });
