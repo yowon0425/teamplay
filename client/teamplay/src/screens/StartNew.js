@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, TextInput} from 'react-native';
 import Button from '../components/Button';
-import { v4 as uuidv4 } from 'uuid';
-import { getRandomBase64 } from 'react-native-get-random-values';
+import {v4 as uuidv4} from 'uuid';
+import {getRandomBase64} from 'react-native-get-random-values';
 import axios from 'axios';
 
 const StartNew = () => {
   const [name, setName] = useState('');
   const [lecture, setLecture] = useState('');
-  const [nunOfMember, setNunOfMember] = useState('');
+  const [numOfMember, setNumOfMember] = useState('');
   const [description, setDescription] = useState('');
   const [displayText, setDisplayText] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -16,7 +16,7 @@ const StartNew = () => {
 
   const handleButtonPress = async () => {
     try {
-      const newTeamId = uuidv4({ random: getRandomBase64 });
+      const newTeamId = uuidv4({random: getRandomBase64});
       const truncatedTeamId = newTeamId.slice(0, 10);
 
       setTeamId(truncatedTeamId);
@@ -27,23 +27,37 @@ const StartNew = () => {
         userName: '채요원',
       };
 
-      // API 호출
-      const response = await axios.post('/api/createTeam', {
+      // 이것들 중 undefined 없는지 값 모두 잘 들어있는지 확인 부탁
+      // 애네들 중 undefined가 있어서 나는 오류 같음
+      const data = {
         uid: userObj.uid,
         userName: userObj.userName,
         name,
         lecture,
         teamId: truncatedTeamId,
-        nunOfMember,
+        numOfMember,
         description,
-        member: [userObj],
-      });
+      };
+      console.log('api 요청 data -> ', data);
 
-      if (response.data.isCompleted) {
-        console.log('Team created successfully.');
-      } else {
-        console.log('Team creation failed.');
-      }
+      // API 호출
+      await axios
+        .post('/api/createTeam', {
+          uid: userObj.uid,
+          userName: userObj.userName,
+          name,
+          lecture,
+          teamId: truncatedTeamId,
+          numOfMember,
+          description,
+        })
+        .then(res => {
+          if (res.data.isCompleted) {
+            console.log('Team created successfully.');
+          } else {
+            console.log('Team creation failed.');
+          }
+        });
     } catch (err) {
       console.log('[error]: ', err);
     }
@@ -51,15 +65,14 @@ const StartNew = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 20, color: 'black' }}>새로운 팀플 시작하기</Text>
+      <Text style={{fontSize: 20, color: 'black'}}>새로운 팀플 시작하기</Text>
 
       {submitted ? (
         <Text style={styles.headerText}>
-          새로운 팀플 개설이 {"\n"}
-          완료되었습니다! {"\n"}
-          {"\n"}
-          팀 ID: {teamId} {"\n"}
-          {"\n"}
+          새로운 팀플 개설이 {'\n'}
+          완료되었습니다! {'\n'}
+          {'\n'}팀 ID: {teamId} {'\n'}
+          {'\n'}
         </Text>
       ) : (
         <View style={styles.container}>
@@ -68,25 +81,25 @@ const StartNew = () => {
             style={styles.input}
             placeholder="            팀플명 입력            "
             value={name}
-            onChangeText={(text) => setName(text)}
+            onChangeText={text => setName(text)}
           />
           <TextInput
             style={styles.input}
             placeholder="            수업명 입력            "
             value={lecture}
-            onChangeText={(text) => setLecture(text)}
+            onChangeText={text => setLecture(text)}
           />
           <TextInput
             style={styles.input}
             placeholder="            팀원수 입력            "
-            value={nunOfMember}
-            onChangeText={(text) => setNunOfMember(text)}
+            value={numOfMember}
+            onChangeText={text => setNumOfMember(text)}
           />
           <TextInput
             style={styles.input}
             placeholder="            팀플 설명 입력            "
             value={description}
-            onChangeText={(text) => setDescription(text)}
+            onChangeText={text => setDescription(text)}
           />
           <Button
             style={styles.input}
@@ -94,7 +107,7 @@ const StartNew = () => {
             light={true}
             onPress={handleButtonPress}
           />
-          <Text style={{ marginTop: 10 }}>{displayText}</Text>
+          <Text style={{marginTop: 10}}>{displayText}</Text>
         </View>
       )}
     </View>

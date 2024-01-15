@@ -101,7 +101,8 @@ app.post("/api/signup", async (req, res) => {
 */
 app.post("/api/createTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, userName, name, lecture, nunOfMember, description } = req.body;
+  const { uid, userName, name, lecture, numOfMember, description, teamId } =
+    req.body;
 
   try {
     let userObj = new Map([
@@ -116,7 +117,7 @@ app.post("/api/createTeam", async (req, res) => {
         name,
         lecture,
         teamId,
-        nunOfMember,
+        numOfMember,
         description,
         member: [userObj],
         teamGoal: "팀플 목표를 설정해보세요.",
