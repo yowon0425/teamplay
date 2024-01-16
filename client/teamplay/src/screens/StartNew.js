@@ -15,16 +15,25 @@ const StartNew = () => {
   const [submitted, setSubmitted] = useState(false);
   const [teamId, setTeamId] = useState('');
   var truncId;
-  const {uid} = auth().currentUser;
-  //const userName = auth().currentUserInfo;
-  //console.log('cur user info: ' + userName); // 유저이름 어떻게 가져오는지 모르겠음
-  // 팀원 수 받지 않기
+  const {uid, displayName} = auth().currentUser;
+  
 
   const handleButtonPress = async () => {
     try {
-      const newTeamId = uuidv4({random: getRandomBase64}); // 이 자체로 쓰면 띄어쓰기때문에 문서 이름으로 등록이 안돼서 가공 필요할듯
+      console.log('cur user info: ' + displayName);
+      function getRandomAlphaNumericId(length) {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let randomId = '';
+        for (let i = 0; i < length; i++) {
+          const randomIndex = Math.floor(Math.random() * characters.length);
+          randomId += characters.charAt(randomIndex);
+        }
+        return randomId;
+      }
+      
+      const newTeamId = getRandomAlphaNumericId(10);
       console.log('newid: ' + newTeamId);
-      truncId = newTeamId.slice(0, 10);
+      truncId = newTeamId;
 
       setTeamId(newTeamId);
       setSubmitted(true);
@@ -122,7 +131,7 @@ const StartNew = () => {
         <Text style={styles.headerText}>
           새로운 팀플 개설이 {'\n'}
           완료되었습니다! {'\n'}
-          {'\n'}팀 ID: {truncId} {'\n'}
+          {'\n'}팀 ID: {teamId} {'\n'}
           {'\n'}
         </Text>
       ) : (
@@ -139,12 +148,6 @@ const StartNew = () => {
             placeholder="            수업명 입력            "
             value={lecture}
             onChangeText={text => setLecture(text)}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="            팀원수 입력            "
-            value={numOfMember}
-            onChangeText={text => setNumOfMember(text)}
           />
           <TextInput
             style={styles.input}
