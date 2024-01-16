@@ -46,6 +46,7 @@ const Home = ({teamId}) => {
             member: [{userName: oo, uid: oo}, {...}]
           }
           */
+          /* 멤버 역할 입력받는 페이지 필요 */
           const data = JSON.stringify(res.data);
           console.log('Home data : ' + data);
           setTeamInfo(res.data);

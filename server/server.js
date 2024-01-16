@@ -101,14 +101,18 @@ app.post("/api/signup", async (req, res) => {
 */
 app.post("/api/createTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, userName, name, lecture, numOfMember, description, teamId } =
+  const { uid, userName, name, teamId, lecture, numOfMember, description } =
     req.body;
 
   try {
-    let userObj = new Map([
+    /*let userObj = new Map([
       ["uid", uid],
       ["name", userName],
-    ]);
+    ]);이 형태가 자바스크립트의 일반 객체 형태가 아니라서 오류난 것*/
+    let userObj = {
+      uid,
+      userName, // 다른 필드에는 다 유저네임으로 되어있어서 일단 바꿔보았다..스리슬쩍
+    };
     // firestore에 저장
     await db
       .collection("teamlist")
@@ -123,14 +127,19 @@ app.post("/api/createTeam", async (req, res) => {
         teamGoal: "팀플 목표를 설정해보세요.",
       });
 
-    let teamObj = new Map([
+    /*let teamObj = new Map([
       ["teamId", teamId],
       ["name", name],
       ["description", description],
-    ]);
+    ]); 이 형태가 자바스크립트의 일반 객체 형태가 아니라서 오류난 것*/
+    let teamObj = {
+      teamId,
+      name,
+      description,
+    };
     // user 정보 -> teamList에 팀플 추가
     await db
-      .collection("user")
+      .collection("users") //여기 users라고해야하는데 user로 오타났음....
       .doc(uid)
       .update({
         teamList: FieldValue.arrayUnion(teamObj),

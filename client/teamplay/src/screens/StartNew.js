@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import {v4 as uuidv4} from 'uuid';
 import {getRandomBase64} from 'react-native-get-random-values';
 import axios from 'axios';
+import auth from '@react-native-firebase/auth';
 
 const StartNew = () => {
   const [name, setName] = useState('');
@@ -13,24 +14,74 @@ const StartNew = () => {
   const [displayText, setDisplayText] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [teamId, setTeamId] = useState('');
+  var truncId;
+  const {uid} = auth().currentUser;
+  //const userName = auth().currentUserInfo;
+  //console.log('cur user info: ' + userName); // 유저이름 어떻게 가져오는지 모르겠음
+  // 팀원 수 받지 않기
 
   const handleButtonPress = async () => {
     try {
-      const newTeamId = uuidv4({random: getRandomBase64});
-      const truncatedTeamId = newTeamId.slice(0, 10);
+      const newTeamId = uuidv4({random: getRandomBase64}); // 이 자체로 쓰면 띄어쓰기때문에 문서 이름으로 등록이 안돼서 가공 필요할듯
+      console.log('newid: ' + newTeamId);
+      truncId = newTeamId.slice(0, 10);
 
-      setTeamId(truncatedTeamId);
+      setTeamId(newTeamId);
       setSubmitted(true);
+      createTeam();
+    } catch {}
+  };
+  // API 호출
+  /* ------------- 팀플 생성 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: user id
+    userName: user name
+    teamId: 팀플 id (랜덤 생성)
+    name: 팀플 이름
+    leture: 수업 이름
+    numOfMember: 팀원 수
+    description: 팀플 설명
+  }
 
-      const userObj = {
-        uid: 'D0zT5KbB36MttJMA18DinFR4NTC3',
-        userName: '채요원',
-      };
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
+  const createTeam = async () => {
+    console.log('api 호출됨');
+    console.log(
+      '보내는 정보: ' + uid,
+      teamId,
+      name,
+      lecture,
+      numOfMember,
+      description,
+    );
+    //console.log(userName);
+    await axios
+      .post('/api/createTeam', {
+        uid: uid,
+        userName: uid,
+        teamId: truncId,
+        name,
+        lecture,
+        numOfMember,
+        description,
+      })
+      .then(res => {
+        if (res.data.isCompleted) {
+          console.log('Team created successfully.');
+        } else {
+          console.log('Team creation failed.');
+        }
+      })
+      .catch(err => console.log(err));
+  };
 
-      // 이것들 중 undefined 없는지 값 모두 잘 들어있는지 확인 부탁
-      // 애네들 중 undefined가 있어서 나는 오류 같음
-      const data = {
-        uid: userObj.uid,
+
+  /*const response = await axios.post('/api/createTeam', {
+    uid: userObj.uid,
         userName: userObj.userName,
         name,
         lecture,
@@ -61,7 +112,7 @@ const StartNew = () => {
     } catch (err) {
       console.log('[error]: ', err);
     }
-  };
+  };*/
 
   return (
     <View style={styles.container}>
@@ -71,7 +122,7 @@ const StartNew = () => {
         <Text style={styles.headerText}>
           새로운 팀플 개설이 {'\n'}
           완료되었습니다! {'\n'}
-          {'\n'}팀 ID: {teamId} {'\n'}
+          {'\n'}팀 ID: {truncId} {'\n'}
           {'\n'}
         </Text>
       ) : (

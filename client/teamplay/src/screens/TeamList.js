@@ -8,6 +8,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Modal,
 } from 'react-native';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
@@ -18,12 +19,19 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import TeamCard from '../components/TeamCard';
 
 const TeamList = () => {
-  const [showOptions, setShowOptions] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [teams, setTeams] = useState();
 
-  const toggleOptions = () => {
-    setShowOptions(!showOptions);
+  const navigation = useNavigation();
+  const openStartNew = () => {
+    console.log('네비게이터');
+    navigation.navigate('StartNew', {userName: {uid}});
   };
+  const modalOpen = () => {
+    console.log(showModal);
+    setShowModal(!showModal);
+  };
+
   const {uid} = auth().currentUser;
   const getTeams = async () => {
     await axios
@@ -60,7 +68,7 @@ const TeamList = () => {
             teams.map(data => {
               return <TeamCard key={data.teamId} team={data} />;
             })}
-          <TouchableOpacity onPress={toggleOptions} style={styles.teamBlock}>
+          <TouchableOpacity onPress={modalOpen} style={styles.teamBlock}>
             <Shadow
               style={styles.shadow}
               distance={1}
@@ -77,6 +85,29 @@ const TeamList = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      <View style={styles.modalContainer}>
+        <Modal
+          style={styles.modal}
+          animationType="fade"
+          visible={showModal}
+          transparent={true}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <TouchableOpacity
+                onPress={openStartNew}
+                style={styles.modalTextContainer}>
+                <Text style={styles.modalText}>새 팀 만들기</Text>
+              </TouchableOpacity>
+              <View style={styles.line} />
+              <TouchableOpacity
+                onPress={openStartNew}
+                style={styles.modalTextContainer}>
+                <Text style={styles.modalText}>팀 참가하기</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 };
@@ -158,6 +189,38 @@ const styles = StyleSheet.create({
   },
   shadow: {
     width: '100%',
+  },
+  modalContainer: {},
+  centeredView: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalView: {
+    backgroundColor: 'white',
+    width: 250,
+    height: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+  },
+  modalTextContainer: {
+    alignItems: 'center',
+    height: '50%',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    color: 'black',
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
+  line: {
+    height: 1,
+    width: '95%',
+    backgroundColor: '#E8E8E8',
   },
 });
 
