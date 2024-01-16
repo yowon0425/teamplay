@@ -7,6 +7,8 @@ import TeamList from '../screens/TeamList';
 import {NavigationContainer} from '@react-navigation/native';
 import Main from '../screens/Main';
 import MenuBar from './TabNavigator';
+import StartNew from '../screens/StartNew';
+import StartJoin from '../screens/StartJoin';
 
 /* 메인화면-로그인-팀리스트까지의 stackNavigator */
 

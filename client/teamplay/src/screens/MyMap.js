@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   dot: {
-    fontSize: 24,
+    fontSize: 20,
     color: 'black',
     alignContent: 'flex-end',
   },
