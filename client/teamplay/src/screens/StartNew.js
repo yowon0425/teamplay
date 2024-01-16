@@ -79,6 +79,7 @@ const StartNew = () => {
       .catch(err => console.log(err));
   };
 
+
   /*const response = await axios.post('/api/createTeam', {
     uid: userObj.uid,
         userName: userObj.userName,
@@ -87,14 +88,27 @@ const StartNew = () => {
         teamId: truncatedTeamId,
         numOfMember,
         description,
-        member: [userObj],
-      });
+      };
+      console.log('api 요청 data -> ', data);
 
-      if (response.data.isCompleted) {
-        console.log('Team created successfully.');
-      } else {
-        console.log('Team creation failed.');
-      }
+      // API 호출
+      await axios
+        .post('/api/createTeam', {
+          uid: userObj.uid,
+          userName: userObj.userName,
+          name,
+          lecture,
+          teamId: truncatedTeamId,
+          numOfMember,
+          description,
+        })
+        .then(res => {
+          if (res.data.isCompleted) {
+            console.log('Team created successfully.');
+          } else {
+            console.log('Team creation failed.');
+          }
+        });
     } catch (err) {
       console.log('[error]: ', err);
     }
