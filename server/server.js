@@ -166,30 +166,38 @@ app.post("/api/createTeam", async (req, res) => {
 */
 app.post("/api/joinTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, teamId } = req.body;
+  const { uid, teamId, userName } = req.body;
 
-  const { name, description } = await axios.post("/api/teamData", { teamId });
+  let name = "";
+  let description = "";
+
+  await axios
+    .post("http://127.0.0.1:4000/api/teamData", { teamId })
+    .then((res) => {
+      name = res.data.name;
+      description = res.data.description;
+    });
 
   try {
-    let teamObj = new Map([
-      ["teamId", teamId],
-      ["name", name],
-      ["description", description],
-    ]);
+    let teamObj = {
+      teamId,
+      name,
+      description,
+    };
 
     // user 정보 -> teamList에 팀플 추가
     await db
-      .collection("user")
+      .collection("users")
       .doc(uid)
       .update({
         teamList: FieldValue.arrayUnion(teamObj),
       });
 
-    let userObj = new Map([
-      ["uid", uid],
-      ["userName", userName],
-      ["todo", []],
-    ]);
+    let userObj = {
+      uid,
+      userName,
+      todo: [],
+    };
 
     // 팀플 DB에 유저(팀플 멤버) id 추가
     await db

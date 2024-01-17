@@ -23,6 +23,11 @@
     "request-promise": "^4.2.6",
     "streamifier": "^0.1.1"
   },
+  "nodemonConfig": {
+    "ignore": [
+      "data/*"
+    ]
+  },
   "devDependencies": {
     "nodemon": "^3.0.1"
   }
