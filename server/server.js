@@ -90,7 +90,7 @@ app.post("/api/signup", async (req, res) => {
     userName: user name
     teamId: 팀플 id (랜덤 생성)
     name: 팀플 이름
-    leture: 수업 이름
+    lecture: 수업 이름
     numOfMember: 팀원 수
     description: 팀플 설명
   }
@@ -105,10 +105,6 @@ app.post("/api/createTeam", async (req, res) => {
     req.body;
 
   try {
-    /*let userObj = new Map([
-      ["uid", uid],
-      ["name", userName],
-    ]);이 형태가 자바스크립트의 일반 객체 형태가 아니라서 오류난 것*/
     let userObj = {
       uid,
       userName, // 다른 필드에는 다 유저네임으로 되어있어서 일단 바꿔보았다..스리슬쩍
@@ -127,11 +123,6 @@ app.post("/api/createTeam", async (req, res) => {
         teamGoal: "팀플 목표를 설정해보세요.",
       });
 
-    /*let teamObj = new Map([
-      ["teamId", teamId],
-      ["name", name],
-      ["description", description],
-    ]); 이 형태가 자바스크립트의 일반 객체 형태가 아니라서 오류난 것*/
     let teamObj = {
       teamId,
       name,
@@ -144,6 +135,18 @@ app.post("/api/createTeam", async (req, res) => {
       .update({
         teamList: FieldValue.arrayUnion(teamObj),
       });
+
+    let commentObj = {
+      [uid]: {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+      },
+    };
+
+    // comment collection 추가
+    await db.collection("comment").doc(teamId).set(commentObj);
 
     res.send({ isCompleted: true });
   } catch (err) {
@@ -171,14 +174,14 @@ app.post("/api/joinTeam", async (req, res) => {
   let name = "";
   let description = "";
 
-  await axios
-    .post("http://127.0.0.1:4000/api/teamData", { teamId })
-    .then((res) => {
-      name = res.data.name;
-      description = res.data.description;
-    });
-
   try {
+    await axios
+      .post("http://127.0.0.1:4000/api/teamData", { teamId })
+      .then((res) => {
+        name = res.data.name;
+        description = res.data.description;
+      });
+
     let teamObj = {
       teamId,
       name,
@@ -206,6 +209,27 @@ app.post("/api/joinTeam", async (req, res) => {
       .update({
         member: FieldValue.arrayUnion(userObj),
       });
+
+    console.log("teamData");
+    const teamDoc = await db.collection("comment").doc(teamId).get();
+    const data = data.data();
+
+    const comment = {
+      ...data,
+      [uid]: {
+        0: [],
+        1: [],
+        2: [],
+        3: [],
+      },
+    };
+
+    // comment collection 추가
+    await db
+      .collection("comment")
+      .doc(teamId)
+      .set({ ...comment });
+
     res.send({ isJoined: true });
   } catch (err) {
     res.send({ isJoined: false });
@@ -234,7 +258,7 @@ app.post("/api/teamList", async (req, res) => {
     // firestore에서 가져오기
     await db
       .collection("users")
-      .doc(`${uid}`)
+      .doc(uid)
       .get()
       .then((snapshot) => {
         // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
@@ -459,6 +483,63 @@ app.post("/api/todo", async (req, res) => {
     }
   } catch (err) {
     res.send({ isCompleted: false, error: "error" });
+    console.log(err);
+  }
+});
+
+/* ------------- comment 추가 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: user id
+    teamId: 팀플 id
+    commentUserId: comment를 남긴 유저 id
+    comment: comment 내용
+    todoId: todo 번호 (string 형태 -> "0")
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
+app.post("/api/addComment", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId, comment, commentUserId, todoId } = req.body;
+
+  // const comment = {
+  //   ...teamData,
+  //   [uid]: {
+  //     0: [],
+  //     1: [],
+  //     2: [],
+  //     3: [],
+  //   },
+  // };
+
+  try {
+    // firestore에서 문서 가져오기
+    const doc = await db.collection("comment").doc(teamId).get();
+    const data = doc.data();
+
+    // date 객체
+    let dateObj = new Date();
+    let date = {
+      year: dateObj.getFullYear(),
+      month: dateObj.getMonth() + 1,
+      day: dateObj.getDate(),
+    };
+
+    // 코멘트 업데이트
+    data[uid][todoId][commentUserId] = {
+      comment: comment,
+      createdAt: `${date.year}-${date.month}-${date.day}`,
+    };
+
+    // firestore에 저장
+    await db.collection("comment").doc(teamId).set(data);
+
+    res.send({ isCompleted: true });
+  } catch (err) {
+    res.send({ isCompleted: false });
     console.log(err);
   }
 });
