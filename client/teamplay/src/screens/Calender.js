@@ -101,21 +101,25 @@ class CalendarScreen extends Component {
 
   renderDay = (date) => {
     const eventsOnDate = this.state.events[date.dateString];
-
+  
     // Use toLocaleDateString to format the date string
     const formattedDate = new Date(date.dateString).toLocaleDateString({
       weekday: 'long',
       day: 'numeric',
     });
-
+  
+    const containerStyle = {
+      backgroundColor: 'transparent', // Set the background color to transparent
+    };
+  
     return (
       <TouchableOpacity onPress={() => this.handleDayPress(date)}>
         <LinearGradient
           colors={['#FFB8D0', '#FEE5E1']}
           style={styles.circleContainer}
         >
-          <View style={styles.circle}>
-            <Text style={styles.dayText}>{formattedDate}</Text>
+          <View style={[styles.circle, containerStyle]}>
+            <Text style={[styles.dayText, containerStyle]}>{formattedDate}</Text>
           </View>
         </LinearGradient>
         {eventsOnDate &&
@@ -129,7 +133,7 @@ class CalendarScreen extends Component {
           ))}
       </TouchableOpacity>
     );
-  };
+  };  
 
   render() {
     const currentDate = new Date();
@@ -147,54 +151,57 @@ class CalendarScreen extends Component {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         enabled
       >
-        <View style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
-        <Calendar
-          current={currentDateString}
-          monthFormat={'MMMM'}
-          onDayPress={this.handleDayPress}
-          markedDates={markedDates}
-          theme={{
-            arrowColor: 'gray',
-            todayTextColor: 'black',
-          }}
-          renderDay={this.renderDay}
-        />
+        <ScrollView style={{ flex: 1 }}>
+          <View style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
+          <Calendar
+  current={currentDateString}
+  monthFormat={'MMMM'}
+  onDayPress={this.handleDayPress}
+  markedDates={markedDates}
+  theme={{
+    arrowColor: 'gray',
+    todayTextColor: 'black',
+    calendarBackground: 'transparent', // Set the background color to transparent
+  }}
+  renderDay={this.renderDay}
+  style={{ backgroundColor: 'transparent' }}
+/>
 
-          {this.state.isTextInputVisible && (
-            <View style={styles.textInputContainer}>
-              <TextInput
-                style={styles.textInput}
-                placeholder="일정을 입력하세요..."
-                value={this.state.eventText}
-                onChangeText={(text) => this.setState({ eventText: text })}
-                autoCorrect={false}
-                autoCapitalize="none"
-                keyboardType="default"
+
+            {this.state.isTextInputVisible && (
+              <View style={styles.textInputContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="일정을 입력하세요..."
+                  value={this.state.eventText}
+                  onChangeText={(text) => this.setState({ eventText: text })}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  keyboardType="default"
+                />
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={this.handleAddEvent}
+                >
+                  <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {this.state.showTimePicker && (
+              <DateTimePicker
+                value={this.state.selectedTime}
+                mode="time"
+                is24Hour={false}
+                display="spinner"
+                onChange={this.handleTimeChange}
               />
-              <TouchableOpacity
-                style={styles.addButton}
-                onPress={this.handleAddEvent}
-              >
-                <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {this.state.showTimePicker && (
-            <DateTimePicker
-              value={this.state.selectedTime}
-              mode="time"
-              is24Hour={false}
-              display="spinner"
-              onChange={this.handleTimeChange}
-            />
-          )}
-          <ScrollView style={{ flex: 1 }}>
+            )}
             <EventList
               events={this.state.events}
               onDeleteEvent={this.handleDeleteEvent}
             />
-          </ScrollView>
-        </View>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     );
   }
