@@ -1,8 +1,16 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, TextInput} from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import Button from '../components/Button';
-import {v4 as uuidv4} from 'uuid';
-import {getRandomBase64} from 'react-native-get-random-values';
+import { v4 as uuidv4 } from 'uuid';
+import { getRandomBase64 } from 'react-native-get-random-values';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 
@@ -21,6 +29,12 @@ const StartNew = () => {
   const handleButtonPress = async () => {
     try {
       console.log('cur user info: ' + displayName);
+
+      if (!name || !lecture || !numOfMember || !description) {
+        setDisplayText('모두 입력해주세요.');
+        return;
+      }
+
       function getRandomAlphaNumericId(length) {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let randomId = '';
@@ -124,47 +138,52 @@ const StartNew = () => {
   };*/
 
   return (
-    <View style={styles.container}>
-      <Text style={{fontSize: 20, color: 'black'}}>새로운 팀플 시작하기</Text>
-
-      {submitted ? (
-        <Text style={styles.headerText}>
-          새로운 팀플 개설이 {'\n'}
-          완료되었습니다! {'\n'}
-          {'\n'}팀 ID: {teamId} {'\n'}
-          {'\n'}
-        </Text>
-      ) : (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior="padding"
+      keyboardVerticalOffset={-150}
+    >
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.container}>
-          <Text>팀플에 대한 정보를 입력하세요.</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="            팀플명 입력            "
-            value={name}
-            onChangeText={text => setName(text)}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="            수업명 입력            "
-            value={lecture}
-            onChangeText={text => setLecture(text)}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="            팀플 설명 입력            "
-            value={description}
-            onChangeText={text => setDescription(text)}
-          />
-          <Button
-            style={styles.input}
-            text="시작하기"
-            light={true}
-            onPress={handleButtonPress}
-          />
-          <Text style={{marginTop: 10}}>{displayText}</Text>
+          <Text style={{ fontSize: 20, color: 'black' }}>새로운 팀플 시작하기</Text>
+
+          {submitted ? (
+            <Text style={styles.headerText}>
+              새로운 팀플 개설이 {'\n'} 완료되었습니다! {'\n'} {'\n'}팀 ID: {teamId} {'\n'} {'\n'}
+            </Text>
+          ) : (
+            <View style={styles.container}>
+              <Text>팀플에 대한 정보를 입력하세요.</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="            팀플명 입력            "
+                value={name}
+                onChangeText={(text) => setName(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="            수업명 입력            "
+                value={lecture}
+                onChangeText={(text) => setLecture(text)}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="            팀플 설명 입력            "
+                value={description}
+                onChangeText={(text) => setDescription(text)}
+              />
+              <Button
+                style={styles.input}
+                text="시작하기"
+                light={true}
+                onPress={handleButtonPress}
+              />
+              <Text style={{ marginTop: 10 }}>{displayText}</Text>
+            </View>
+          )}
         </View>
-      )}
-    </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
