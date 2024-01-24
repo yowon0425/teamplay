@@ -212,7 +212,7 @@ app.post("/api/joinTeam", async (req, res) => {
 
     console.log("teamData");
     const teamDoc = await db.collection("comment").doc(teamId).get();
-    const data = data.data();
+    const data = teamDoc.data();
 
     const comment = {
       ...data,
