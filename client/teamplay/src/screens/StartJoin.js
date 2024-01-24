@@ -38,40 +38,28 @@ await axios.post('/api/API이름', {
 
 const handleButtonPress = async () => {
   const { uid, displayName } = auth().currentUser;
-  try {
-    console.log('현재 사용자 정보: ' + displayName);
+  
+  const joinTeam = async () => {
+    console.log('api 호출됨');
+    console.log(
+      '보내는 정보: ' + uid,
+      displayName,
+      teamId
+    );
 
-    const isJoined = async () => {
-      console.log('API 호출됨');
-      console.log(
-        '보내는 정보: ' + uid,
+    await axios
+      .post('/api/joinTeam', {
+        uid,
         displayName,
         teamId,
-      );
-      try {
-        const response = await axios.post('/api/isJoined', {
-          uid: uid,
-          userName: displayName,
-          teamId: teamId,
-        });
+      })
+      .catch(err => console.log(err));
+  };
 
-        if (response.data.isJoined) {
-          console.log('팀 참가 성공.');
-        } else {
-          console.log('팀 참가 실패.');
-        }
-      } catch (error) {
-        console.log('API 요청에서 에러 발생:', error);
-      }
-    };
-
-    await isJoined();
-
-  } catch (error) {
-    console.log('에러:', error);
-  }
-};
-
+  setTeamId(teamId);
+  setSubmitted(true);
+  joinTeam();
+}
 
   return (
     <View style={styles.container}>
