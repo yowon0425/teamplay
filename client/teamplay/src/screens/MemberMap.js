@@ -1,4 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View, ScrollView} from 'react-native';
 import React from 'react';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
@@ -6,9 +6,10 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 
-const MemberMap = () => {
+const MemberMap = ({uid}) => {
+  console.log('member map: ' + uid);
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.top}>
         <View>
           <Text style={styles.name}>이름</Text>
@@ -74,19 +75,14 @@ const MemberMap = () => {
           </View>
         </View>
       </View>
-      <NavigationContainer>
-        <MenuBar />
-      </NavigationContainer>
-    </View>
+    </ScrollView>
   );
 };
 
 export default MemberMap;
 
 const styles = StyleSheet.create({
-  container: {
-    justifyContent: 'center',
-  },
+  container: {},
   top: {
     width: '100%',
     alignItems: 'center',

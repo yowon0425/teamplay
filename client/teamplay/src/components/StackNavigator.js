@@ -9,6 +9,7 @@ import Main from '../screens/Main';
 import MenuBar from './TabNavigator';
 import StartNew from '../screens/StartNew';
 import StartJoin from '../screens/StartJoin';
+import MemberMap from '../screens/MemberMap';
 
 /* 메인화면-로그인-팀리스트까지의 stackNavigator */
 
@@ -63,6 +64,16 @@ const StackNavigator = () => {
         <Stack.Screen
           name="MenuBar"
           component={MenuBar}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="StartNew"
+          component={StartNew}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="StartJoin"
+          component={StartJoin}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

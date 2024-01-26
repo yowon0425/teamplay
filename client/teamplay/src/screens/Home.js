@@ -4,9 +4,10 @@ import {
   ProgressBarAndroidBase,
   StyleSheet,
   ScrollView,
+  Touchable,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import MenuBar from '../components/TabNavigator';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
@@ -27,8 +28,21 @@ const Home = ({teamId}) => {
   /*내 작업 페이지로 이동하는 이벤트*/
   const navigation = useNavigation();
   const goMyPage = () => {
-    console.log('네비게이터');
-    navigation.navigate('MyMap', {});
+    console.log('내 작업 페이지로');
+    navigation.navigate('MenuBar', {
+      screen: 'Maps',
+      my: true,
+    });
+  };
+
+  /*팀원 작업 페이지로 이동하는 이벤트*/
+  const goMemberPage = uid => {
+    console.log('팀원 작업 페이지로: ');
+    navigation.navigate('MenuBar', {
+      screen: 'Maps',
+      my: false,
+      uid: uid,
+    });
   };
 
   const getTeamInfo = async () => {
@@ -64,7 +78,7 @@ const Home = ({teamId}) => {
     <View style={styles.container}>
       <View style={styles.top}>
         <Text style={styles.teamName}>{teamInfo.name}</Text>
-        <Text style={styles.goal}>{teamInfo.description}객체 A+ 받자!!</Text>
+        <Text style={styles.goal}>{teamInfo.description}</Text>
       </View>
       <View style={styles.teamProgress}>
         <MaskedView
@@ -91,13 +105,16 @@ const Home = ({teamId}) => {
         {teamInfo.member &&
           teamInfo.member.map(data => {
             return (
-              <View style={styles.member}>
+              <TouchableOpacity
+                key={data.uid}
+                style={styles.member}
+                onPress={() => goMemberPage(data.uid)}>
                 <View style={styles.memberInfo}>
                   <Text>{data.userName}</Text>
                   <Text>0%</Text>
                 </View>
                 <Progress.Bar style={styles.memberBar} />
-              </View>
+              </TouchableOpacity>
             );
           })}
         <View style={styles.member}>

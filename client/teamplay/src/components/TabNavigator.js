@@ -9,10 +9,12 @@ import Calender from '../screens/Calender';
 import Message from '../screens/Message';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import MyMap from '../screens/MyMap';
+import MemberMap from '../screens/MemberMap';
 
 const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
-  console.log(route);
+  const params = JSON.stringify(route);
+  console.log('route: ' + params);
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -27,28 +29,32 @@ const MenuBar = ({route}) => {
           if (route.name === 'Home') {
             iconName = 'home';
             color = focused ? '#484848' : '#CCCCCC';
-          } else if (route.name === 'MyMap') {
-            iconName = 'list';
+          } else if (route.name === 'Maps') {
+            iconName = 'color-palette-outline';
             color = focused ? '#484848' : '#CCCCCC';
           } else if (route.name === 'Notice') {
             iconName = 'notifications-outline';
             color = focused ? '#484848' : '#CCCCCC';
           } else if (route.name === 'Calender') {
-            iconName = 'calendar-outline';
+            iconName = 'today-outline';
             color = focused ? '#484848' : '#CCCCCC';
           } else if (route.name === 'Message') {
-            iconName = 'chatbox-outline';
+            iconName = 'chatbubbles-outline';
             color = focused ? '#484848' : '#CCCCCC';
           }
 
           return <Ionic name={iconName} size={size} color={color} />;
         },
       })}>
-      <Tab.Screen name="MyMap" component={MyMap} />
-      <Tab.Screen name="Notice" component={Notice} />
       <Tab.Screen name="Home">
         {() => <Home teamId={route.params.teamId} />}
       </Tab.Screen>
+      <Tab.Screen name="Maps">
+        {() =>
+          route.params.my ? <MyMap /> : <MemberMap uid={route.params.uid} />
+        }
+      </Tab.Screen>
+      <Tab.Screen name="Notice" component={Notice} />
       <Tab.Screen name="Calender" component={Calender} />
       <Tab.Screen name="Message" component={Message} />
     </Tab.Navigator>

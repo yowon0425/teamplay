@@ -1,6 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
-import Button from '../components/Button';
 import {
   View,
   Text,
@@ -13,24 +12,48 @@ import {
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import {Shadow} from 'react-native-shadow-2';
-import MenuBar from '../components/TabNavigator';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
 import TeamCard from '../components/TeamCard';
 
 const TeamList = () => {
+  console.log('팀리스트로');
   const [showModal, setShowModal] = useState(false);
   const [teams, setTeams] = useState();
+  const outside = useRef();
 
   const navigation = useNavigation();
   const openStartNew = () => {
     console.log('네비게이터');
-    navigation.navigate('StartNew', {userName: {uid}});
+    navigation.push('StartNew', {
+      userName: {uid},
+    });
+    setShowModal(false);
   };
+  const openStartJoin = () => {
+    console.log('네비게이터');
+    navigation.push('StartJoin', {
+      userName: {uid},
+    });
+    setShowModal(false);
+  };
+
   const modalOpen = () => {
     console.log(showModal);
-    setShowModal(!showModal);
+    setShowModal(true);
   };
+
+  const modalClose = e => {
+    setShowModal(false);
+    if (e.target == outside.current) {
+      console.log(showModal);
+      setShowModal(false);
+    }
+  };
+
+  useEffect(() => {
+    getTeams();
+    console.log('팀리스트 불러오는 함수 실행');
+  }, []);
 
   const {uid} = auth().currentUser;
   const getTeams = async () => {
@@ -46,16 +69,11 @@ const TeamList = () => {
               {
                 teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
               }
-            */
+          */
         }
       })
       .catch(err => console.log(err));
   };
-
-  useEffect(() => {
-    getTeams();
-  }, []);
-  console.log('2teams : ' + teams);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -90,7 +108,10 @@ const TeamList = () => {
           style={styles.modal}
           animationType="fade"
           visible={showModal}
-          transparent={true}>
+          transparent={true}
+          onRequestClose={modalClose}
+          ref={outside}
+          onPress={modalClose}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
               <TouchableOpacity
@@ -100,7 +121,7 @@ const TeamList = () => {
               </TouchableOpacity>
               <View style={styles.line} />
               <TouchableOpacity
-                onPress={openStartNew}
+                onPress={openStartJoin}
                 style={styles.modalTextContainer}>
                 <Text style={styles.modalText}>팀 참가하기</Text>
               </TouchableOpacity>
@@ -190,7 +211,9 @@ const styles = StyleSheet.create({
   shadow: {
     width: '100%',
   },
-  modalContainer: {},
+  modalContainer: {
+    backgroundColor: 'red',
+  },
   centeredView: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
