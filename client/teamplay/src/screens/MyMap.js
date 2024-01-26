@@ -120,15 +120,11 @@ const styles = StyleSheet.create({
   mapContainer: {
     alignItems: 'center',
     height: '75%',
-    borderColor: 'red',
-    borderWidth: 1,
   },
   maps: {
     width: '75%',
     height: '80%',
     margin: 50,
-    borderColor: 'red',
-    borderWidth: 1,
   },
   map: {
     flexDirection: 'row',
