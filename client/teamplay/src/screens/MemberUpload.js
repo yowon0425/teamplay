@@ -10,21 +10,76 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
+import axios from 'axios'; 
+import auth from '@react-native-firebase/auth';
+
+/* ------------- comment 추가 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: user id
+    teamId: 팀플 id
+    commentUserId: comment를 남긴 유저 id
+    comment: comment 내용
+    todoId: todo 번호 (number)
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
 
 const MemberUpload = () => {
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState([]);
-
+  const [todoId, setTodoId] = useState(0);
+  
   const handleCommentInputChange = (text) => {
     setCommentInput(text);
   };
 
-  const handleCommentSubmit = () => {
+  const user = auth().currentUser;
+
+const handleCommentSubmit = async () => {
+  try {
     if (commentInput.trim() !== '') {
       setComments([...comments, commentInput]);
-      setCommentInput('');
+
+      if (user) {
+        const { uid, teamId } = user;
+        const commentUserId = uid;
+        const currentTodoId = todoId;
+
+        const response = await axios.post('/api/addComment', {
+          uid,
+          teamId,
+          commentUserId,
+          comment: commentInput,
+          todoId: currentTodoId,
+        });
+
+        console.log('보내는 정보 ' + uid,
+          teamId,
+          commentUserId,
+          commentInput,
+          currentTodoId
+        );
+
+        if (response.data.isCompleted) {
+          console.log('Comment added successfully');
+          setTodoId(String(currentTodoId + 1)); // 다음 todoId로 업데이트하고 문자열로 변환
+        } else {
+          console.log('Failed to add comment');
+        }
+
+        setCommentInput('');
+      } else {
+        console.error('User is not authenticated');
+      }
     }
-  };
+  } catch (error) {
+    console.error('코멘트 제출 오류:', error);
+  }
+};
 
   return (
     <View style={styles.container}>
