@@ -11,6 +11,15 @@ import auth from '@react-native-firebase/auth';
 const MyMap = () => {
   const {uid} = auth().currentUser;
   console.log('map user: ' + uid);
+
+  // 데이터 개수 처리 함수
+  let numCompleted;
+  let numTodo;
+  let nowTodo;
+  const countTodo = todoData => {
+    // 필터 써서 개수 구하는 함수
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.top}>
