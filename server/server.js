@@ -180,6 +180,9 @@ app.post("/api/joinTeam", async (req, res) => {
       .then((res) => {
         name = res.data.name;
         description = res.data.description;
+      })
+      .catch((err) => {
+        res.send({ errorMsg: "존재하지 않는 팀입니다." });
       });
 
     let teamObj = {
@@ -540,6 +543,57 @@ app.post("/api/addComment", async (req, res) => {
     res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 프로젝트 계획 수정 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+    memberId: 멤버 id
+    newContent: {
+      number: 수정할 todo번호 -> string 형태
+      content: "바꿀 내용",
+      deadline: "바꿀 기한",
+      isCompleted: false,  -> 완료 여부
+    }
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false, error: "msg"
+*/
+app.post("/api/changeTodo", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { teamId, memberId, todoId, newContent } = req.body;
+
+  try {
+    // firestore에서 팀 정보 가져오기
+    const doc = await db.collection("teamlist").doc(teamId).get();
+    const data = doc.data();
+
+    // 계획을 추가할 멤버 데이터 찾기
+    const index = data.member.findIndex((member) => member.uid === memberId);
+
+    // 찾았다면, 계획 찾기
+    if (index !== -1) {
+      const todoIndex = data.member[index].todo.findIndex(
+        (todo) => todo.number === newContent.todoId
+      );
+
+      data.member[index].todo[todoIndex] = newContent;
+
+      // 업데이트
+      await db.collection("teamlist").doc(teamId).update({
+        member: data.member,
+      });
+      res.send({ isCompleted: true });
+    } else {
+      res.send({ isCompleted: false, error: "Member not found" });
+    }
+  } catch (err) {
+    res.send({ isCompleted: false, error: "error" });
     console.log(err);
   }
 });

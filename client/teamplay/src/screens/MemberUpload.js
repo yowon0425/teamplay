@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -5,14 +6,81 @@ import {
   ScrollView,
   Image,
   TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
-import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
-import MenuBar from '../components/TabNavigator';
-import {NavigationContainer} from '@react-navigation/native';
+import axios from 'axios'; 
+import auth from '@react-native-firebase/auth';
+
+/* ------------- comment 추가 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: user id
+    teamId: 팀플 id
+    commentUserId: comment를 남긴 유저 id
+    comment: comment 내용
+    todoId: todo 번호 (number)
+  }
+
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
 
 const MemberUpload = () => {
+  const [commentInput, setCommentInput] = useState('');
+  const [comments, setComments] = useState([]);
+  const [todoId, setTodoId] = useState(0);
+  
+  const handleCommentInputChange = (text) => {
+    setCommentInput(text);
+  };
+
+  const user = auth().currentUser;
+
+const handleCommentSubmit = async () => {
+  try {
+    if (commentInput.trim() !== '') {
+      setComments([...comments, commentInput]);
+
+      if (user) {
+        const { uid, teamId } = user;
+        const commentUserId = uid;
+        const currentTodoId = todoId;
+
+        const response = await axios.post('/api/addComment', {
+          uid,
+          teamId,
+          commentUserId,
+          comment: commentInput,
+          todoId: currentTodoId,
+        });
+
+        console.log('보내는 정보 ' + uid,
+          teamId,
+          commentUserId,
+          commentInput,
+          currentTodoId
+        );
+
+        if (response.data.isCompleted) {
+          console.log('Comment added successfully');
+          setTodoId(String(currentTodoId + 1)); // 다음 todoId로 업데이트하고 문자열로 변환
+        } else {
+          console.log('Failed to add comment');
+        }
+
+        setCommentInput('');
+      } else {
+        console.error('User is not authenticated');
+      }
+    }
+  } catch (error) {
+    console.error('코멘트 제출 오류:', error);
+  }
+};
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
@@ -41,41 +109,28 @@ const MemberUpload = () => {
         <View style={styles.comment}>
           <Text style={styles.title}>코멘트</Text>
           <ScrollView style={styles.bubbles}>
-            <View style={styles.commentLine}>
-              <Image style={styles.image} />
-              <LinearGradient
-                style={styles.chatbox}
-                colors={['#E9E9EB', '#FFFFFF']}>
-                <Text style={styles.chatboxText}>
-                  챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                </Text>
-              </LinearGradient>
-            </View>
-            <View style={styles.commentLine}>
-              <Image style={styles.image} />
-              <LinearGradient
-                style={styles.chatbox}
-                colors={['#E9E9EB', '#FFFFFF']}>
-                <Text style={styles.chatboxText}>
-                  사례에 대한 대중의 반응도 있었으면 좋겠어
-                </Text>
-              </LinearGradient>
-            </View>
-            <View style={styles.commentLine}>
-              <Image style={styles.image} />
-              <LinearGradient
-                style={styles.chatbox}
-                colors={['#E9E9EB', '#FFFFFF']}>
-                <Text style={styles.chatboxText}>
-                  챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                </Text>
-              </LinearGradient>
-            </View>
+            {comments.map((comment, index) => (
+              <View key={index} style={styles.commentLine}>
+                <Image style={styles.image} />
+                <LinearGradient
+                  style={styles.chatbox}
+                  colors={['#E9E9EB', '#FFFFFF']}>
+                  <Text style={styles.chatboxText}>{comment}</Text>
+                </LinearGradient>
+              </View>
+            ))}
           </ScrollView>
         </View>
         <View style={styles.message}>
-          <TextInput style={styles.input} placeholder="코멘트 작성하기" />
-          <Ionic name="send" style={styles.sendIcon} />
+          <KeyboardAvoidingView>
+            <TextInput
+            style={styles.input}
+            placeholder="코멘트 작성하기"
+            value={commentInput}
+            onChangeText={handleCommentInputChange}
+          /></KeyboardAvoidingView>
+          
+          <Ionic name="send" style={styles.sendIcon} onPress={handleCommentSubmit} />
         </View>
       </View>
     </View>
