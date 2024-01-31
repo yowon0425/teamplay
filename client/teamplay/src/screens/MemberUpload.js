@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -5,14 +6,26 @@ import {
   ScrollView,
   Image,
   TextInput,
+  KeyboardAvoidingView,
 } from 'react-native';
-import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
-import MenuBar from '../components/TabNavigator';
-import {NavigationContainer} from '@react-navigation/native';
 
 const MemberUpload = () => {
+  const [commentInput, setCommentInput] = useState('');
+  const [comments, setComments] = useState([]);
+
+  const handleCommentInputChange = (text) => {
+    setCommentInput(text);
+  };
+
+  const handleCommentSubmit = () => {
+    if (commentInput.trim() !== '') {
+      setComments([...comments, commentInput]);
+      setCommentInput('');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
@@ -41,41 +54,28 @@ const MemberUpload = () => {
         <View style={styles.comment}>
           <Text style={styles.title}>코멘트</Text>
           <ScrollView style={styles.bubbles}>
-            <View style={styles.commentLine}>
-              <Image style={styles.image} />
-              <LinearGradient
-                style={styles.chatbox}
-                colors={['#E9E9EB', '#FFFFFF']}>
-                <Text style={styles.chatboxText}>
-                  챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                </Text>
-              </LinearGradient>
-            </View>
-            <View style={styles.commentLine}>
-              <Image style={styles.image} />
-              <LinearGradient
-                style={styles.chatbox}
-                colors={['#E9E9EB', '#FFFFFF']}>
-                <Text style={styles.chatboxText}>
-                  사례에 대한 대중의 반응도 있었으면 좋겠어
-                </Text>
-              </LinearGradient>
-            </View>
-            <View style={styles.commentLine}>
-              <Image style={styles.image} />
-              <LinearGradient
-                style={styles.chatbox}
-                colors={['#E9E9EB', '#FFFFFF']}>
-                <Text style={styles.chatboxText}>
-                  챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                </Text>
-              </LinearGradient>
-            </View>
+            {comments.map((comment, index) => (
+              <View key={index} style={styles.commentLine}>
+                <Image style={styles.image} />
+                <LinearGradient
+                  style={styles.chatbox}
+                  colors={['#E9E9EB', '#FFFFFF']}>
+                  <Text style={styles.chatboxText}>{comment}</Text>
+                </LinearGradient>
+              </View>
+            ))}
           </ScrollView>
         </View>
         <View style={styles.message}>
-          <TextInput style={styles.input} placeholder="코멘트 작성하기" />
-          <Ionic name="send" style={styles.sendIcon} />
+          <KeyboardAvoidingView>
+            <TextInput
+            style={styles.input}
+            placeholder="코멘트 작성하기"
+            value={commentInput}
+            onChangeText={handleCommentInputChange}
+          /></KeyboardAvoidingView>
+          
+          <Ionic name="send" style={styles.sendIcon} onPress={handleCommentSubmit} />
         </View>
       </View>
     </View>
