@@ -28,11 +28,10 @@ import auth from '@react-native-firebase/auth';
   실패 -> isCompleted: false
 */
 
-const MemberUpload = () => {
+const MemberUpload = ({ todoId }) => {
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState([]);
-  const [todoId, setTodoId] = useState(0);
-  
+
   const handleCommentInputChange = (text) => {
     setCommentInput(text);
   };
@@ -47,26 +46,24 @@ const handleCommentSubmit = async () => {
       if (user) {
         const { uid, teamId } = user;
         const commentUserId = uid;
-        const currentTodoId = todoId;
 
         const response = await axios.post('/api/addComment', {
           uid,
           teamId,
           commentUserId,
           comment: commentInput,
-          todoId: currentTodoId,
+          todoId
         });
 
         console.log('보내는 정보 ' + uid,
           teamId,
           commentUserId,
           commentInput,
-          currentTodoId
+          todoId
         );
 
         if (response.data.isCompleted) {
           console.log('Comment added successfully');
-          setTodoId(String(currentTodoId + 1)); // 다음 todoId로 업데이트하고 문자열로 변환
         } else {
           console.log('Failed to add comment');
         }
