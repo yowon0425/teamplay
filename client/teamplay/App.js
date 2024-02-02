@@ -20,7 +20,7 @@ import MemberUpload from './src/screens/MemberUpload';
 
 const App = () => {
 
-  return <StackNavigator />;
+  return <MemberUpload />;
 
 };
 

@@ -5,6 +5,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
+import MemberUpload from './MemberUpload';
 
 const MemberMap = ({uid}) => {
   console.log('member map: ' + uid);
@@ -75,6 +76,7 @@ const MemberMap = ({uid}) => {
           </View>
         </View>
       </View>
+      <MemberUpload todoId={mapNumB} />
     </ScrollView>
   );
 };
