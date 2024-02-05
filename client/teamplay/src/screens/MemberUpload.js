@@ -13,70 +13,50 @@ import Ionic from 'react-native-vector-icons/Ionicons';
 import axios from 'axios'; 
 import auth from '@react-native-firebase/auth';
 
-/* ------------- comment 추가 API -------------
-  // req로 받아야하는 데이터 형식
-  {
-    uid: user id
-    teamId: 팀플 id
-    commentUserId: comment를 남긴 유저 id
-    comment: comment 내용
-    todoId: todo 번호 (number)
-  }
-
-  // 응답 형식 -> res.data.isCompleted
-  성공 -> isCompleted: true
-  실패 -> isCompleted: false
-*/
-
 const MemberUpload = ({ todoId }) => {
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState([]);
+  const user = auth().currentUser;
 
   const handleCommentInputChange = (text) => {
     setCommentInput(text);
   };
 
-  const user = auth().currentUser;
+  const handleCommentSubmit = async () => {
+    try {
+      if (commentInput.trim() !== '') {
+        setComments([...comments, commentInput]);
 
-const handleCommentSubmit = async () => {
-  try {
-    if (commentInput.trim() !== '') {
-      setComments([...comments, commentInput]);
+        if (user) {
+          const { uid, teamId } = user;
+          const commentUserId = uid;
 
-      if (user) {
-        const { uid, teamId } = user;
-        const commentUserId = uid;
+          // 여기서 todoId를 직접 사용
+          const response = await axios.post('/api/addComment', {
+            uid,
+            teamId,
+            commentUserId,
+            comment: commentInput,
+            todoId: todoId,
+          });
 
-        const response = await axios.post('/api/addComment', {
-          uid,
-          teamId,
-          commentUserId,
-          comment: commentInput,
-          todoId
-        });
+          console.log('보내는 정보 ' + uid, teamId, commentUserId, commentInput, todoId);
 
-        console.log('보내는 정보 ' + uid,
-          teamId,
-          commentUserId,
-          commentInput,
-          todoId
-        );
+          if (response.data.isCompleted) {
+            console.log('Comment added successfully');
+          } else {
+            console.log('Failed to add comment');
+          }
 
-        if (response.data.isCompleted) {
-          console.log('Comment added successfully');
+          setCommentInput('');
         } else {
-          console.log('Failed to add comment');
+          console.error('User is not authenticated');
         }
-
-        setCommentInput('');
-      } else {
-        console.error('User is not authenticated');
       }
+    } catch (error) {
+      console.error('코멘트 제출 오류:', error);
     }
-  } catch (error) {
-    console.error('코멘트 제출 오류:', error);
-  }
-};
+  };
 
   return (
     <View style={styles.container}>
@@ -121,11 +101,12 @@ const handleCommentSubmit = async () => {
         <View style={styles.message}>
           <KeyboardAvoidingView>
             <TextInput
-            style={styles.input}
-            placeholder="코멘트 작성하기"
-            value={commentInput}
-            onChangeText={handleCommentInputChange}
-          /></KeyboardAvoidingView>
+              style={styles.input}
+              placeholder="코멘트 작성하기"
+              value={commentInput}
+              onChangeText={handleCommentInputChange}
+            />
+          </KeyboardAvoidingView>
           
           <Ionic name="send" style={styles.sendIcon} onPress={handleCommentSubmit} />
         </View>
@@ -134,7 +115,15 @@ const handleCommentSubmit = async () => {
   );
 };
 
-export default MemberUpload;
+const ParentComponent = () => {
+  const todoId = '1';
+
+  return (
+    <MemberUpload todoId={todoId} />
+  );
+};
+
+export default ParentComponent;
 
 const styles = StyleSheet.create({
   container: {
