@@ -123,6 +123,10 @@ app.post("/api/createTeam", async (req, res) => {
         teamGoal: "팀플 목표를 설정해보세요.",
       });
 
+    await db.collection("todo").doc(teamId).set({
+      uid: {},
+    });
+
     let teamObj = {
       teamId,
       name,
@@ -202,8 +206,14 @@ app.post("/api/joinTeam", async (req, res) => {
     let userObj = {
       uid,
       userName,
-      todo: [],
     };
+
+    const todoDoc = await db.collection("todo").doc(teamId).get();
+    let todoData = todoDoc.data();
+
+    todoData = { ...todoData, [uid]: {} };
+
+    await db.collection("todo").doc(teamId).update(todoData);
 
     // 팀플 DB에 유저(팀플 멤버) id 추가
     await db
@@ -292,14 +302,6 @@ app.post("/api/teamList", async (req, res) => {
       {
         name: oo,
         uid: oo,
-        todo: [
-          {
-            number: 1,
-            content: "자료조사",
-            deadline: "2024.1.1",
-            isCompleted: false,
-          },
-        ]
       },
     ]
     teamGoal: 팀플 목표
@@ -463,27 +465,24 @@ app.post("/api/todo", async (req, res) => {
   const { teamId, memberId, todoData } = req.body;
 
   try {
-    // firestore에서 팀 정보 가져오기
-    const teamDoc = await db.collection("teamlist").doc(teamId).get();
-    const teamData = teamDoc.data();
-
-    // 계획을 추가할 멤버 데이터 찾기
-    const index = teamData.member.findIndex(
-      (member) => member.uid === memberId
-    );
-
-    // 찾았다면, 계획 데이터 추가
-    if (index !== -1) {
-      teamData.member[index].todo.push(todoData);
-
-      // 업데이트
-      await db.collection("teamlist").doc(teamId).update({
-        member: teamData.member,
+    let data = {};
+    // firestore에서 todo 정보 가져오기
+    await db
+      .collection("todo")
+      .doc(teamId)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        data = snapshot.data();
       });
-      res.send({ isCompleted: true });
-    } else {
-      res.send({ isCompleted: false, error: "Member not found" });
-    }
+    console.log(data);
+
+    // 계획 데이터 추가
+    data[memberId][todoData.number] = todoData;
+
+    // 업데이트
+    await db.collection("todo").doc(teamId).update(data);
+    res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false, error: "error" });
     console.log(err);
@@ -570,28 +569,14 @@ app.post("/api/changeTodo", async (req, res) => {
 
   try {
     // firestore에서 팀 정보 가져오기
-    const doc = await db.collection("teamlist").doc(teamId).get();
+    const doc = await db.collection("todo").doc(teamId).get();
     const data = doc.data();
 
-    // 계획을 추가할 멤버 데이터 찾기
-    const index = data.member.findIndex((member) => member.uid === memberId);
+    data[memberId][todoId] = newContent;
 
-    // 찾았다면, 계획 찾기
-    if (index !== -1) {
-      const todoIndex = data.member[index].todo.findIndex(
-        (todo) => todo.number === newContent.todoId
-      );
-
-      data.member[index].todo[todoIndex] = newContent;
-
-      // 업데이트
-      await db.collection("teamlist").doc(teamId).update({
-        member: data.member,
-      });
-      res.send({ isCompleted: true });
-    } else {
-      res.send({ isCompleted: false, error: "Member not found" });
-    }
+    // 업데이트
+    await db.collection("todo").doc(teamId).update(data);
+    res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false, error: "error" });
     console.log(err);
