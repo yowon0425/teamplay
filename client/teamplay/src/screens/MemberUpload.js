@@ -13,7 +13,8 @@ import Ionic from 'react-native-vector-icons/Ionicons';
 import axios from 'axios'; 
 import auth from '@react-native-firebase/auth';
 
-const MemberUpload = ({ todoId }) => {
+const MemberUpload = ({ todoId, teamId }) => {
+  
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState([]);
   const user = auth().currentUser;
@@ -24,20 +25,20 @@ const MemberUpload = ({ todoId }) => {
 
   const handleCommentSubmit = async () => {
     try {
+      console.log(auth().currentUser);
       if (commentInput.trim() !== '') {
         setComments([...comments, commentInput]);
 
         if (user) {
-          const { uid, teamId } = user;
+          const { uid } = user;
           const commentUserId = uid;
 
-          // 여기서 todoId를 직접 사용
           const response = await axios.post('/api/addComment', {
             uid,
             teamId,
             commentUserId,
             comment: commentInput,
-            todoId: todoId,
+            todoId,
           });
 
           console.log('보내는 정보 ' + uid, teamId, commentUserId, commentInput, todoId);
@@ -117,9 +118,10 @@ const MemberUpload = ({ todoId }) => {
 
 const ParentComponent = () => {
   const todoId = '1';
+  const teamId= 'a17d8175-3';
 
   return (
-    <MemberUpload todoId={todoId} />
+    <MemberUpload todoId={todoId} teamId={teamId}/>
   );
 };
 
