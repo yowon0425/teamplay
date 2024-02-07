@@ -6,6 +6,7 @@ import {
   Image,
   TextInput,
   Button,
+  TouchableOpacity,
 } from 'react-native';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -15,11 +16,15 @@ import DocumentPicker from 'react-native-document-picker';
 import axios from 'axios';
 import MainButton from './../components/MainButton';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import FileInfoLine from '../components/FileInfoLine';
 
 const MyUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadedFile, setUploadedFile] = useState([]);
+  const [fileList, setFileList] = useState();
+  const {uid} = auth().currentUser;
 
+  console.log(uid);
   const handleFileSelect = async () => {
     try {
       const result = await DocumentPicker.pick({
@@ -27,7 +32,7 @@ const MyUpload = () => {
       });
 
       setSelectedFile(result[0]);
-      console.log(result);
+      console.log('result' + JSON.stringify(result));
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         // User canceled the picker
@@ -49,15 +54,15 @@ const MyUpload = () => {
         date: new Date(),
       });
 
-      const fileInfo = new Map([
-        ['name', selectedFile.name],
-        ['uploadTime', handleAddEvent()],
-        ['uri', selectedFile.uri],
-      ]);
+      const fileInfo = {
+        name: selectedFile.name,
+        uploadTime: handleAddEvent(),
+        uri: selectedFile.uri,
+      };
 
-      const {uid} = auth().currentUser;
       formData.append('uid', uid);
-      formData.append('fileInfo', fileInfo);
+      formData.append('fileInfo', JSON.stringify(fileInfo));
+      // JSON으로 저장되어서 문자열 형태로 저장되어 문제 -> 서버에서 parse해서 객체 형태로 바꿈
 
       try {
         const response = await axios.post('/api/upload', formData, {
@@ -66,6 +71,8 @@ const MyUpload = () => {
           },
         });
         console.log('Server response:', response.data);
+        setSelectedFile(null);
+        getFileInfo();
       } catch (error) {
         console.error('Error uploading file to server:', error);
       }
@@ -74,47 +81,34 @@ const MyUpload = () => {
 
   const handleAddEvent = () => {
     const date = new Date();
-    const localTime = date.toLocaleDateString();
     const uploadTime =
       date.getMonth() +
       1 +
       '/' +
       date.getDate() +
       ' ' +
-      localTime.substring(0, 5);
+      date.getHours() +
+      ':' +
+      date.getMinutes();
+
     return uploadTime;
   };
 
   useEffect(() => {
     getFileInfo();
+    console.log('getFileInfo 실행');
   }, []);
 
   const getFileInfo = async () => {
-    // const {uid} = auth().currentUser;
-    const uid = 'jnpUeRCXKtOEsr7NDFXW4qJybgW2';
     try {
       await axios.post('/api/fileList', {uid}).then(res => {
         console.log('fileList-> ', res.data);
-        console.log(res.data.files[0]);
+        setFileList(res.data.files);
       });
     } catch (error) {
       console.error('Error uploading file to server:', error);
     }
   };
-
-  const FileList = () => (
-    <ScrollView style={styles.fileList}>
-      {uploadedFile.map(file => (
-        <View>
-          <View style={styles.file}>
-            <Text style={styles.fileName}>{file.name}</Text>
-            <Text style={styles.time}>{file.uploadTime}</Text>
-          </View>
-          <View style={styles.line}></View>
-        </View>
-      ))}
-    </ScrollView>
-  );
 
   return (
     <SafeAreaView>
@@ -133,18 +127,16 @@ const MyUpload = () => {
             <LinearGradient
               style={styles.uploadBox}
               colors={['#B9E3FC', '#FFFFFF']}>
-              <FileList />
               <ScrollView style={styles.fileList}>
-                <View style={styles.file}>
-                  <Text style={styles.fileName}>오픈소스 사례-챗봇.hwp</Text>
-                  <Text style={styles.time}>8/12 17:34</Text>
-                </View>
-                <View style={styles.line}></View>
-                <View style={styles.file}>
-                  <Text style={styles.fileName}>오픈소스 사례-챗봇.hwp</Text>
-                  <Text style={styles.time}>8/12 17:34</Text>
-                </View>
-                <View style={styles.line}></View>
+                {fileList &&
+                  fileList.map(data => {
+                    return (
+                      <FileInfoLine
+                        key={data.name + data.uploadTime}
+                        file={data}
+                      />
+                    );
+                  })}
               </ScrollView>
             </LinearGradient>
             {selectedFile == null ? (
@@ -154,11 +146,24 @@ const MyUpload = () => {
                 onPress={handleFileSelect}
               />
             ) : (
-              <MainButton
-                text="파일 업로드하기"
-                light={true}
-                onPress={handleFileUpload}
-              />
+              <>
+                <View style={styles.selectedFileBlock}>
+                  <Text style={styles.selectedFileName}>
+                    {selectedFile.name}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setSelectedFile(null);
+                    }}>
+                    <Text>X</Text>
+                  </TouchableOpacity>
+                </View>
+                <MainButton
+                  text="파일 업로드하기"
+                  light={true}
+                  onPress={handleFileUpload}
+                />
+              </>
             )}
             <View style={styles.comment}>
               <Text style={styles.title}>코멘트</Text>
@@ -279,6 +284,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'black',
     width: '70%',
+  },
+  selectedFileBlock: {
+    width: 330,
+    padding: 10,
+    borderRadius: 20,
+    backgroundColor: '#F2F2F2',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  selectedFileName: {
+    fontSize: 12,
+    color: 'black',
   },
   comment: {
     alignItems: 'center',

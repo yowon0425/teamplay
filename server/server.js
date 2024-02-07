@@ -340,8 +340,8 @@ app.post("/api/teamData", async (req, res) => {
 */
 app.post("/api/upload", upload.any(), async (req, res) => {
   const { uid, fileInfo } = req.body;
+  console.log(uid, fileInfo);
   const file = req.files[0];
-
   try {
     // 필요한 메타데이터 정의
     const metadata = {
@@ -370,7 +370,7 @@ app.post("/api/upload", upload.any(), async (req, res) => {
       .collection("fileList")
       .doc(uid)
       .update({
-        files: FieldValue.arrayUnion(fileInfo),
+        files: FieldValue.arrayUnion(JSON.parse(fileInfo)),
       });
 
     res.send({ uploaded: true });
