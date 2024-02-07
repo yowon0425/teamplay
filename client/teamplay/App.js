@@ -19,9 +19,7 @@ import MyMap from './src/screens/MyMap';
 import MemberUpload from './src/screens/MemberUpload';
 
 const App = () => {
-
-  return <MemberUpload />;
-
+  return <MyUpload />;
 };
 
 export default App;
