@@ -51,7 +51,11 @@ const MenuBar = ({route}) => {
       </Tab.Screen>
       <Tab.Screen name="Maps">
         {() =>
-          route.params.my ? <MyMap /> : <MemberMap uid={route.params.uid} />
+          route.params.my ? (
+            <MyMap teamId={route.params.teamId} />
+          ) : (
+            <MemberMap uid={route.params.uid} />
+          )
         }
       </Tab.Screen>
       <Tab.Screen name="Notice" component={Notice} />

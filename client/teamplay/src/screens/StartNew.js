@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -8,9 +8,9 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from 'react-native';
-import Button from '../components/Button';
-import { v4 as uuidv4 } from 'uuid';
-import { getRandomBase64 } from 'react-native-get-random-values';
+import Button from '../components/PinkButton';
+import {v4 as uuidv4} from 'uuid';
+import {getRandomBase64} from 'react-native-get-random-values';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 
@@ -24,7 +24,6 @@ const StartNew = () => {
   const [teamId, setTeamId] = useState('');
   var truncId;
   const {uid, displayName} = auth().currentUser;
-  
 
   const handleButtonPress = async () => {
     try {
@@ -36,7 +35,8 @@ const StartNew = () => {
       }
 
       function getRandomAlphaNumericId(length) {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const characters =
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let randomId = '';
         for (let i = 0; i < length; i++) {
           const randomIndex = Math.floor(Math.random() * characters.length);
@@ -44,7 +44,7 @@ const StartNew = () => {
         }
         return randomId;
       }
-      
+
       const newTeamId = getRandomAlphaNumericId(10);
       console.log('newid: ' + newTeamId);
       truncId = newTeamId;
@@ -102,7 +102,6 @@ const StartNew = () => {
       .catch(err => console.log(err));
   };
 
-
   /*const response = await axios.post('/api/createTeam', {
     uid: userObj.uid,
         userName: userObj.userName,
@@ -141,15 +140,17 @@ const StartNew = () => {
     <KeyboardAvoidingView
       style={styles.container}
       behavior="padding"
-      keyboardVerticalOffset={-150}
-    >
+      keyboardVerticalOffset={-150}>
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
         <View style={styles.container}>
-          <Text style={{ fontSize: 20, color: 'black' }}>새로운 팀플 시작하기</Text>
+          <Text style={{fontSize: 20, color: 'black'}}>
+            새로운 팀플 시작하기
+          </Text>
 
           {submitted ? (
             <Text style={styles.headerText}>
-              새로운 팀플 개설이 {'\n'} 완료되었습니다! {'\n'} {'\n'}팀 ID: {teamId} {'\n'} {'\n'}
+              새로운 팀플 개설이 {'\n'} 완료되었습니다! {'\n'} {'\n'}팀 ID:{' '}
+              {teamId} {'\n'} {'\n'}
             </Text>
           ) : (
             <View style={styles.container}>
@@ -158,19 +159,19 @@ const StartNew = () => {
                 style={styles.input}
                 placeholder="            팀플명 입력            "
                 value={name}
-                onChangeText={(text) => setName(text)}
+                onChangeText={text => setName(text)}
               />
               <TextInput
                 style={styles.input}
                 placeholder="            수업명 입력            "
                 value={lecture}
-                onChangeText={(text) => setLecture(text)}
+                onChangeText={text => setLecture(text)}
               />
               <TextInput
                 style={styles.input}
                 placeholder="            팀플 설명 입력            "
                 value={description}
-                onChangeText={(text) => setDescription(text)}
+                onChangeText={text => setDescription(text)}
               />
               <Button
                 style={styles.input}
@@ -178,7 +179,7 @@ const StartNew = () => {
                 light={true}
                 onPress={handleButtonPress}
               />
-              <Text style={{ marginTop: 10 }}>{displayText}</Text>
+              <Text style={{marginTop: 10}}>{displayText}</Text>
             </View>
           )}
         </View>

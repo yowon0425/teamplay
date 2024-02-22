@@ -1,7 +1,7 @@
 import {StyleSheet, Text, View, TextInput} from 'react-native';
 import React from 'react';
 import {Picker} from '@react-native-picker/picker';
-import Button from '../components/Button';
+import PinkButton from '../components/PinkButton';
 
 const SendNotice = () => {
   return (
@@ -35,7 +35,7 @@ const SendNotice = () => {
           <TextInput style={styles.commentInput} />
         </View>
       </View>
-      <Button text="알림 보내기" light={true} />
+      <PinkButton text="알림 보내기" light={true} />
     </View>
   );
 };
