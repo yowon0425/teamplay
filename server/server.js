@@ -582,3 +582,51 @@ app.post("/api/changeTodo", async (req, res) => {
     console.log(err);
   }
 });
+
+/* ------------- 팀별 todo 받아오기 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+  }
+
+  // 응답 형식
+  성공 -> res.data
+  {
+    [uid -> 유저id]: {
+      1: {
+        content: todo 내용,
+        deadline: 기한,
+        isCompleted: 완료 여부,
+        number: todo 번호
+      }
+      2: {
+        content: todo 내용,
+        deadline: 기한,
+        isCompleted: 완료 여부,
+        number: todo 번호
+      }
+      ....
+    }
+  }
+  실패 -> isCompleted: false
+*/
+app.post("/api/teamData/todos", async (req, res) => {
+  // 요청 데이터 받아오기
+  const teamId = req.body.teamId;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("todo")
+      .doc(teamId)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var teamData = snapshot.data();
+        return res.json(teamData);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
