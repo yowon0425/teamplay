@@ -29,22 +29,21 @@ const StartNew = () => {
     try {
       console.log('cur user info: ' + displayName);
 
-      if (!name || !lecture || !numOfMember || !description) {
+      if (!name || !lecture || !description) {
         setDisplayText('모두 입력해주세요.');
         return;
       }
 
-      function getRandomAlphaNumericId(length) {
-        const characters =
-          'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const getRandomAlphaNumericId = (length) => {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let randomId = '';
         for (let i = 0; i < length; i++) {
           const randomIndex = Math.floor(Math.random() * characters.length);
           randomId += characters.charAt(randomIndex);
         }
         return randomId;
-      }
-
+      };      
+      
       const newTeamId = getRandomAlphaNumericId(10);
       console.log('newid: ' + newTeamId);
       truncId = newTeamId;
@@ -81,7 +80,7 @@ const StartNew = () => {
       numOfMember,
       description,
     );
-    //console.log(userName);
+    
     await axios
       .post('/api/createTeam', {
         uid: uid,
