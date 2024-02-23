@@ -1,6 +1,6 @@
 import {StyleSheet, Text, View, TextInput} from 'react-native';
 import React, {useEffect, useState} from 'react';
-import Button from '../components/Button';
+import PinkButton from '../components/PinkButton';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
@@ -83,7 +83,7 @@ const LogIn = () => {
           />
         </View>
       </View>
-      <Button text="시작하기" light={true} onPress={onClickSignUp} />
+      <PinkButton text="시작하기" light={true} onPress={onClickSignUp} />
     </View>
   );
 };

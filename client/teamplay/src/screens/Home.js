@@ -11,10 +11,10 @@ import React, {useEffect, useState} from 'react';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
-import Button from '../components/Button';
 import MaskedView from '@react-native-masked-view/masked-view';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
+import PinkButton from '../components/PinkButton';
 
 const Home = ({teamId}) => {
   // 텍스트 테두리 필요
@@ -32,6 +32,7 @@ const Home = ({teamId}) => {
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       my: true,
+      teamId,
     });
   };
 
@@ -126,7 +127,7 @@ const Home = ({teamId}) => {
         </View>
       </ScrollView>
       <View style={{alignItems: 'center', margin: 20}}>
-        <Button text="내 작업 페이지로" light={true} onPress={goMyPage} />
+        <PinkButton text="내 작업 페이지로" light={true} onPress={goMyPage} />
       </View>
     </View>
   );

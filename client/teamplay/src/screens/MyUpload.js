@@ -14,9 +14,9 @@ import auth from '@react-native-firebase/auth';
 import React, {useEffect, useState} from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import axios from 'axios';
-import MainButton from './../components/MainButton';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import FileInfoLine from '../components/FileInfoLine';
+import PinkButton from '../components/PinkButton';
 
 const MyUpload = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -140,7 +140,7 @@ const MyUpload = () => {
               </ScrollView>
             </LinearGradient>
             {selectedFile == null ? (
-              <MainButton
+              <PinkButton
                 text="파일 선택하기"
                 light={true}
                 onPress={handleFileSelect}
@@ -158,7 +158,7 @@ const MyUpload = () => {
                     <Text>X</Text>
                   </TouchableOpacity>
                 </View>
-                <MainButton
+                <PinkButton
                   text="파일 업로드하기"
                   light={true}
                   onPress={handleFileUpload}

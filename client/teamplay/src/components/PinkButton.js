@@ -1,8 +1,8 @@
-import {View, Text, StyleSheet, Button, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {Shadow} from 'react-native-shadow-2';
 
-const MainButton = ({text, light, onPress}) => {
+const PinkButton = ({text, light, onPress}) => {
   /* 
   text prop은 버튼 안에 써 있는 문구를 받아옴
   light는 버튼이 누를 수 있는 상태인지 아닌지 볼 수 있음
@@ -21,17 +21,16 @@ const MainButton = ({text, light, onPress}) => {
         </Shadow>
       ) : (
         <Shadow style={styles.shadow}>
-          <TouchableOpacity
-            style={[styles.button, {backgroundColor: '#F1F1F1'}]}>
+          <View style={[styles.button, {backgroundColor: '#F1F1F1'}]}>
             <Text style={styles.text}>{text}</Text>
-          </TouchableOpacity>
+          </View>
         </Shadow>
       )}
     </View>
   );
 };
 
-export default MainButton;
+export default PinkButton;
 
 const styles = StyleSheet.create({
   button: {
@@ -48,6 +47,6 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   shadow: {
-    distance: 10,
+    distance: 15,
   },
 });
