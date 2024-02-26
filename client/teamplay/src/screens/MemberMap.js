@@ -76,7 +76,7 @@ const MemberMap = ({uid}) => {
           </View>
         </View>
       </View>
-      <MemberUpload todoId={mapNumB} />
+      <MemberUpload />
     </ScrollView>
   );
 };

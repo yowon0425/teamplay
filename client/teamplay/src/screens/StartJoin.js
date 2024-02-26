@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput } from 'react-native';
-import Button from '../components/Button';
+import React, {useState, useEffect} from 'react';
+import {View, Text, StyleSheet, TextInput} from 'react-native';
+import Button from '../components/PinkButton';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 
 const StartJoin = () => {
-  const [teamId, setTeamId] = useState(''); 
+  const [teamId, setTeamId] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   /* ------------- 팀플 참가 API -------------
@@ -21,7 +21,7 @@ const StartJoin = () => {
   실패 -> isJoined: false
 */
 
-/* ------- API 요청법 --------
+  /* ------- API 요청법 --------
 await axios.post('/api/API이름', {
         전달할 데이터를 이곳에 객체 형식으로
       })
@@ -36,39 +36,35 @@ await axios.post('/api/API이름', {
 
 */
 
-const handleButtonPress = async () => {
-  const { uid, displayName } = auth().currentUser;
-  
-  const joinTeam = async () => {
-    console.log('api 호출됨');
-    console.log(
-      '보내는 정보: ' + uid,
-      displayName,
-      teamId
-    );
+  const handleButtonPress = async () => {
+    const {uid, displayName} = auth().currentUser;
 
-    await axios
-      .post('/api/joinTeam', {
-        uid,
-        displayName,
-        teamId,
-      })
-      .catch(err => console.log(err));
+    const joinTeam = async () => {
+      console.log('api 호출됨');
+      console.log('보내는 정보: ' + uid, displayName, teamId);
+
+      await axios
+        .post('/api/joinTeam', {
+          uid,
+          displayName,
+          teamId,
+        })
+        .catch(err => console.log(err));
+    };
+
+    setTeamId(teamId);
+    setSubmitted(true);
+    joinTeam();
   };
-
-  setTeamId(teamId);
-  setSubmitted(true);
-  joinTeam();
-}
 
   return (
     <View style={styles.container}>
       {submitted ? (
         <Text style={styles.headerText}>
-          팀플 참가 요청이 {"\n"}
-          완료되었습니다! {"\n"}
-          {"\n"}
-        <Text>팀플 ID : {teamId}</Text>
+          팀플 참가 요청이 {'\n'}
+          완료되었습니다! {'\n'}
+          {'\n'}
+          <Text>팀플 ID : {teamId}</Text>
         </Text>
       ) : (
         <Text style={styles.headerText}>새로운 팀플 참가하기</Text>
@@ -79,7 +75,7 @@ const handleButtonPress = async () => {
           style={styles.input}
           placeholder="팀플 ID 입력"
           value={teamId}
-          onChangeText={(text) => setTeamId(text)}
+          onChangeText={text => setTeamId(text)}
         />
       )}
       {!submitted && (
