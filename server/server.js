@@ -531,13 +531,32 @@ app.post("/api/addComment", async (req, res) => {
     };
 
     // 코멘트 업데이트
-    data[uid][todoId][commentUserId] = {
-      comment: comment,
-      createdAt: `${date.year}-${date.month}-${date.day}`,
-    };
+    let newData = {};
+    if (data[uid].hasOwnProperty(todoId)) {
+      newData = {
+        ...data[uid],
+        [todoId]: {
+          ...data[uid][todoId],
+          [commentUserId]: {
+            comment: comment,
+            createdAt: `${date.year}-${date.month}-${date.day}`,
+          },
+        },
+      };
+    } else {
+      newData = {
+        ...data[uid],
+        [todoId]: {
+          [commentUserId]: {
+            comment: comment,
+            createdAt: `${date.year}-${date.month}-${date.day}`,
+          },
+        },
+      };
+    }
 
     // firestore에 저장
-    await db.collection("comment").doc(teamId).set(data);
+    await db.collection("comment").doc(teamId).set(newData);
 
     res.send({ isCompleted: true });
   } catch (err) {
