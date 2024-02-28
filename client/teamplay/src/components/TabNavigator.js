@@ -51,10 +51,10 @@ const MenuBar = ({route}) => {
       </Tab.Screen>
       <Tab.Screen name="Maps">
         {() =>
-          route.params.my ? (
-            <MyMap teamId={route.params.teamId} />
-          ) : (
+          route.params.member ? (
             <MemberMap uid={route.params.uid} />
+          ) : (
+            <MyMap teamId={route.params.teamId} />
           )
         }
       </Tab.Screen>

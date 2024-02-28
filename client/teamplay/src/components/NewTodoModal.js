@@ -13,23 +13,20 @@ import DatePicker from 'react-native-date-picker';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 
-const TodoModal = ({teamId, name, isVisible, newTodo}) => {
+const NewTodoModal = ({teamId, isVisible, showTodo, num}) => {
   const {uid} = auth().currentUser;
-  const now = new Date();
+  const initialDate = new Date();
   const [content, setContent] = useState('');
-  const [date, setDate] = useState(now);
-  const [time, setTime] = useState(now);
+  const [date, setDate] = useState(initialDate);
+  const [time, setTime] = useState(initialDate);
   const [dateOpen, setDateOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
+  const [isCompleted, setIsCompleted] = useState();
 
   /* 프로젝트 계획 추가하기 */
   const addTodo = async () => {
     const selectedDue =
-      date.toLocaleDateString('ko-KR', {
-        year: '2-digit',
-        month: '2-digit',
-        day: '2-digit',
-      }) +
+      date.toISOString().slice(0, 10) +
       ' ' +
       time.toLocaleTimeString('ko-KR', {
         hour: '2-digit',
@@ -43,7 +40,7 @@ const TodoModal = ({teamId, name, isVisible, newTodo}) => {
           teamId,
           memberId: uid,
           todoData: {
-            number: 2,
+            number: num,
             content,
             deadline: selectedDue,
             isCompleted: false,
@@ -59,6 +56,7 @@ const TodoModal = ({teamId, name, isVisible, newTodo}) => {
           } else {
             console.log('등록 실패');
           }
+          setIsCompleted(res.data);
         })
         .catch(err => console.log(err));
     } catch (err) {
@@ -66,18 +64,28 @@ const TodoModal = ({teamId, name, isVisible, newTodo}) => {
     }
   };
 
+  useEffect(() => {
+    showTodo(false);
+  }, [isCompleted]);
+
   return (
     <Modal
-      visible={true}
+      visible={isVisible}
       animationType="slide"
       statusBarTranslucent={false}
-      transparent={true}>
+      transparent={true}
+      onRequestClose={() => showTodo(false)}>
       <TouchableOpacity style={styles.modalOverlay}>
         <View style={styles.modalScreen}>
           <View style={styles.header}>
             <Text style={styles.title}> </Text>
-            <Text style={styles.title}>계획 추가</Text>
-            <Text style={styles.x}>X</Text>
+            <Text style={styles.title}>계획 등록</Text>
+            <TouchableOpacity
+              onPress={() => {
+                showTodo(false);
+              }}>
+              <Text style={styles.x}>X</Text>
+            </TouchableOpacity>
           </View>
           <View style={styles.contentContainer}>
             <View style={styles.inputName}>
@@ -95,11 +103,7 @@ const TodoModal = ({teamId, name, isVisible, newTodo}) => {
                     style={styles.picker}
                     onPressIn={() => setDateOpen(true)}>
                     <Text style={styles.inputText}>
-                      {date.toLocaleDateString('ko-KR', {
-                        year: '2-digit',
-                        month: '2-digit',
-                        day: '2-digit',
-                      })}
+                      {date.toISOString().slice(0, 10)}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -123,7 +127,7 @@ const TodoModal = ({teamId, name, isVisible, newTodo}) => {
                   locale="ko"
                   cancelText="취소"
                   confirmText="확인"
-                  minimumDate={now}
+                  minimumDate={initialDate}
                   onConfirm={date => {
                     setDateOpen(false);
                     setDate(date);
@@ -138,7 +142,7 @@ const TodoModal = ({teamId, name, isVisible, newTodo}) => {
                   mode="time"
                   title="시간 선택"
                   open={timeOpen}
-                  date={time}
+                  date={date}
                   locale="ko"
                   cancelText="취소"
                   confirmText="확인"
@@ -167,7 +171,7 @@ const TodoModal = ({teamId, name, isVisible, newTodo}) => {
   );
 };
 
-export default TodoModal;
+export default NewTodoModal;
 
 const styles = StyleSheet.create({
   modalOverlay: {

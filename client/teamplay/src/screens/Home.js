@@ -22,8 +22,6 @@ const Home = ({teamId}) => {
   const percent = 0;
   const [teamInfo, setTeamInfo] = useState([]);
   const {uid} = auth().currentUser;
-  console.log('home id: ' + teamId);
-  console.log('home user: ' + uid);
 
   /*내 작업 페이지로 이동하는 이벤트*/
   const navigation = useNavigation();
@@ -31,7 +29,7 @@ const Home = ({teamId}) => {
     console.log('내 작업 페이지로');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
-      my: true,
+      member: false,
       teamId,
     });
   };
@@ -41,7 +39,7 @@ const Home = ({teamId}) => {
     console.log('팀원 작업 페이지로: ');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
-      my: false,
+      member: true,
       uid: uid,
     });
   };
@@ -63,7 +61,6 @@ const Home = ({teamId}) => {
           */
           /* 멤버 역할 입력받는 페이지 필요 */
           const data = JSON.stringify(res.data);
-          console.log('Home data : ' + data);
           setTeamInfo(res.data);
         }
       })
@@ -73,7 +70,6 @@ const Home = ({teamId}) => {
   useEffect(() => {
     getTeamInfo();
   }, []);
-  console.log('teamInfo: ' + teamInfo);
 
   return (
     <View style={styles.container}>
@@ -126,7 +122,7 @@ const Home = ({teamId}) => {
           <Progress.Bar style={styles.memberBar} />
         </View>
       </ScrollView>
-      <View style={{alignItems: 'center', margin: 20}}>
+      <View style={{alignItems: 'center', margin: 30}}>
         <PinkButton text="내 작업 페이지로" light={true} onPress={goMyPage} />
       </View>
     </View>
@@ -214,6 +210,7 @@ const styles = StyleSheet.create({
   memberInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 5,
   },
   memberBar: {
     width: '100%',

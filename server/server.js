@@ -565,14 +565,14 @@ app.post("/api/addComment", async (req, res) => {
 */
 app.post("/api/changeTodo", async (req, res) => {
   // 요청 데이터 받아오기
-  const { teamId, memberId, todoId, newContent } = req.body;
+  const { teamId, memberId, newContent } = req.body;
 
   try {
     // firestore에서 팀 정보 가져오기
     const doc = await db.collection("todo").doc(teamId).get();
     const data = doc.data();
 
-    data[memberId][todoId] = newContent;
+    data[memberId][newContent.number] = newContent;
 
     // 업데이트
     await db.collection("todo").doc(teamId).update(data);
