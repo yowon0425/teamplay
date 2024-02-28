@@ -1,7 +1,15 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
+import MaskedView from '@react-native-masked-view/masked-view';
+import LinearGradient from 'react-native-linear-gradient';
 
-const MapBubble = ({todoData}) => {
+const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
+  const handleEditMode = () => {
+    console.log('=======handleEditMode========');
+    setEditNum(todoData.number);
+    showEditTodo(true);
+  };
+
   return (
     /* 
     완료 -> 색칠된 동그라미
@@ -10,45 +18,76 @@ const MapBubble = ({todoData}) => {
     */
     <View>
       {todoData.isCompleted ? (
-        <TouchableOpacity style={styles.map}>
-          <LinearGradient
-            style={styles.coloredCircle}
-            colors={['#033495', '#AEE4FF']}>
-            <Text style={styles.mapNum}>1{todoData.number}</Text>
-          </LinearGradient>
-          <View style={styles.plan}>
-            <Text style={styles.planTitle}>자료 조사{todoData.content}</Text>
-            <Text style={styles.planDue}>8/20 20:00{todoData.deadline}</Text>
-          </View>
-        </TouchableOpacity>
-      ) : todoData.number == nowTodo ? (
-        <TouchableOpacity style={styles.map}>
-          <MaskedView
-            maskElement={
-              <View style={styles.strokedCircle}>
-                <Text style={styles.mapNumB}>2</Text>
-              </View>
-            }>
+        <>
+          {todoData.number == 1 ? null : (
             <LinearGradient
-              style={styles.coloredCircle}
+              style={styles.line}
               colors={['#033495', '#AEE4FF']}
             />
-          </MaskedView>
-          <View style={styles.plan}>
-            <Text style={styles.planTitle}>자료 조사</Text>
-            <Text style={styles.planDue}>8/20 20:00</Text>
-          </View>
-        </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={styles.map}
+            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+            <LinearGradient
+              style={styles.coloredCircle}
+              colors={['#033495', '#AEE4FF']}>
+              <Text style={styles.mapNum}>{todoData.number}</Text>
+            </LinearGradient>
+            <View style={styles.plan}>
+              <Text style={styles.planTitle}>
+                {todoData.content.replace('\n', ' ')}
+              </Text>
+              <Text style={styles.planDue}>{todoData.deadline}</Text>
+            </View>
+          </TouchableOpacity>
+        </>
+      ) : todoData.number == nowTodo ? (
+        <>
+          {todoData.number == 1 ? null : (
+            <LinearGradient
+              style={styles.line}
+              colors={['#033495', '#AEE4FF']}
+            />
+          )}
+          <TouchableOpacity
+            style={styles.map}
+            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+            <MaskedView
+              maskElement={
+                <View style={styles.strokedCircle}>
+                  <Text style={styles.mapNumB}>{todoData.number}</Text>
+                </View>
+              }>
+              <LinearGradient
+                style={styles.coloredCircle}
+                colors={['#033495', '#AEE4FF']}
+              />
+            </MaskedView>
+            <View style={styles.plan}>
+              <Text style={styles.planTitle}>
+                {todoData.content.replace('\n', ' ')}
+              </Text>
+              <Text style={styles.planDue}>{todoData.deadline}</Text>
+            </View>
+          </TouchableOpacity>
+        </>
       ) : (
-        <TouchableOpacity style={styles.map}>
-          <View style={styles.circle}>
-            <Text style={styles.mapNumB}>3</Text>
-          </View>
-          <View style={styles.plan}>
-            <Text style={styles.planTitle}>자료 조사</Text>
-            <Text style={styles.planDue}>8/20 20:00</Text>
-          </View>
-        </TouchableOpacity>
+        <>
+          <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
+          <TouchableOpacity
+            style={styles.map}
+            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+            <View style={styles.circle}>
+              <Text style={styles.mapNumB}>{todoData.number}</Text>
+            </View>
+            <View style={styles.plan}>
+              <Text style={styles.planTitle}>
+                {todoData.content.replace('\n', ' ')}
+              </Text>
+              <Text style={styles.planDue}>{todoData.deadline}</Text>
+            </View>
+          </TouchableOpacity>
+        </>
       )}
     </View>
   );

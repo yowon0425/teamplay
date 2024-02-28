@@ -1,4 +1,5 @@
 import {
+  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -7,15 +8,14 @@ import {
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import LinearGradient from 'react-native-linear-gradient';
-import MaskedView from '@react-native-masked-view/masked-view';
-import MenuBar from '../components/TabNavigator';
-import {NavigationContainer} from '@react-navigation/native';
 import PinkButton from '../components/PinkButton';
 import Entypo from 'react-native-vector-icons/Entypo';
 import auth from '@react-native-firebase/auth';
-import TodoModal from '../components/TodoModal';
+import NewTodoModal from '../components/NewTodoModal';
 import {Shadow} from 'react-native-shadow-2';
+import axios from 'axios';
+import MapBubble from '../components/MapBubble';
+import EditTodoModal from '../components/EditTodoModal';
 
 const MyMap = ({teamId}) => {
   const {uid} = auth().currentUser;
@@ -23,17 +23,20 @@ const MyMap = ({teamId}) => {
   const [showNewTodo, setShowNewTodo] = useState(false);
   const [showEditTodo, setShowEditTodo] = useState(false);
   const [showMiniModal, setShowMiniModal] = useState(false);
-  console.log('map user: ' + uid + '/teamId: ' + teamId);
+  const [editMode, setEditMode] = useState(false);
+  const [editNum, setEditNum] = useState();
+  const [nowTodo, setNowTodo] = useState(0);
+  const [numNewTodo, setNumNewTodo] = useState(0);
+
+  // 계획 없을 때 수정할 수 없게 오류처리 필요
 
   /* 프로젝트 계획 받아오기 */
-  /*const getTodos = async () => {
+  const getTodos = async () => {
     await axios
-      .post('/api/teamData/todos', teamId)
+      .post('/api/teamData/todos', {teamId})
       .then(res => {
         if (res.data) {
-          const data = JSON.stringify(res.data);
-          console.log('todos : ' + data);
-          setTodos(res.data);
+          setTodos(res.data[uid]);
         } else {
           // 실패 시 할 작업
         }
@@ -44,28 +47,27 @@ const MyMap = ({teamId}) => {
   useEffect(() => {
     getTodos();
     console.log('투두 불러오는 함수 실행');
-  }, []);*/
+  }, [showNewTodo, showEditTodo]);
+
+  useEffect(() => {
+    countTodo();
+  }, [todos]);
 
   // 데이터 개수 처리 함수
-  let numCompleted;
-  let numTodo;
-  let nowTodo;
-  const countTodo = todoData => {
-    // 필터 써서 개수 구하는 함수
-  };
-
-  /* 모달 관리 */
-  const modalOpen = () => {
-    console.log(showModal);
-    setShowModal(true);
-  };
-
-  const modalClose = e => {
-    setShowModal(false);
-    if (e.target == outside.current) {
-      console.log(showModal);
-      setShowModal(false);
+  var numTodo = 0;
+  var numCompleted = 0;
+  const countTodo = () => {
+    for (let key in todos) {
+      numTodo += 1;
+      if (todos[key].isCompleted == true) {
+        numCompleted += 1;
+      }
     }
+    setNowTodo(numCompleted + 1);
+    setNumNewTodo(numTodo + 1);
+    console.log('전체 투두 : ' + numTodo);
+    console.log('완료 투두 : ' + numCompleted);
+    console.log('지금 투두 : ' + nowTodo);
   };
 
   return (
@@ -78,60 +80,29 @@ const MyMap = ({teamId}) => {
             <Entypo name="dots-three-vertical" style={styles.dot} />
           </TouchableOpacity>
         </View>
+        {editMode ? (
+          <View style={styles.notice}>
+            <Text style={styles.noticeText}>수정할 계획을 선택하세요</Text>
+            <TouchableOpacity onPress={() => setEditMode(false)}>
+              <Text style={styles.noticeCancel}>취소</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
         <View style={styles.mapContainer}>
           <View style={styles.maps}>
-            <View style={styles.map}>
-              <LinearGradient
-                style={styles.coloredCircle}
-                colors={['#033495', '#AEE4FF']}>
-                <Text style={styles.mapNum}>1</Text>
-              </LinearGradient>
-              <View style={styles.plan}>
-                <Text style={styles.planTitle}>자료 조사</Text>
-                <Text style={styles.planDue}>8/20 20:00</Text>
-              </View>
-            </View>
-            <LinearGradient
-              style={styles.line}
-              colors={['#033495', '#AEE4FF']}
-            />
-            <View style={styles.map}>
-              <MaskedView
-                maskElement={
-                  <View style={styles.strokedCircle}>
-                    <Text style={styles.mapNumB}>2</Text>
-                  </View>
-                }>
-                <LinearGradient
-                  style={styles.coloredCircle}
-                  colors={['#033495', '#AEE4FF']}
-                />
-              </MaskedView>
-              <View style={styles.plan}>
-                <Text style={styles.planTitle}>자료 조사</Text>
-                <Text style={styles.planDue}>8/20 20:00</Text>
-              </View>
-            </View>
-            <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
-            <View style={styles.map}>
-              <View style={styles.circle}>
-                <Text style={styles.mapNumB}>3</Text>
-              </View>
-              <View style={styles.plan}>
-                <Text style={styles.planTitle}>자료 조사</Text>
-                <Text style={styles.planDue}>8/20 20:00</Text>
-              </View>
-            </View>
-            <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
-            <View style={styles.map}>
-              <View style={styles.circle}>
-                <Text style={styles.mapNumB}>4</Text>
-              </View>
-              <View style={styles.plan}>
-                <Text style={styles.planTitle}>자료 조사</Text>
-                <Text style={styles.planDue}>8/20 20:00</Text>
-              </View>
-            </View>
+            {todos &&
+              Object.keys(todos).map(key => {
+                return (
+                  <MapBubble
+                    key={key}
+                    todoData={todos[key]}
+                    nowTodo={nowTodo}
+                    editMode={editMode}
+                    setEditNum={setEditNum}
+                    showEditTodo={setShowEditTodo}
+                  />
+                );
+              })}
           </View>
         </View>
         <View style={styles.button}>
@@ -150,7 +121,7 @@ const MyMap = ({teamId}) => {
             style={styles.modalOverlay}
             onPress={() => setShowMiniModal(!showMiniModal)}>
             <Shadow>
-              <View style={styles.modalView}>
+              <View style={[styles.modalView, {height: 80}]}>
                 <TouchableOpacity
                   onPress={() => {
                     setShowMiniModal(!showMiniModal);
@@ -163,7 +134,7 @@ const MyMap = ({teamId}) => {
                 <TouchableOpacity
                   onPress={() => {
                     setShowMiniModal(!showMiniModal);
-                    setShowEditTodo(!showEditTodo);
+                    setEditMode(true);
                   }}
                   style={styles.modalTextContainer}>
                   <Text style={styles.modalText}>계획 수정</Text>
@@ -174,7 +145,25 @@ const MyMap = ({teamId}) => {
         </Modal>
       </View>
       <View style={styles.modalContainer}>
-        <TodoModal teamId={teamId} />
+        <NewTodoModal
+          teamId={teamId}
+          showTodo={setShowNewTodo}
+          isVisible={showNewTodo}
+          num={numNewTodo}
+          editMode={editMode}
+          setEditMode={setEditMode}
+        />
+        {editMode && todos[editNum] ? (
+          <EditTodoModal
+            teamId={teamId}
+            showTodo={setShowEditTodo}
+            isVisible={showEditTodo}
+            todoData={editNum ? todos[editNum] : null}
+            num={editNum}
+            editMode={editMode}
+            setEditMode={setEditMode}
+          />
+        ) : null}
       </View>
     </View>
   );
@@ -191,6 +180,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
+  },
+  notice: {
+    padding: 5,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  noticeText: {
+    fontSize: 14,
+  },
+  noticeCancel: {
+    fontSize: 12,
+    textDecorationLine: 'underline',
   },
   title: {
     fontSize: 20,
@@ -222,12 +223,10 @@ const styles = StyleSheet.create({
   },
   mapContainer: {
     alignItems: 'center',
-    height: '75%',
   },
   maps: {
     width: '75%',
-    height: '80%',
-    margin: 50,
+    margin: 40,
   },
   map: {
     flexDirection: 'row',
@@ -301,7 +300,6 @@ const styles = StyleSheet.create({
   modalView: {
     backgroundColor: 'white',
     width: 130,
-    height: 80,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
