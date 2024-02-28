@@ -6151,10 +6151,10 @@ react-native-calendars@^1.1301.0:
   optionalDependencies:
     moment "^2.29.4"
 
-react-native-date-picker@^4.3.6:
-  version "4.3.6"
-  resolved "https://registry.npmjs.org/react-native-date-picker/-/react-native-date-picker-4.3.6.tgz"
-  integrity sha512-HRiBcmBzLvGc5k9+TVr3H5Wg6SIvY6Ib0MRbl2pMAGo25jh6bVmk2DcDnXFMFgUZa4d1ExDNe9+1wWmFz0MNcw==
+react-native-date-picker@^4.3.7:
+  version "4.3.7"
+  resolved "https://registry.npmjs.org/react-native-date-picker/-/react-native-date-picker-4.3.7.tgz"
+  integrity sha512-0FunP9uDdRHH7VmGTdwUvDQMC9heifxvrNLiASxaO5tv6imvcE7U/Ic2btfQPUYCxs46BEZXpT6HeqXlHf07kQ==
 
 react-native-document-picker@^9.0.1:
   version "9.0.1"

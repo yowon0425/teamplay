@@ -13,7 +13,7 @@ import Ionic from 'react-native-vector-icons/Ionicons';
 import axios from 'axios'; 
 import auth from '@react-native-firebase/auth';
 
-const MemberUpload = ({ todoId, teamId }) => {
+const MemberUpload = ({ }) => {
   
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState([]);
@@ -25,13 +25,14 @@ const MemberUpload = ({ todoId, teamId }) => {
 
   const handleCommentSubmit = async () => {
     try {
-      console.log(auth().currentUser);
       if (commentInput.trim() !== '') {
         setComments([...comments, commentInput]);
 
         if (user) {
           const { uid } = user;
           const commentUserId = uid;
+          const teamId = "Bo1TOvTsYc";
+          const todoId = "1";
 
           const response = await axios.post('/api/addComment', {
             uid,
@@ -40,14 +41,15 @@ const MemberUpload = ({ todoId, teamId }) => {
             comment: commentInput,
             todoId,
           });
+          
+          if (response && response.data && response.data.isCompleted) {
+            console.log('코멘트가 성공적으로 추가되었습니다');
+          } else {
+            console.log('코멘트 추가 실패');
+          }
+          
 
           console.log('보내는 정보 ' + uid, teamId, commentUserId, commentInput, todoId);
-
-          if (response.data.isCompleted) {
-            console.log('Comment added successfully');
-          } else {
-            console.log('Failed to add comment');
-          }
 
           setCommentInput('');
         } else {
@@ -116,16 +118,7 @@ const MemberUpload = ({ todoId, teamId }) => {
   );
 };
 
-const ParentComponent = () => {
-  const todoId = '1';
-  const teamId= 'a17d8175-3';
-
-  return (
-    <MemberUpload todoId={todoId} teamId={teamId}/>
-  );
-};
-
-export default ParentComponent;
+export default MemberUpload;
 
 const styles = StyleSheet.create({
   container: {
