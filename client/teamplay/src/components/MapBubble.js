@@ -2,12 +2,32 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import MaskedView from '@react-native-masked-view/masked-view';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation} from '@react-navigation/native';
 
-const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
+const MapBubble = ({
+  teamId,
+  todoData,
+  nowTodo,
+  editMode,
+  setEditNum,
+  showEditTodo,
+}) => {
   const handleEditMode = () => {
     console.log('=======handleEditMode========');
     setEditNum(todoData.number);
     showEditTodo(true);
+  };
+
+  const navigation = useNavigation();
+  const openMyUpload = () => {
+    console.log('네비게이터');
+    navigation.navigate('MenuBar', {
+      screen: 'Maps',
+      todoData,
+      teamId,
+      upload: true,
+      member: false,
+    });
   };
 
   return (
@@ -27,7 +47,7 @@ const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
           )}
           <TouchableOpacity
             style={styles.map}
-            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+            onPress={editMode ? handleEditMode : openMyUpload}>
             <LinearGradient
               style={styles.coloredCircle}
               colors={['#033495', '#AEE4FF']}>
@@ -51,7 +71,7 @@ const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
           )}
           <TouchableOpacity
             style={styles.map}
-            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+            onPress={editMode ? handleEditMode : openMyUpload}>
             <MaskedView
               maskElement={
                 <View style={styles.strokedCircle}>
@@ -76,7 +96,7 @@ const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
           <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
           <TouchableOpacity
             style={styles.map}
-            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+            onPress={editMode ? handleEditMode : openMyUpload}>
             <View style={styles.circle}>
               <Text style={styles.mapNumB}>{todoData.number}</Text>
             </View>

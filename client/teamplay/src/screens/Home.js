@@ -31,6 +31,7 @@ const Home = ({teamId}) => {
       screen: 'Maps',
       member: false,
       teamId,
+      upload: false,
     });
   };
 
@@ -41,6 +42,7 @@ const Home = ({teamId}) => {
       screen: 'Maps',
       member: true,
       uid: uid,
+      upload: false,
     });
   };
 

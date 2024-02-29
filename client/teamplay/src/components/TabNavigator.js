@@ -10,6 +10,8 @@ import Message from '../screens/Message';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import MyMap from '../screens/MyMap';
 import MemberMap from '../screens/MemberMap';
+import MyUpload from '../screens/MyUpload';
+import StackNavigator from './StackNavigator';
 
 const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
@@ -53,6 +55,11 @@ const MenuBar = ({route}) => {
         {() =>
           route.params.member ? (
             <MemberMap uid={route.params.uid} />
+          ) : route.params.upload ? (
+            <MyUpload
+              teamId={route.params.teamId}
+              todoData={route.params.todoData}
+            />
           ) : (
             <MyMap teamId={route.params.teamId} />
           )

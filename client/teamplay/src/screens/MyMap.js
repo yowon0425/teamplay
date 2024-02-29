@@ -95,6 +95,7 @@ const MyMap = ({teamId}) => {
                 return (
                   <MapBubble
                     key={key}
+                    teamId={teamId}
                     todoData={todos[key]}
                     nowTodo={nowTodo}
                     editMode={editMode}

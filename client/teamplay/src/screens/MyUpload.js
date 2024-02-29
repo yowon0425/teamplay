@@ -18,7 +18,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import FileInfoLine from '../components/FileInfoLine';
 import PinkButton from '../components/PinkButton';
 
-const MyUpload = () => {
+const MyUpload = ({teamId, todoData}) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadedFile, setUploadedFile] = useState([]);
   const [fileList, setFileList] = useState();
@@ -62,6 +62,8 @@ const MyUpload = () => {
 
       formData.append('uid', uid);
       formData.append('fileInfo', JSON.stringify(fileInfo));
+      formData.append('teamId', teamId);
+      formData.append('todoId', todoData.number);
       // JSON으로 저장되어서 문자열 형태로 저장되어 문제 -> 서버에서 parse해서 객체 형태로 바꿈
 
       try {
@@ -116,8 +118,10 @@ const MyUpload = () => {
         <View style={styles.top}>
           <Text style={styles.task}>Today's Task</Text>
           <View style={styles.todoLine}>
-            <Text style={styles.todo}>오픈소스 사례 정리하기</Text>
-            <Text style={styles.time}>8/20 20:00</Text>
+            <Text style={styles.todo}>
+              {todoData.content.replace('/n', ' ')}
+            </Text>
+            <Text style={styles.time}>{todoData.deadline}</Text>
           </View>
         </View>
         <View style={styles.line}></View>

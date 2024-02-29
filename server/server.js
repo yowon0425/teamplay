@@ -341,7 +341,7 @@ app.post("/api/teamData", async (req, res) => {
   실패 -> uploaded: false
 */
 app.post("/api/upload", upload.any(), async (req, res) => {
-  const { uid, fileInfo } = req.body;
+  const { uid, teamId, todoId, fileInfo } = req.body;
   console.log(uid, fileInfo);
   const file = req.files[0];
   try {
@@ -367,13 +367,36 @@ app.post("/api/upload", upload.any(), async (req, res) => {
       metadata: metadata,
     });
 
-    // firestore에 파일 정보 저장
-    await db
+    // firestore에서 문서 가져오기
+    const doc = await db.collection("fileList").doc(uid).get();
+    const data = doc.data();
+
+    // 계획 데이터 추가
+
+    /*await db
       .collection("fileList")
       .doc(uid)
       .update({
         files: FieldValue.arrayUnion(JSON.parse(fileInfo)),
-      });
+      });*/
+    let newData = {};
+    if (data[teamId].hasOwnProperty(todoId)) {
+      newData = {
+        ...data[teamId],
+        [todoId]: [...data[teamId][todoId], JSON.parse(fileInfo)],
+      };
+    } else {
+      newData = {
+        ...data[teamId],
+        [todoId]: [JSON.parse(fileInfo)],
+      };
+    }
+
+    // firestore에 파일 정보 저장
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .update({ [teamId]: newData }); // 같은 투두아이디에 안만들어짐
 
     res.send({ uploaded: true });
   } catch (error) {
