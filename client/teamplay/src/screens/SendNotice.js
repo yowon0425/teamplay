@@ -1,20 +1,54 @@
-import {StyleSheet, Text, View, TextInput} from 'react-native';
-import React from 'react';
-import {Picker} from '@react-native-picker/picker';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import PinkButton from '../components/PinkButton';
+import axios from 'axios';
+import auth from '@react-native-firebase/auth';
 
 const SendNotice = () => {
+  const [title, setTitle] = useState('');
+  const [noticeType, setNoticeType] = useState('');
+  const [notificationText, setNotificationText] = useState('');
+
+  const handleButtonPress = async () => {
+    const { uid } = auth().currentUser;
+
+    const sendNotice = async () => {
+      console.log('api 호출됨');
+      console.log('보내는 정보: ' + uid, title, noticeType, notificationText);
+
+      await axios
+        .post('/api/joinTeam', {
+          uid,
+          title,
+          label: noticeType, // Renamed label to noticeType
+          text: notificationText // Changed text to notificationText
+        })
+        .catch(err => console.log(err));
+    };
+
+    sendNotice();
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>회원정보</Text>
+      <Text style={styles.title}>알림 보내기</Text>
       <View style={styles.inputContainer}>
         <View style={styles.inputLine}>
           <Text style={styles.text}>알림 제목</Text>
-          <TextInput style={styles.input} />
+          <TextInput
+            style={styles.input}
+            value={title}
+            onChangeText={setTitle}
+          />
         </View>
         <View style={styles.pickerLine}>
           <Text style={styles.text}>알림 종류</Text>
-          <Picker style={styles.typePicker}>
+          <Picker
+            style={styles.typePicker}
+            selectedValue={noticeType}
+            onValueChange={(itemValue, itemIndex) => setNoticeType(itemValue)}
+          >
             <Picker.Item label="공지" value="notice" />
             <Picker.Item label="확인요청" value="check" />
             <Picker.Item label="독려" value="encouragement" />
@@ -32,10 +66,21 @@ const SendNotice = () => {
         </View>
         <View style={styles.inputLine}>
           <Text style={styles.text}>알림 내용</Text>
-          <TextInput style={styles.commentInput} />
+          <TextInput
+            style={styles.commentInput}
+            multiline
+            numberOfLines={4}
+            value={notificationText}
+            onChangeText={setNotificationText}
+          />
         </View>
       </View>
-      <PinkButton text="알림 보내기" light={true} />
+      <PinkButton
+        style={styles.input}
+        text="알림 보내기"
+        light={true}
+        onPress={handleButtonPress}
+      />
     </View>
   );
 };
@@ -55,7 +100,6 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     width: '80%',
-    backgroundColor: 'yellow',
     marginBottom: 30,
   },
   inputLine: {
@@ -63,7 +107,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '90%',
-    backgroundColor: 'red',
     margin: 10,
   },
   text: {
@@ -86,7 +129,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: '90%',
-    backgroundColor: 'blue',
     margin: 10,
   },
   typePicker: {
