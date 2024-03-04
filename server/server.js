@@ -695,3 +695,24 @@ app.post("/api/teamData/comment", async (req, res) => {
     console.log(err);
   }
 });
+
+/* ------------- 알림 보내기 API -------------
+*/
+app.post("/api/noticesend", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, title, label, text } = req.body;
+
+  try {
+    // 알림을 받는 사용자의 UID를 기반으로 알림 데이터베이스에 저장
+    await db.collection("notifications").doc(uid).collection("notices").add({
+      title,
+      label,
+      text
+    });
+
+    res.send({ isSaved: true });
+  } catch (err) {
+    res.send({ isSaved: false });
+    console.log(err);
+  }
+});
