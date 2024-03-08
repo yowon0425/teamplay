@@ -1,10 +1,24 @@
-import {StyleSheet, Text, View, Image, ScrollView} from 'react-native';
-import React from 'react';
+import {StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, Alert} from 'react-native';
+import React, {useState} from 'react';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import LinearGradient from 'react-native-linear-gradient';
 
 const Notice = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const handleDeleteNotice = () => {
+    Alert.alert('알림 삭제', '알림을 삭제하시겠습니까?', [
+      {text: '취소', onPress: () => console.log('취소')},
+      {text: '확인', onPress: () => console.log('알림 삭제됨')},
+    ]);
+    toggleModal();
+  };
+
   return (
     <View>
       <View style={styles.top}>
@@ -33,19 +47,51 @@ const Notice = () => {
               </Text>
             </View>
             <View style={styles.etc}>
-              <Entypo name="dots-three-vertical" style={styles.dot} />
+              <TouchableOpacity onPress={toggleModal}>
+                <Entypo name="dots-three-vertical" style={styles.dot} />
+              </TouchableOpacity>
               <Text style={styles.time}>15시간 전</Text>
             </View>
           </LinearGradient>
         </View>
       </ScrollView>
+      <Modal visible={isModalVisible} animationType="slide" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity onPress={handleDeleteNotice}>
+              <Text style={styles.modalText}>알림 삭제</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleModal}>
+              <Text style={styles.modalText}>닫기</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
 export default Notice;
 
+
 const styles = StyleSheet.create({
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%', // 모달 창의 가로 너비를 조정할 수 있습니다.
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    marginVertical: 10,
+  },
   top: {
     width: '100%',
     alignItems: 'center',
