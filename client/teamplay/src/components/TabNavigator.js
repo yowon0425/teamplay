@@ -10,6 +10,9 @@ import Message from '../screens/Message';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import MyMap from '../screens/MyMap';
 import MemberMap from '../screens/MemberMap';
+import MyUpload from '../screens/MyUpload';
+import MyMapStackScreen from './MyMapStackScreen';
+import MemberMapStackScreen from './MemberMapStackScreen';
 
 const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
@@ -52,9 +55,16 @@ const MenuBar = ({route}) => {
       <Tab.Screen name="Maps">
         {() =>
           route.params.member ? (
-            <MemberMap uid={route.params.uid} />
+            <MemberMapStackScreen
+              teamId={route.params.teamId}
+              memberId={route.params.memberId}
+              todoData={route.params.todoData}
+            />
           ) : (
-            <MyMap teamId={route.params.teamId} />
+            <MyMapStackScreen
+              teamId={route.params.teamId}
+              todoData={route.params.todoData}
+            />
           )
         }
       </Tab.Screen>

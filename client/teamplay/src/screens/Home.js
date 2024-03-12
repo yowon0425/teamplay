@@ -26,7 +26,7 @@ const Home = ({teamId}) => {
   /*내 작업 페이지로 이동하는 이벤트*/
   const navigation = useNavigation();
   const goMyPage = () => {
-    console.log('내 작업 페이지로');
+    console.log('내 작업 페이지로, ' + teamId);
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       member: false,
@@ -40,7 +40,8 @@ const Home = ({teamId}) => {
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       member: true,
-      uid: uid,
+      teamId,
+      memberId: uid,
     });
   };
 

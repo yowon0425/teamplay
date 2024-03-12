@@ -1,14 +1,54 @@
 import {StyleSheet, Text, View, ScrollView} from 'react-native';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
-import MemberUpload from './MemberUpload';
+import axios from 'axios';
+import MemberMapBubble from '../components/MemberMapBubble';
 
-const MemberMap = ({uid}) => {
-  console.log('member map: ' + uid);
+const MemberMap = ({teamId, memberId}) => {
+  const [todos, setTodos] = useState();
+  const [nowTodo, setNowTodo] = useState(0);
+  console.log('멤버맵: ' + teamId);
+  console.log('member map: ' + memberId);
+
+  /* 프로젝트 계획 받아오기 */
+  const getTodos = async () => {
+    await axios
+      .post('/api/teamData/todos', {teamId})
+      .then(res => {
+        if (res.data) {
+          setTodos(res.data[memberId]);
+        } else {
+          // 실패 시 할 작업
+        }
+      })
+      .catch(err => console.log(err));
+  };
+
+  useEffect(() => {
+    getTodos();
+    console.log('투두 불러오는 함수 실행');
+  }, []);
+
+  useEffect(() => {
+    countTodo();
+  }, [todos]);
+
+  // 데이터 개수 처리 함수
+  var numCompleted = 0;
+  const countTodo = () => {
+    for (let key in todos) {
+      if (todos[key].isCompleted == true) {
+        numCompleted += 1;
+      }
+    }
+    setNowTodo(numCompleted + 1);
+    console.log('지금 투두 : ' + nowTodo);
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.top}>
@@ -25,58 +65,20 @@ const MemberMap = ({uid}) => {
       </View>
       <View style={styles.mapContainer}>
         <View style={styles.maps}>
-          <View style={styles.map}>
-            <LinearGradient
-              style={styles.coloredCircle}
-              colors={['#033495', '#AEE4FF']}>
-              <Text style={styles.mapNum}>1</Text>
-            </LinearGradient>
-            <View style={styles.plan}>
-              <Text style={styles.planTitle}>자료 조사</Text>
-              <Text style={styles.planDue}>8/20 20:00</Text>
-            </View>
-          </View>
-          <LinearGradient style={styles.line} colors={['#033495', '#AEE4FF']} />
-          <View style={styles.map}>
-            <MaskedView
-              maskElement={
-                <View style={styles.strokedCircle}>
-                  <Text style={styles.mapNumB}>2</Text>
-                </View>
-              }>
-              <LinearGradient
-                style={styles.coloredCircle}
-                colors={['#033495', '#AEE4FF']}
-              />
-            </MaskedView>
-            <View style={styles.plan}>
-              <Text style={styles.planTitle}>자료 조사</Text>
-              <Text style={styles.planDue}>8/20 20:00</Text>
-            </View>
-          </View>
-          <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
-          <View style={styles.map}>
-            <View style={styles.circle}>
-              <Text style={styles.mapNumB}>3</Text>
-            </View>
-            <View style={styles.plan}>
-              <Text style={styles.planTitle}>자료 조사</Text>
-              <Text style={styles.planDue}>8/20 20:00</Text>
-            </View>
-          </View>
-          <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
-          <View style={styles.map}>
-            <View style={styles.circle}>
-              <Text style={styles.mapNumB}>4</Text>
-            </View>
-            <View style={styles.plan}>
-              <Text style={styles.planTitle}>자료 조사</Text>
-              <Text style={styles.planDue}>8/20 20:00</Text>
-            </View>
-          </View>
+          {todos &&
+            Object.keys(todos).map(key => {
+              return (
+                <MemberMapBubble
+                  key={key}
+                  teamId={teamId}
+                  memberId={memberId}
+                  todoData={todos[key]}
+                  nowTodo={nowTodo}
+                />
+              );
+            })}
         </View>
       </View>
-      <MemberUpload />
     </ScrollView>
   );
 };

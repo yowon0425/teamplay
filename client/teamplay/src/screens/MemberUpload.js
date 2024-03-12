@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,16 +10,19 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
-import axios from 'axios'; 
+import axios from 'axios';
 import auth from '@react-native-firebase/auth';
+import FileInfoLine from '../components/FileInfoLine';
 
-const MemberUpload = ({ }) => {
-  
+const MemberUpload = ({teamId, memberId, todoData}) => {
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState([]);
-  const user = auth().currentUser;
+  const [fileList, setFileList] = useState();
+  const {uid} = auth().currentUser;
+  const todoId = todoData.number;
+  console.log(memberId, teamId);
 
-  const handleCommentInputChange = (text) => {
+  const handleCommentInputChange = text => {
     setCommentInput(text);
   };
 
@@ -28,8 +31,7 @@ const MemberUpload = ({ }) => {
       if (commentInput.trim() !== '') {
         setComments([...comments, commentInput]);
 
-        if (user) {
-          const { uid } = user;
+        if (uid) {
           const commentUserId = uid;
           const teamId = "Bo1TOvTsYc";
           const todoId = "1";
@@ -41,6 +43,14 @@ const MemberUpload = ({ }) => {
             comment: commentInput,
             todoId,
           });
+
+          console.log(
+            '보내는 정보 ' + uid,
+            teamId,
+            commentUserId,
+            commentInput,
+            todoId,
+          );
           
           if (response && response.data && response.data.isCompleted) {
             console.log('코멘트가 성공적으로 추가되었습니다');
@@ -61,11 +71,28 @@ const MemberUpload = ({ }) => {
     }
   };
 
+  /* 파일 리스트 불러오기 */
+  useEffect(() => {
+    getFileInfo();
+    console.log('getFileInfo 실행');
+  }, []);
+
+  const getFileInfo = async () => {
+    try {
+      await axios.post('/api/fileList', {uid: memberId}).then(res => {
+        console.log('fileList-> ', res.data);
+        setFileList(res.data[teamId][todoId]);
+      });
+    } catch (error) {
+      console.error('err:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Text style={styles.todo}>오픈소스 사례 정리하기</Text>
-        <Text style={styles.time}>8/20 20:00</Text>
+        <Text style={styles.todo}>{todoData.content}</Text>
+        <Text style={styles.time}>{todoData.deadline}</Text>
       </View>
       <View style={styles.line}></View>
       <View style={styles.upload}>
@@ -74,16 +101,12 @@ const MemberUpload = ({ }) => {
           style={styles.uploadBox}
           colors={['#B9E3FC', '#FFFFFF']}>
           <ScrollView style={styles.fileList}>
-            <View style={styles.file}>
-              <Text style={styles.fileName}>오픈소스 사례-챗봇.hwp</Text>
-              <Text style={styles.time}>8/12 17:34</Text>
-            </View>
-            <View style={styles.line}></View>
-            <View style={styles.file}>
-              <Text style={styles.fileName}>오픈소스 사례-챗봇.hwp</Text>
-              <Text style={styles.time}>8/12 17:34</Text>
-            </View>
-            <View style={styles.line}></View>
+            {fileList &&
+              fileList.map(data => {
+                return (
+                  <FileInfoLine key={data.name + data.uploadTime} file={data} />
+                );
+              })}
           </ScrollView>
         </LinearGradient>
         <View style={styles.comment}>
@@ -101,18 +124,21 @@ const MemberUpload = ({ }) => {
             ))}
           </ScrollView>
         </View>
-        <View style={styles.message}>
-          <KeyboardAvoidingView>
+        <KeyboardAvoidingView>
+          <View style={styles.message}>
             <TextInput
               style={styles.input}
               placeholder="코멘트 작성하기"
               value={commentInput}
               onChangeText={handleCommentInputChange}
             />
-          </KeyboardAvoidingView>
-          
-          <Ionic name="send" style={styles.sendIcon} onPress={handleCommentSubmit} />
-        </View>
+            <Ionic
+              name="send"
+              style={styles.sendIcon}
+              onPress={handleCommentSubmit}
+            />
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </View>
   );

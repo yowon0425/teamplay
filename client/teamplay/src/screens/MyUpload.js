@@ -7,6 +7,7 @@ import {
   TextInput,
   Button,
   TouchableOpacity,
+  BackHandler,
 } from 'react-native';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -17,14 +18,16 @@ import axios from 'axios';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import FileInfoLine from '../components/FileInfoLine';
 import PinkButton from '../components/PinkButton';
+import {useNavigation} from '@react-navigation/native';
 
-const MyUpload = () => {
+const MyUpload = ({teamId, todoData}) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadedFile, setUploadedFile] = useState([]);
   const [fileList, setFileList] = useState();
   const {uid} = auth().currentUser;
+  const todoId = todoData.number;
 
-  console.log(uid);
+  console.log('MyUpload : ' + uid, teamId, todoData);
   const handleFileSelect = async () => {
     try {
       const result = await DocumentPicker.pick({
@@ -62,6 +65,8 @@ const MyUpload = () => {
 
       formData.append('uid', uid);
       formData.append('fileInfo', JSON.stringify(fileInfo));
+      formData.append('teamId', teamId);
+      formData.append('todoId', todoData.number);
       // JSON으로 저장되어서 문자열 형태로 저장되어 문제 -> 서버에서 parse해서 객체 형태로 바꿈
 
       try {
@@ -102,11 +107,11 @@ const MyUpload = () => {
   const getFileInfo = async () => {
     try {
       await axios.post('/api/fileList', {uid}).then(res => {
-        console.log('fileList-> ', res.data);
-        setFileList(res.data.files);
+        console.log('fileList-> ', res.data[teamId][todoId]);
+        setFileList(res.data[teamId][todoId]);
       });
     } catch (error) {
-      console.error('Error uploading file to server:', error);
+      console.error('err:', error);
     }
   };
 
@@ -116,8 +121,10 @@ const MyUpload = () => {
         <View style={styles.top}>
           <Text style={styles.task}>Today's Task</Text>
           <View style={styles.todoLine}>
-            <Text style={styles.todo}>오픈소스 사례 정리하기</Text>
-            <Text style={styles.time}>8/20 20:00</Text>
+            <Text style={styles.todo}>
+              {todoData.content.replace('\n', ' ')}
+            </Text>
+            <Text style={styles.time}>{todoData.deadline}</Text>
           </View>
         </View>
         <View style={styles.line}></View>

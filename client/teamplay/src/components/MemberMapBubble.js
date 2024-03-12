@@ -2,12 +2,28 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import MaskedView from '@react-native-masked-view/masked-view';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation} from '@react-navigation/native';
 
-const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
+const MemberMapBubble = ({teamId, memberId, todoData, nowTodo}) => {
   const handleEditMode = () => {
     console.log('=======handleEditMode========');
     setEditNum(todoData.number);
     showEditTodo(true);
+  };
+
+  const navigation = useNavigation();
+  const openMemberUpload = () => {
+    console.log('네비게이터');
+    navigation.navigate('MenuBar', {
+      screen: 'Maps',
+      member: true,
+      teamId,
+      memberId,
+      todoData,
+      params: {
+        screen: 'MemberUpload',
+      },
+    });
   };
 
   return (
@@ -25,9 +41,7 @@ const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
               colors={['#033495', '#AEE4FF']}
             />
           )}
-          <TouchableOpacity
-            style={styles.map}
-            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+          <TouchableOpacity style={styles.map} onPress={openMemberUpload}>
             <LinearGradient
               style={styles.coloredCircle}
               colors={['#033495', '#AEE4FF']}>
@@ -49,9 +63,7 @@ const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
               colors={['#033495', '#AEE4FF']}
             />
           )}
-          <TouchableOpacity
-            style={styles.map}
-            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+          <TouchableOpacity style={styles.map} onPress={openMemberUpload}>
             <MaskedView
               maskElement={
                 <View style={styles.strokedCircle}>
@@ -74,9 +86,7 @@ const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
       ) : (
         <>
           <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
-          <TouchableOpacity
-            style={styles.map}
-            onPress={editMode ? handleEditMode : null /*네비게이션 함수*/}>
+          <TouchableOpacity style={styles.map} onPress={openMemberUpload}>
             <View style={styles.circle}>
               <Text style={styles.mapNumB}>{todoData.number}</Text>
             </View>
@@ -93,7 +103,7 @@ const MapBubble = ({todoData, nowTodo, editMode, setEditNum, showEditTodo}) => {
   );
 };
 
-export default MapBubble;
+export default MemberMapBubble;
 
 const styles = StyleSheet.create({
   map: {
