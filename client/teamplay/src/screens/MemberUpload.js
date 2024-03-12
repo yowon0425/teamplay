@@ -28,12 +28,13 @@ const MemberUpload = ({teamId, memberId, todoData}) => {
 
   const handleCommentSubmit = async () => {
     try {
-      console.log(auth().currentUser);
       if (commentInput.trim() !== '') {
         setComments([...comments, commentInput]);
 
         if (uid) {
           const commentUserId = uid;
+          const teamId = "Bo1TOvTsYc";
+          const todoId = "1";
 
           const response = await axios.post('/api/addComment', {
             uid,
@@ -50,12 +51,15 @@ const MemberUpload = ({teamId, memberId, todoData}) => {
             commentInput,
             todoId,
           );
-
-          if (response.data.isCompleted) {
-            console.log('Comment added successfully');
+          
+          if (response && response.data && response.data.isCompleted) {
+            console.log('코멘트가 성공적으로 추가되었습니다');
           } else {
-            console.log('Failed to add comment');
+            console.log('코멘트 추가 실패');
           }
+          
+
+          console.log('보내는 정보 ' + uid, teamId, commentUserId, commentInput, todoId);
 
           setCommentInput('');
         } else {
