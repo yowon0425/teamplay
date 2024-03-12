@@ -10,6 +10,7 @@ import MenuBar from './TabNavigator';
 import StartNew from '../screens/StartNew';
 import StartJoin from '../screens/StartJoin';
 import MemberMap from '../screens/MemberMap';
+import MyUpload from '../screens/MyUpload';
 
 /* 메인화면-로그인-팀리스트까지의 stackNavigator */
 
@@ -21,9 +22,13 @@ Stack Navigator
   - TeamList
   - Tab Navigator
     - Home
+    - Map
+      - MyMap
+        - MyUpload
+      - MemberMap
+        - MemberUpload
     - Notice
     - Calender
-    - Map
     - Message
 */
 

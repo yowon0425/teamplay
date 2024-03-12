@@ -430,7 +430,6 @@ app.post("/api/fileList", async (req, res) => {
         var data = snapshot.data();
         return res.send(data);
       });
-    res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
     console.log(err);
@@ -655,7 +654,6 @@ app.post("/api/changeTodo", async (req, res) => {
 app.post("/api/teamData/todos", async (req, res) => {
   // 요청 데이터 받아오기
   const teamId = req.body.teamId;
-
   try {
     // firestore에서 가져오기
     await db

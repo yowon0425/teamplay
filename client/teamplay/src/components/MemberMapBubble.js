@@ -4,14 +4,7 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 
-const MapBubble = ({
-  teamId,
-  todoData,
-  nowTodo,
-  editMode,
-  setEditNum,
-  showEditTodo,
-}) => {
+const MemberMapBubble = ({teamId, memberId, todoData, nowTodo}) => {
   const handleEditMode = () => {
     console.log('=======handleEditMode========');
     setEditNum(todoData.number);
@@ -19,14 +12,17 @@ const MapBubble = ({
   };
 
   const navigation = useNavigation();
-  const openMyUpload = () => {
+  const openMemberUpload = () => {
     console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
-      todoData,
+      member: true,
       teamId,
-      upload: true,
-      member: false,
+      memberId,
+      todoData,
+      params: {
+        screen: 'MemberUpload',
+      },
     });
   };
 
@@ -45,9 +41,7 @@ const MapBubble = ({
               colors={['#033495', '#AEE4FF']}
             />
           )}
-          <TouchableOpacity
-            style={styles.map}
-            onPress={editMode ? handleEditMode : openMyUpload}>
+          <TouchableOpacity style={styles.map} onPress={openMemberUpload}>
             <LinearGradient
               style={styles.coloredCircle}
               colors={['#033495', '#AEE4FF']}>
@@ -69,9 +63,7 @@ const MapBubble = ({
               colors={['#033495', '#AEE4FF']}
             />
           )}
-          <TouchableOpacity
-            style={styles.map}
-            onPress={editMode ? handleEditMode : openMyUpload}>
+          <TouchableOpacity style={styles.map} onPress={openMemberUpload}>
             <MaskedView
               maskElement={
                 <View style={styles.strokedCircle}>
@@ -94,9 +86,7 @@ const MapBubble = ({
       ) : (
         <>
           <View style={[styles.line, {backgroundColor: '#7D7D7D'}]} />
-          <TouchableOpacity
-            style={styles.map}
-            onPress={editMode ? handleEditMode : openMyUpload}>
+          <TouchableOpacity style={styles.map} onPress={openMemberUpload}>
             <View style={styles.circle}>
               <Text style={styles.mapNumB}>{todoData.number}</Text>
             </View>
@@ -113,7 +103,7 @@ const MapBubble = ({
   );
 };
 
-export default MapBubble;
+export default MemberMapBubble;
 
 const styles = StyleSheet.create({
   map: {

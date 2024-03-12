@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,16 +10,19 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
-import axios from 'axios'; 
+import axios from 'axios';
 import auth from '@react-native-firebase/auth';
+import FileInfoLine from '../components/FileInfoLine';
 
-const MemberUpload = ({ todoId, teamId }) => {
-  
+const MemberUpload = ({teamId, memberId, todoData}) => {
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState([]);
-  const user = auth().currentUser;
+  const [fileList, setFileList] = useState();
+  const {uid} = auth().currentUser;
+  const todoId = todoData.number;
+  console.log(memberId, teamId);
 
-  const handleCommentInputChange = (text) => {
+  const handleCommentInputChange = text => {
     setCommentInput(text);
   };
 
@@ -29,8 +32,7 @@ const MemberUpload = ({ todoId, teamId }) => {
       if (commentInput.trim() !== '') {
         setComments([...comments, commentInput]);
 
-        if (user) {
-          const { uid } = user;
+        if (uid) {
           const commentUserId = uid;
 
           const response = await axios.post('/api/addComment', {
@@ -41,7 +43,13 @@ const MemberUpload = ({ todoId, teamId }) => {
             todoId,
           });
 
-          console.log('보내는 정보 ' + uid, teamId, commentUserId, commentInput, todoId);
+          console.log(
+            '보내는 정보 ' + uid,
+            teamId,
+            commentUserId,
+            commentInput,
+            todoId,
+          );
 
           if (response.data.isCompleted) {
             console.log('Comment added successfully');
@@ -59,11 +67,28 @@ const MemberUpload = ({ todoId, teamId }) => {
     }
   };
 
+  /* 파일 리스트 불러오기 */
+  useEffect(() => {
+    getFileInfo();
+    console.log('getFileInfo 실행');
+  }, []);
+
+  const getFileInfo = async () => {
+    try {
+      await axios.post('/api/fileList', {uid: memberId}).then(res => {
+        console.log('fileList-> ', res.data);
+        setFileList(res.data[teamId][todoId]);
+      });
+    } catch (error) {
+      console.error('err:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Text style={styles.todo}>오픈소스 사례 정리하기</Text>
-        <Text style={styles.time}>8/20 20:00</Text>
+        <Text style={styles.todo}>{todoData.content}</Text>
+        <Text style={styles.time}>{todoData.deadline}</Text>
       </View>
       <View style={styles.line}></View>
       <View style={styles.upload}>
@@ -72,16 +97,12 @@ const MemberUpload = ({ todoId, teamId }) => {
           style={styles.uploadBox}
           colors={['#B9E3FC', '#FFFFFF']}>
           <ScrollView style={styles.fileList}>
-            <View style={styles.file}>
-              <Text style={styles.fileName}>오픈소스 사례-챗봇.hwp</Text>
-              <Text style={styles.time}>8/12 17:34</Text>
-            </View>
-            <View style={styles.line}></View>
-            <View style={styles.file}>
-              <Text style={styles.fileName}>오픈소스 사례-챗봇.hwp</Text>
-              <Text style={styles.time}>8/12 17:34</Text>
-            </View>
-            <View style={styles.line}></View>
+            {fileList &&
+              fileList.map(data => {
+                return (
+                  <FileInfoLine key={data.name + data.uploadTime} file={data} />
+                );
+              })}
           </ScrollView>
         </LinearGradient>
         <View style={styles.comment}>
@@ -99,33 +120,27 @@ const MemberUpload = ({ todoId, teamId }) => {
             ))}
           </ScrollView>
         </View>
-        <View style={styles.message}>
-          <KeyboardAvoidingView>
+        <KeyboardAvoidingView>
+          <View style={styles.message}>
             <TextInput
               style={styles.input}
               placeholder="코멘트 작성하기"
               value={commentInput}
               onChangeText={handleCommentInputChange}
             />
-          </KeyboardAvoidingView>
-          
-          <Ionic name="send" style={styles.sendIcon} onPress={handleCommentSubmit} />
-        </View>
+            <Ionic
+              name="send"
+              style={styles.sendIcon}
+              onPress={handleCommentSubmit}
+            />
+          </View>
+        </KeyboardAvoidingView>
       </View>
     </View>
   );
 };
 
-const ParentComponent = () => {
-  const todoId = '1';
-  const teamId= 'a17d8175-3';
-
-  return (
-    <MemberUpload todoId={todoId} teamId={teamId}/>
-  );
-};
-
-export default ParentComponent;
+export default MemberUpload;
 
 const styles = StyleSheet.create({
   container: {

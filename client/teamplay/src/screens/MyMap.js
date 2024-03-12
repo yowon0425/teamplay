@@ -14,8 +14,8 @@ import auth from '@react-native-firebase/auth';
 import NewTodoModal from '../components/NewTodoModal';
 import {Shadow} from 'react-native-shadow-2';
 import axios from 'axios';
-import MapBubble from '../components/MapBubble';
 import EditTodoModal from '../components/EditTodoModal';
+import MyMapBubble from '../components/MyMapBubble';
 
 const MyMap = ({teamId}) => {
   const {uid} = auth().currentUser;
@@ -47,7 +47,7 @@ const MyMap = ({teamId}) => {
   useEffect(() => {
     getTodos();
     console.log('투두 불러오는 함수 실행');
-  }, [showNewTodo, showEditTodo]);
+  }, [editMode]);
 
   useEffect(() => {
     countTodo();
@@ -93,7 +93,7 @@ const MyMap = ({teamId}) => {
             {todos &&
               Object.keys(todos).map(key => {
                 return (
-                  <MapBubble
+                  <MyMapBubble
                     key={key}
                     teamId={teamId}
                     todoData={todos[key]}
