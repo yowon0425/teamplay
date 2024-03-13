@@ -37,6 +37,7 @@ const MyMap = ({teamId}) => {
       .then(res => {
         if (res.data) {
           setTodos(res.data[uid]);
+          console.log(res.data[uid]);
         } else {
           // 실패 시 할 작업
         }

@@ -19,11 +19,13 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import FileInfoLine from '../components/FileInfoLine';
 import PinkButton from '../components/PinkButton';
 import {useNavigation} from '@react-navigation/native';
+import CommentLine from './../components/CommentLine';
 
 const MyUpload = ({teamId, todoData}) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadedFile, setUploadedFile] = useState([]);
   const [fileList, setFileList] = useState();
+  const [comments, setComments] = useState();
   const {uid} = auth().currentUser;
   const todoId = todoData.number;
 
@@ -99,6 +101,7 @@ const MyUpload = ({teamId, todoData}) => {
     return uploadTime;
   };
 
+  /* 파일 리스트 불러오기 */
   useEffect(() => {
     getFileInfo();
     console.log('getFileInfo 실행');
@@ -112,6 +115,26 @@ const MyUpload = ({teamId, todoData}) => {
       });
     } catch (error) {
       console.error('err:', error);
+    }
+  };
+
+  /* 코멘트 불러오기 */
+  useEffect(() => {
+    getComments();
+  }, []);
+
+  const getComments = async () => {
+    try {
+      await axios.post('/api/teamData/comment', {teamId}).then(res => {
+        if (res.data) {
+          console.log(res.data[todoId]);
+          setComments(res.data[todoId]);
+        } else {
+          console.log('코멘트를 불러오지 못했습니다.');
+        }
+      });
+    } catch (error) {
+      console.log('err: ', error);
     }
   };
 
@@ -175,46 +198,10 @@ const MyUpload = ({teamId, todoData}) => {
             <View style={styles.comment}>
               <Text style={styles.title}>코멘트</Text>
               <View style={styles.bubbles}>
-                <View style={styles.commentLine}>
-                  <Image style={styles.image} />
-                  <LinearGradient
-                    style={styles.chatbox}
-                    colors={['#E9E9EB', '#FFFFFF']}>
-                    <Text style={styles.chatboxText}>
-                      챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                    </Text>
-                  </LinearGradient>
-                </View>
-                <View style={styles.commentLine}>
-                  <Image style={styles.image} />
-                  <LinearGradient
-                    style={styles.chatbox}
-                    colors={['#E9E9EB', '#FFFFFF']}>
-                    <Text style={styles.chatboxText}>
-                      챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                    </Text>
-                  </LinearGradient>
-                </View>
-                <View style={styles.commentLine}>
-                  <Image style={styles.image} />
-                  <LinearGradient
-                    style={styles.chatbox}
-                    colors={['#E9E9EB', '#FFFFFF']}>
-                    <Text style={styles.chatboxText}>
-                      챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                    </Text>
-                  </LinearGradient>
-                </View>
-                <View style={styles.commentLine}>
-                  <Image style={styles.image} />
-                  <LinearGradient
-                    style={styles.chatbox}
-                    colors={['#E9E9EB', '#FFFFFF']}>
-                    <Text style={styles.chatboxText}>
-                      챗지피티 이외의 다양한 챗봇의 사례가 더 있었으면 좋겠어
-                    </Text>
-                  </LinearGradient>
-                </View>
+                {comments &&
+                  Object.keys(comments).map(key => {
+                    return <CommentLine key={key} comment={comments[key]} />;
+                  })}
               </View>
             </View>
           </View>
@@ -229,6 +216,7 @@ export default MyUpload;
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
+    height: '100%',
   },
   top: {
     width: '100%',
@@ -315,13 +303,15 @@ const styles = StyleSheet.create({
   commentLine: {
     flexDirection: 'row',
     width: 330,
+    margin: 8,
+    alignItems: 'center',
   },
   image: {
     width: 50,
     height: 50,
     borderRadius: 100,
     backgroundColor: 'skyblue',
-    margin: 10,
+    marginRight: 10,
     borderColor: 'black',
     borderWidth: 1,
     color: '#D9D9D9',
@@ -330,7 +320,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 10,
     width: '80%',
-    height: 80,
   },
   chatboxText: {
     fontSize: 16,
