@@ -19,8 +19,9 @@ import PinkButton from '../components/PinkButton';
 const Home = ({teamId}) => {
   // 텍스트 테두리 필요
   // 팀 목표 입력 페이지 만들기
-  const percent = 0;
   const [teamInfo, setTeamInfo] = useState([]);
+  const [todos, setTodos] = useState();
+  const [completionRate, setCompletionRate] = useState([]);
   const {uid} = auth().currentUser;
 
   /*내 작업 페이지로 이동하는 이벤트*/
@@ -45,6 +46,7 @@ const Home = ({teamId}) => {
     });
   };
 
+  /* 팀 정보 받아오기 */
   const getTeamInfo = async () => {
     await axios
       .post('/api/teamData', {teamId})
@@ -72,6 +74,67 @@ const Home = ({teamId}) => {
     getTeamInfo();
   }, []);
 
+  /* 프로젝트 계획 받아오기 */
+  const getTodos = async () => {
+    await axios
+      .post('/api/teamData/todos', {teamId})
+      .then(res => {
+        if (res.data) {
+          setTodos(res.data);
+          console.log(res.data);
+        } else {
+          // 실패 시 할 작업
+        }
+      })
+      .catch(err => console.log(err));
+  };
+
+  useEffect(() => {
+    getTodos();
+    console.log('투두 불러오는 함수 실행');
+  }, []);
+
+  useEffect(() => {
+    countTodo();
+  }, [todos]);
+
+  // 데이터 개수 처리 함수
+  var numTotalTodo = 0;
+  var numTotalCompleted = 0;
+  var totalPercent = 0;
+  const countTodo = () => {
+    for (let key in todos) {
+      var numTodo = 0;
+      var numCompleted = 0;
+      var percent = 0;
+      console.log(JSON.stringify(key) + '\n');
+      {
+        for (let nkey in todos[key]) {
+          numTodo += 1;
+          numTotalTodo += 1;
+          if (todos[key][nkey].isCompleted == true) {
+            numCompleted += 1;
+            numTotalCompleted += 1;
+          }
+        }
+      }
+      percent = (numCompleted / numTodo).toFixed(3);
+      let newData = {
+        key,
+        percent,
+        numTodo,
+        numCompleted,
+      }; // 데이터 구조 생각해보기
+      console.log(newData);
+      completionRate.push(newData);
+      console.log('전체 투두 : ' + numTodo);
+      console.log('완료 투두 : ' + numCompleted);
+    }
+    console.log('comRate: ' + JSON.stringify(completionRate));
+    totalPercent = numTotalCompleted / numTotalTodo;
+    console.log(totalPercent);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
@@ -88,7 +151,9 @@ const Home = ({teamId}) => {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <Text style={styles.percentText1}>{percent}%</Text>
+              <Text style={styles.percentText1}>
+                {(totalPercent * 100).toFixed(0)}%
+              </Text>
             </View>
           }>
           <LinearGradient
@@ -96,7 +161,7 @@ const Home = ({teamId}) => {
             colors={['#6A9CFD', '#FEE5E1']}
           />
         </MaskedView>
-        <Progress.Bar style={styles.mainBar} />
+        <Progress.Bar style={styles.mainBar} progress={totalPercent} />
         <Text style={styles.progressText}>Project Progress...</Text>
       </View>
       <ScrollView style={styles.members}>
@@ -109,19 +174,18 @@ const Home = ({teamId}) => {
                 onPress={() => goMemberPage(data.uid)}>
                 <View style={styles.memberInfo}>
                   <Text>{data.userName}</Text>
-                  <Text>0%</Text>
+                  <Text key={data.uid}>{}%</Text>
                 </View>
-                <Progress.Bar style={styles.memberBar} />
+                <Progress.Bar
+                  style={styles.memberBar}
+                  progress={0.7}
+                  unfilledColor="gray"
+                  color="#FFFFFF"
+                  height={10}
+                />
               </TouchableOpacity>
             );
           })}
-        <View style={styles.member}>
-          <View style={styles.memberInfo}>
-            <Text>김은영(자료조사)</Text>
-            <Text>0%</Text>
-          </View>
-          <Progress.Bar style={styles.memberBar} />
-        </View>
       </ScrollView>
       <View style={{alignItems: 'center', margin: 30}}>
         <PinkButton text="내 작업 페이지로" light={true} onPress={goMyPage} />
@@ -201,7 +265,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   members: {
-    paddingVertical: 10,
+    paddingVertical: 5,
     paddingHorizontal: 30,
     height: '30%',
   },
