@@ -718,7 +718,7 @@ app.post("/api/teamData/comment", async (req, res) => {
 });
 
 /* ------------- 알림 보내기 API -------------
-*/
+ */
 app.post("/api/noticesend", async (req, res) => {
   // 요청 데이터 받아오기
   const { uid, title, label, text } = req.body;
@@ -728,12 +728,74 @@ app.post("/api/noticesend", async (req, res) => {
     await db.collection("notifications").doc(uid).collection("notices").add({
       title,
       label,
-      text
+      text,
     });
 
     res.send({ isSaved: true });
   } catch (err) {
     res.send({ isSaved: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 캘린더 일정 추가 API ------------
+ */
+app.post("/api/addCalender", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId, name, date, time } = req.body;
+
+  try {
+    let calObj = {
+      name,
+      date,
+      time,
+    };
+    // firestore에 저장
+    await db
+      .collection("calender")
+      .doc(uid)
+      .set({
+        [teamId]: [calObj],
+      });
+
+    res.send({ isCompleted: true });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 캘린더 받아오기 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: 유저 id
+    teamId: 팀플 id
+  }
+
+  // 응답 형식
+  성공 -> res.data
+  {
+    calender: [ { name: 일정 이름, date: 날짜, time: 시간 }, ~... ]
+  } 
+  실패 -> isCompleted: false
+*/
+app.post("/api/calender", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId } = req.body;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("calender")
+      .doc(uid)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var calenderData = snapshot.data();
+        return res.json(calenderData[teamId]);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
     console.log(err);
   }
 });

@@ -31,7 +31,7 @@ const MemberMap = ({teamId, memberId}) => {
   useEffect(() => {
     getTodos();
     console.log('투두 불러오는 함수 실행');
-  }, []);
+  }, [memberId]);
 
   useEffect(() => {
     countTodo();

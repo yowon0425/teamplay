@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   View,
   Text,
@@ -9,23 +9,63 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
+import {Calendar, LocaleConfig} from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import LinearGradient from 'react-native-linear-gradient';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
-    '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월',
+    '1월',
+    '2월',
+    '3월',
+    '4월',
+    '5월',
+    '6월',
+    '7월',
+    '8월',
+    '9월',
+    '10월',
+    '11월',
+    '12월',
   ],
   monthNamesShort: [
-    '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월',
+    '1월',
+    '2월',
+    '3월',
+    '4월',
+    '5월',
+    '6월',
+    '7월',
+    '8월',
+    '9월',
+    '10월',
+    '11월',
+    '12월',
   ],
-  dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+  dayNames: [
+    '일요일',
+    '월요일',
+    '화요일',
+    '수요일',
+    '목요일',
+    '금요일',
+    '토요일',
+  ],
   dayNamesShort: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
   today: '오늘',
   monthNames: [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ],
 };
 LocaleConfig.defaultLocale = 'fr';
@@ -40,7 +80,7 @@ class CalendarScreen extends Component {
     showTimePicker: false,
   };
 
-  handleDayPress = (day) => {
+  handleDayPress = day => {
     this.setState({
       selectedDate: day.dateString,
       isTextInputVisible: false,
@@ -49,19 +89,23 @@ class CalendarScreen extends Component {
   };
 
   handleAddEvent = () => {
-    const { selectedDate, selectedTime, eventText, events } = this.state;
+    const {selectedDate, selectedTime, eventText, events} = this.state;
 
     if (selectedDate && eventText) {
-      const updatedEvents = { ...events };
+      const updatedEvents = {...events};
       const dateTime = `${selectedDate}`;
       if (!updatedEvents[dateTime]) {
         updatedEvents[dateTime] = [];
       }
 
-      const formattedTime = selectedTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      const formattedTime = selectedTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
       const formattedEvent = `${formattedTime} ${eventText}`;
 
-      updatedEvents[dateTime].push({ text: formattedEvent, time: selectedTime });
+      updatedEvents[dateTime].push({text: formattedEvent, time: selectedTime});
 
       this.setState({
         events: updatedEvents,
@@ -80,12 +124,12 @@ class CalendarScreen extends Component {
         isTextInputVisible: true,
       });
     } else {
-      this.setState({ showTimePicker: false });
+      this.setState({showTimePicker: false});
     }
   };
 
   handleDeleteEvent = (dateTime, index) => {
-    const updatedEvents = { ...this.state.events };
+    const updatedEvents = {...this.state.events};
     const eventsOnDateTime = updatedEvents[dateTime];
 
     if (eventsOnDateTime && eventsOnDateTime.length > index) {
@@ -95,37 +139,39 @@ class CalendarScreen extends Component {
         delete updatedEvents[dateTime];
       }
 
-      this.setState({ events: updatedEvents });
+      this.setState({events: updatedEvents});
     }
   };
 
-  renderDay = (date) => {
+  renderDay = date => {
     const eventsOnDate = this.state.events[date.dateString];
-  
+
     // Use toLocaleDateString to format the date string
     const formattedDate = new Date(date.dateString).toLocaleDateString({
       weekday: 'long',
       day: 'numeric',
     });
-  
+
     const containerStyle = {
       backgroundColor: 'transparent', // Set the background color to transparent
     };
-  
+
     return (
       <TouchableOpacity onPress={() => this.handleDayPress(date)}>
         <LinearGradient
           colors={['#FFB8D0', '#FEE5E1']}
-          style={styles.circleContainer}
-        >
+          style={styles.circleContainer}>
           <View style={[styles.circle, containerStyle]}>
-            <Text style={[styles.dayText, containerStyle]}>{formattedDate}</Text>
+            <Text style={[styles.dayText, containerStyle]}>
+              {formattedDate}
+            </Text>
           </View>
         </LinearGradient>
         {eventsOnDate &&
           eventsOnDate.map((event, index) => (
             <View key={index} style={styles.eventContainer}>
-              <TouchableOpacity onPress={() => this.handleDeleteEvent(date.dateString, index)}>
+              <TouchableOpacity
+                onPress={() => this.handleDeleteEvent(date.dateString, index)}>
                 <Text style={styles.deleteText}>X</Text>
               </TouchableOpacity>
               <Text style={styles.eventText}>{`${event.text}`}</Text>
@@ -133,40 +179,46 @@ class CalendarScreen extends Component {
           ))}
       </TouchableOpacity>
     );
-  };  
+  };
 
   render() {
     const currentDate = new Date();
     const currentDateString = currentDate.toISOString().split('T')[0];
 
-    const markedDates = Object.keys(this.state.events).reduce((acc, dateTime) => {
-      const [date] = dateTime.split(' ');
-      acc[date] = { marked: true, dotColor: '#FFB8D0', selectedColor: '#FFB8D0' };
-      return acc;
-    }, {});
+    const markedDates = Object.keys(this.state.events).reduce(
+      (acc, dateTime) => {
+        const [date] = dateTime.split(' ');
+        acc[date] = {
+          marked: true,
+          dotColor: '#FFB8D0',
+          selectedColor: '#FFB8D0',
+        };
+        return acc;
+      },
+      {},
+    );
 
     return (
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        enabled
-      >
-        <ScrollView style={{ flex: 1 }}>
-          <View style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
-          <Calendar
-  current={currentDateString}
-  monthFormat={'MMMM'}
-  onDayPress={this.handleDayPress}
-  markedDates={markedDates}
-  theme={{
-    arrowColor: 'gray',
-    todayTextColor: 'black',
-    calendarBackground: 'transparent', // Set the background color to transparent
-  }}
-  renderDay={this.renderDay}
-  style={{ backgroundColor: 'transparent' }}
-/>
-
+        enabled>
+        <ScrollView style={{flex: 1}}>
+          <View
+            style={{paddingTop: 50, flex: 1, justifyContent: 'space-between'}}>
+            <Calendar
+              current={currentDateString}
+              monthFormat={'MMMM'}
+              onDayPress={this.handleDayPress}
+              markedDates={markedDates}
+              theme={{
+                arrowColor: 'gray',
+                todayTextColor: 'black',
+                calendarBackground: 'transparent', // Set the background color to transparent
+              }}
+              renderDay={this.renderDay}
+              style={{backgroundColor: 'transparent'}}
+            />
 
             {this.state.isTextInputVisible && (
               <View style={styles.textInputContainer}>
@@ -174,16 +226,15 @@ class CalendarScreen extends Component {
                   style={styles.textInput}
                   placeholder="일정을 입력하세요..."
                   value={this.state.eventText}
-                  onChangeText={(text) => this.setState({ eventText: text })}
+                  onChangeText={text => this.setState({eventText: text})}
                   autoCorrect={false}
                   autoCapitalize="none"
                   keyboardType="default"
                 />
                 <TouchableOpacity
                   style={styles.addButton}
-                  onPress={this.handleAddEvent}
-                >
-                  <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
+                  onPress={this.handleAddEvent}>
+                  <Text style={{fontSize: 24, color: 'white'}}>+</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -206,6 +257,49 @@ class CalendarScreen extends Component {
     );
   }
 }
+
+const EventList = ({events, onDeleteEvent}) => {
+  const sortedDateTimes = Object.keys(events).sort();
+
+  return (
+    <View style={styles.eventListContainer}>
+      {sortedDateTimes.map((dateTime, index) => (
+        <View key={dateTime}>
+          <View style={styles.dayTop}>
+            <Text style={styles.dayText}>
+              {new Date(dateTime).toLocaleDateString('en', {
+                day: 'numeric',
+                weekday: 'long',
+              })}
+            </Text>
+            <View style={styles.separator} />
+          </View>
+          {events[dateTime].map((event, eventIndex) => (
+            <View
+              key={`${dateTime}_${eventIndex}`}
+              style={styles.eventContainer}>
+              <View style={styles.eventTextContainer}>
+                <Text style={styles.Text1}>{`${
+                  event.text.split(' ')[0]
+                }`}</Text>
+                <Text style={styles.Text2}>{`${
+                  event.text.split(' ')[1]
+                }`}</Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => onDeleteEvent(dateTime, eventIndex)}
+                style={styles.deleteButton}>
+                <Text style={styles.deleteText}>X</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+};
+
+export default CalendarScreen;
 
 const styles = StyleSheet.create({
   textInputContainer: {
@@ -231,7 +325,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   eventListContainer: {
-    marginHorizontal: 20,
+    margin: 20,
   },
   eventContainer: {
     flexDirection: 'row',
@@ -240,31 +334,40 @@ const styles = StyleSheet.create({
     marginVertical: 5,
   },
   circleContainer: {
-    width: '90%', 
-    aspectRatio: 1, 
-    borderRadius: 50, 
-    overflow: 'hidden', 
+    width: '90%',
+    aspectRatio: 1,
+    borderRadius: 50,
+    overflow: 'hidden',
   },
   circle: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },  
+  },
+  dayTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
   dayText: {
-    fontSize: 14,
+    fontSize: 16,
+    color: '#666666',
   },
-  Text1 :{
+  Text1: {
     fontSize: 14,
-    left: '20%'
+    left: '20%',
+    marginRight: 20,
   },
-  Text2 : {
+  Text2: {
     fontSize: 14,
-    left: '60%'
+    left: '60%',
+    color: 'black',
   },
   separator: {
     height: 1,
     backgroundColor: 'lightgray',
-    marginVertical: 5,
+    width: '65%',
   },
   deleteText: {
     color: 'gray',
@@ -279,36 +382,4 @@ const styles = StyleSheet.create({
   deleteButton: {
     marginLeft: 'auto',
   },
-  
 });
-
-const EventList = ({ events, onDeleteEvent }) => {
-  const sortedDateTimes = Object.keys(events).sort();
-
-  return (
-    <View style={styles.eventListContainer}>
-      {sortedDateTimes.map((dateTime, index) => (
-        <View key={dateTime}>
-          <Text style={styles.dayText}>{new Date(dateTime).toLocaleDateString('en', {
-            weekday: 'long',
-            day: 'numeric',
-          })}</Text>
-          {events[dateTime].map((event, eventIndex) => (
-            <View key={`${dateTime}_${eventIndex}`} style={styles.eventContainer}>
-              <View style={styles.eventTextContainer}>
-                <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
-                <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
-              </View>
-              <TouchableOpacity onPress={() => onDeleteEvent(dateTime, eventIndex)} style={styles.deleteButton}>
-                <Text style={styles.deleteText}>X</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          {index !== sortedDateTimes.length - 1 && <View style={styles.separator} />}
-        </View>
-      ))}
-    </View>
-  );
-};
-
-export default CalendarScreen;
