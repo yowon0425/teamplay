@@ -9,6 +9,7 @@ const SendNotice = () => {
   const [title, setTitle] = useState('');
   const [noticeType, setNoticeType] = useState('');
   const [notificationText, setNotificationText] = useState('');
+  const [recipient, setRecipient] = useState('all');
 
   const handleButtonPress = async () => {
     const { uid } = auth().currentUser;
@@ -21,8 +22,9 @@ const SendNotice = () => {
         .post('/api/joinTeam', {
           uid,
           title,
-          label: noticeType, // Renamed label to noticeType
-          text: notificationText // Changed text to notificationText
+          label: noticeType,
+          text: notificationText,
+          recipient
         })
         .catch(err => console.log(err));
     };
@@ -56,7 +58,11 @@ const SendNotice = () => {
         </View>
         <View style={styles.pickerLine}>
           <Text style={styles.text}>보낼 사람</Text>
-          <Picker style={styles.peoplePicker}>
+          <Picker
+            style={styles.peoplePicker}
+            selectedValue={recipient}
+            onValueChange={(itemValue, itemIndex) => setRecipient(itemValue)}
+          >
             <Picker.Item label="모두" value="all" />
             <Picker.Item label="자료조사" value="research" />
             <Picker.Item label="PPT" value="ppt" />
