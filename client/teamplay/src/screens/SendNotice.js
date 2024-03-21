@@ -1,17 +1,45 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text, View, TextInput} from 'react-native';
+import {Picker} from '@react-native-picker/picker';
 import PinkButton from '../components/PinkButton';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 
-const SendNotice = () => {
+const SendNotice = ({route}) => {
+  const {teamId} = route.params;
   const [title, setTitle] = useState('');
   const [noticeType, setNoticeType] = useState('');
   const [notificationText, setNotificationText] = useState('');
+  const [member, setMember] = useState();
+  console.log(teamId);
+
+  // 팀 멤버 목록 불러오기
+  const getTeamMember = async () => {
+    await axios
+      .post('/api/teamData/member', {teamId})
+      .then(res => {
+        if (res.data) {
+          /* 응답 형식
+          {
+            member: [{userName: oo, uid: oo}, {...}]
+          }
+          */
+          setMember(
+            res.data.map(data => {
+              return data.uid;
+            }),
+          ); // 멤버 uid 배열 불러오기
+        }
+      })
+      .catch(err => console.log(err));
+  };
+
+  useEffect(() => {
+    getTeamMember();
+  }, []);
 
   const handleButtonPress = async () => {
-    const { uid } = auth().currentUser;
+    const {uid} = auth().currentUser;
 
     const sendNotice = async () => {
       console.log('api 호출됨');
@@ -22,7 +50,7 @@ const SendNotice = () => {
           uid,
           title,
           label: noticeType, // Renamed label to noticeType
-          text: notificationText // Changed text to notificationText
+          text: notificationText, // Changed text to notificationText
         })
         .catch(err => console.log(err));
     };
@@ -47,8 +75,7 @@ const SendNotice = () => {
           <Picker
             style={styles.typePicker}
             selectedValue={noticeType}
-            onValueChange={(itemValue, itemIndex) => setNoticeType(itemValue)}
-          >
+            onValueChange={(itemValue, itemIndex) => setNoticeType(itemValue)}>
             <Picker.Item label="공지" value="notice" />
             <Picker.Item label="확인요청" value="check" />
             <Picker.Item label="독려" value="encouragement" />

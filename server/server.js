@@ -72,9 +72,13 @@ app.post("/api/signup", async (req, res) => {
     });
 
     // fileList에 문서 생성
-    await db.collection("fileList").doc(uid).set({
-      files: [],
-    });
+    await db.collection("fileList").doc(uid).set({});
+
+    // notice에 문서 생성
+    await db.collection("notice").doc(uid).set({});
+
+    // calender에 문서 생성
+    await db.collection("calender").doc(uid).set({});
 
     res.send({ isSaved: true });
   } catch (err) {
@@ -329,6 +333,45 @@ app.post("/api/teamData", async (req, res) => {
   }
 });
 
+/* ------------- 팀플 멤버 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+  }
+
+  // 응답 형식
+  성공 -> res.data
+  {
+    member: [
+      {
+        name: oo,
+        uid: oo,
+      },
+    ]
+  }
+  실패 -> isCompleted: false
+*/
+app.post("/api/teamData/member", async (req, res) => {
+  // 요청 데이터 받아오기
+  const teamId = req.body.teamId;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("teamlist")
+      .doc(teamId)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var teamData = snapshot.data().member;
+        return res.json(teamData);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
 /* ------------- 파일 업로드 API -------------
   // req로 받아야하는 데이터 = formData 
   {
@@ -555,6 +598,7 @@ app.post("/api/addComment", async (req, res) => {
     // 코멘트 업데이트
     let newData = {};
     if (data[uid].hasOwnProperty(todoId)) {
+      // 문서에 todoId가 없을 때 생성 안됨
       newData = {
         ...data[uid],
         [todoId]: {
@@ -717,27 +761,6 @@ app.post("/api/teamData/comment", async (req, res) => {
   }
 });
 
-/* ------------- 알림 보내기 API -------------
- */
-app.post("/api/noticesend", async (req, res) => {
-  // 요청 데이터 받아오기
-  const { uid, title, label, text } = req.body;
-
-  try {
-    // 알림을 받는 사용자의 UID를 기반으로 알림 데이터베이스에 저장
-    await db.collection("notifications").doc(uid).collection("notices").add({
-      title,
-      label,
-      text,
-    });
-
-    res.send({ isSaved: true });
-  } catch (err) {
-    res.send({ isSaved: false });
-    console.log(err);
-  }
-});
-
 /* ------------- 캘린더 일정 추가 API ------------
  */
 app.post("/api/addCalender", async (req, res) => {
@@ -754,8 +777,35 @@ app.post("/api/addCalender", async (req, res) => {
     await db
       .collection("calender")
       .doc(uid)
-      .set({
-        [teamId]: [calObj],
+      .update({
+        [teamId]: FieldValue.arrayUnion(calObj),
+      });
+
+    res.send({ isCompleted: true });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 캘린더 일정 삭제 API ------------
+ */
+app.post("/api/deleteCalender", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId, name, date, time } = req.body;
+
+  try {
+    let deleteCal = {
+      name,
+      date,
+      time,
+    };
+    // firestore에 저장
+    await db
+      .collection("calender")
+      .doc(uid)
+      .update({
+        [teamId]: FieldValue.arrayRemove(deleteCal),
       });
 
     res.send({ isCompleted: true });
@@ -794,6 +844,47 @@ app.post("/api/calender", async (req, res) => {
         var calenderData = snapshot.data();
         return res.json(calenderData[teamId]);
       });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 알림 생성 API ------------
+ */
+app.post("/api/addNotice", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { writer, teamId, teamMember, title, content } = req.body;
+
+  try {
+    // date 객체
+    let dateObj = new Date();
+    let date = {
+      year: dateObj.getFullYear(),
+      month: dateObj.getMonth() + 1,
+      day: dateObj.getDate(),
+      hour: dateObj.getHours(),
+      minute: dateObj.getMinutes(),
+      second: dateObj.getSeconds(),
+    };
+
+    let noticeObj = {
+      writer,
+      title,
+      content,
+      createdAt: `${date.year}-${date.month}-${date.day} ${date.hour}:${date.minute}:${date.second}`,
+    };
+    // firestore에 저장
+    teamMember.forEach(async (member) => {
+      await db
+        .collection("notice")
+        .doc(member)
+        .update({
+          [teamId]: FieldValue.arrayUnion(noticeObj),
+        });
+    });
+
+    res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
     console.log(err);
