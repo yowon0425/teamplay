@@ -1,11 +1,32 @@
-import {StyleSheet, Text, View, Image, ScrollView, TouchableOpacity, Modal, Alert} from 'react-native';
-import React, {useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  Alert,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import LinearGradient from 'react-native-linear-gradient';
+import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
 
-const Notice = () => {
+const Notice = ({teamId}) => {
+  console.log('notice: ' + teamId);
   const [isModalVisible, setIsModalVisible] = useState(false);
+
+  // 알림 보내기 페이지로 이동
+  const navigation = useNavigation();
+  const openSendNotice = () => {
+    console.log('네비게이터');
+    navigation.navigate('SendNotice', {
+      teamId,
+    });
+  };
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible);
@@ -22,8 +43,11 @@ const Notice = () => {
   return (
     <View>
       <View style={styles.top}>
+        <Text style={styles.title}> </Text>
         <Text style={styles.title}>알림</Text>
-        <Ionic name="notifications-outline" style={styles.noticeIcon} />
+        <TouchableOpacity onPress={openSendNotice}>
+          <Ionic name="notifications-outline" style={styles.noticeIcon} />
+        </TouchableOpacity>
       </View>
       <View style={styles.category}>
         <View style={styles.type}>
@@ -39,7 +63,6 @@ const Notice = () => {
       <ScrollView>
         <View style={styles.noticeList}>
           <LinearGradient style={styles.notice} colors={['#B9E3FC', '#FFFFFF']}>
-            <Image style={styles.image} />
             <View style={styles.comment}>
               <Text style={styles.noticeTitle}>알림 제목</Text>
               <Text style={styles.noticeContent}>
@@ -73,7 +96,6 @@ const Notice = () => {
 
 export default Notice;
 
-
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
@@ -95,17 +117,16 @@ const styles = StyleSheet.create({
   top: {
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     flexDirection: 'row',
+    padding: 10,
   },
   title: {
     fontSize: 20,
     color: 'black',
-    margin: 10,
     fontWeight: '900',
   },
   noticeIcon: {
-    left: 120,
     fontSize: 24,
   },
   category: {

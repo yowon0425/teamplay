@@ -68,9 +68,12 @@ const MenuBar = ({route}) => {
           )
         }
       </Tab.Screen>
-      <Tab.Screen name="Notice" component={Notice} />
-      <Tab.Screen name="Calender" component={Calender} />
-      <Tab.Screen name="Message" component={Message} />
+      <Tab.Screen name="Notice">
+        {() => <Notice teamId={route.params.teamId} />}
+      </Tab.Screen>
+      <Tab.Screen name="Calender">
+        {() => <Calender teamId={route.params.teamId} />}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };
