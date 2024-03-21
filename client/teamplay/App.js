@@ -19,7 +19,7 @@ import MyMap from './src/screens/MyMap';
 import MemberUpload from './src/screens/MemberUpload';
 
 const App = () => {
-  return <StackNavigator />;
+  return <SendNotice />;
 };
 
 export default App;
