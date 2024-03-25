@@ -30,8 +30,8 @@ const SendNotice = () => {
 
     PushNotification.localNotification({
       channelId: 'team-channel',
-      title: `title`,
-      message: `test`
+      title: title,
+      message: notificationText 
     })
   };
 
@@ -46,18 +46,6 @@ const SendNotice = () => {
             value={title}
             onChangeText={setTitle}
           />
-        </View>
-        <View style={styles.pickerLine}>
-          <Text style={styles.text}>알림 종류</Text>
-          <Picker
-            style={styles.typePicker}
-            selectedValue={noticeType}
-            onValueChange={(itemValue, itemIndex) => setNoticeType(itemValue)}
-          >
-            <Picker.Item label="공지" value="notice" />
-            <Picker.Item label="확인요청" value="check" />
-            <Picker.Item label="독려" value="encouragement" />
-          </Picker>
         </View>
         <View style={styles.inputLine}>
           <Text style={styles.text}>알림 내용</Text>
