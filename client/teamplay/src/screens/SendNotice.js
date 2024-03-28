@@ -40,7 +40,6 @@ const SendNotice = ({route}) => {
 
   const [recipient, setRecipient] = useState('all');
 
-
   const handleButtonPress = async () => {
     const {uid} = auth().currentUser;
 
@@ -54,8 +53,7 @@ const SendNotice = ({route}) => {
           title,
           label: noticeType,
           text: notificationText,
-          recipient
-
+          recipient,
         })
         .catch(err => console.log(err));
     };
@@ -91,8 +89,7 @@ const SendNotice = ({route}) => {
           <Picker
             style={styles.peoplePicker}
             selectedValue={recipient}
-            onValueChange={(itemValue, itemIndex) => setRecipient(itemValue)}
-          >
+            onValueChange={(itemValue, itemIndex) => setRecipient(itemValue)}>
             <Picker.Item label="모두" value="all" />
             <Picker.Item label="자료조사" value="research" />
             <Picker.Item label="PPT" value="ppt" />
