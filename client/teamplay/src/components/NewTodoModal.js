@@ -13,7 +13,7 @@ import DatePicker from 'react-native-date-picker';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 
-const NewTodoModal = ({teamId, isVisible, showTodo, num}) => {
+const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
   const {uid} = auth().currentUser;
   const initialDate = new Date();
   const [content, setContent] = useState('');
@@ -62,6 +62,7 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num}) => {
     } catch (err) {
       console.log('catch: ' + err);
     }
+    setClickButton(true);
   };
 
   useEffect(() => {

@@ -19,6 +19,7 @@ const EditTodoModal = ({
   num,
   todoData,
   setEditMode,
+  setClickButton,
 }) => {
   const {uid} = auth().currentUser;
   const now = new Date();
@@ -79,6 +80,7 @@ const EditTodoModal = ({
       console.log('catch: ' + err);
     }
     setEditMode(false);
+    setClickButton(true);
   };
 
   return (

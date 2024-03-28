@@ -27,6 +27,7 @@ const MyMap = ({teamId}) => {
   const [editNum, setEditNum] = useState();
   const [nowTodo, setNowTodo] = useState(0);
   const [numNewTodo, setNumNewTodo] = useState(0);
+  const [clickButton, setClickButton] = useState(false);
 
   // 계획 없을 때 수정할 수 없게 오류처리 필요
 
@@ -48,7 +49,8 @@ const MyMap = ({teamId}) => {
   useEffect(() => {
     getTodos();
     console.log('투두 불러오는 함수 실행');
-  }, [editMode]);
+    setClickButton(false);
+  }, [editMode, clickButton]);
 
   useEffect(() => {
     countTodo();
@@ -154,6 +156,7 @@ const MyMap = ({teamId}) => {
           num={numNewTodo}
           editMode={editMode}
           setEditMode={setEditMode}
+          setClickButton={setClickButton}
         />
         {editMode && todos[editNum] ? (
           <EditTodoModal
@@ -164,6 +167,7 @@ const MyMap = ({teamId}) => {
             num={editNum}
             editMode={editMode}
             setEditMode={setEditMode}
+            setClickButton={setClickButton}
           />
         ) : null}
       </View>

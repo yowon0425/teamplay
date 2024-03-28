@@ -19,6 +19,7 @@ const SendNotice = () => {
     createChannel();
   }, [])
 
+
   const [title, setTitle] = useState('');
   const [noticeType, setNoticeType] = useState('');
   const [notificationText, setNotificationText] = useState('');
