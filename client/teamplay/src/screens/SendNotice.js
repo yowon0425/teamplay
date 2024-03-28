@@ -1,64 +1,39 @@
-import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View, TextInput} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import PinkButton from '../components/PinkButton';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
+import PushNotification from 'react-native-push-notification';
 
-const SendNotice = ({route}) => {
-  const {teamId} = route.params;
+const SendNotice = () => {
+
+  const createChannel = () => {
+    PushNotification.createChannel({
+      channelId: 'team-channel',
+      channelName: 'Team Channel',
+    })
+  }
+
+  useEffect(() => {
+    createChannel();
+  }, [])
+
+
   const [title, setTitle] = useState('');
   const [noticeType, setNoticeType] = useState('');
   const [notificationText, setNotificationText] = useState('');
-  const [member, setMember] = useState();
-  console.log(teamId);
-
-  // 팀 멤버 목록 불러오기
-  const getTeamMember = async () => {
-    await axios
-      .post('/api/teamData/member', {teamId})
-      .then(res => {
-        if (res.data) {
-          /* 응답 형식
-          {
-            member: [{userName: oo, uid: oo}, {...}]
-          }
-          */
-          setMember(
-            res.data.map(data => {
-              return data.uid;
-            }),
-          ); // 멤버 uid 배열 불러오기
-        }
-      })
-      .catch(err => console.log(err));
-  };
-
-  useEffect(() => {
-    getTeamMember();
-  }, []);
-
-  const [recipient, setRecipient] = useState('all');
 
   const handleButtonPress = async () => {
-    const {uid} = auth().currentUser;
+    PushNotification.getChannels(function(channel_ids) {
+      console.log(channel_ids);
+    })
 
-    const sendNotice = async () => {
-      console.log('api 호출됨');
-      console.log('보내는 정보: ' + uid, title, noticeType, notificationText);
-
-      await axios
-        .post('/api/joinTeam', {
-          uid,
-          title,
-          label: noticeType,
-          text: notificationText,
-          recipient,
-        })
-        .catch(err => console.log(err));
-    };
-
-    sendNotice();
+    PushNotification.localNotification({
+      channelId: 'team-channel',
+      title: title,
+      message: notificationText 
+    })
   };
 
   return (
@@ -72,30 +47,6 @@ const SendNotice = ({route}) => {
             value={title}
             onChangeText={setTitle}
           />
-        </View>
-        <View style={styles.pickerLine}>
-          <Text style={styles.text}>알림 종류</Text>
-          <Picker
-            style={styles.typePicker}
-            selectedValue={noticeType}
-            onValueChange={(itemValue, itemIndex) => setNoticeType(itemValue)}>
-            <Picker.Item label="공지" value="notice" />
-            <Picker.Item label="확인요청" value="check" />
-            <Picker.Item label="독려" value="encouragement" />
-          </Picker>
-        </View>
-        <View style={styles.pickerLine}>
-          <Text style={styles.text}>보낼 사람</Text>
-          <Picker
-            style={styles.peoplePicker}
-            selectedValue={recipient}
-            onValueChange={(itemValue, itemIndex) => setRecipient(itemValue)}>
-            <Picker.Item label="모두" value="all" />
-            <Picker.Item label="자료조사" value="research" />
-            <Picker.Item label="PPT" value="ppt" />
-            <Picker.Item label="발표" value="presentation" />
-            <Picker.Item label="직접 선택하기" value="pick" />
-          </Picker>
         </View>
         <View style={styles.inputLine}>
           <Text style={styles.text}>알림 내용</Text>
