@@ -5,7 +5,6 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 
 const TeamCard = ({team}) => {
-  console.log(team);
   const navigation = useNavigation();
   const openHome = () => {
     console.log('네비게이터');
@@ -59,6 +58,7 @@ const styles = StyleSheet.create({
   teamDescription: {
     marginTop: 10,
     color: 'black',
+    alignSelf: 'center',
   },
   buttonContainer: {
     marginTop: 20,

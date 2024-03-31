@@ -7,12 +7,12 @@ import MenuBar from '../components/TabNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import axios from 'axios';
 import MemberMapBubble from '../components/MemberMapBubble';
+import ProgressBar from '../components/ProgressBar';
 
-const MemberMap = ({teamId, memberId}) => {
+const MemberMap = ({teamId, memberId, memberObj}) => {
   const [todos, setTodos] = useState();
   const [nowTodo, setNowTodo] = useState(0);
-  console.log('멤버맵: ' + teamId);
-  console.log('member map: ' + memberId);
+  console.log(JSON.stringify(memberObj));
 
   /* 프로젝트 계획 받아오기 */
   const getTodos = async () => {
@@ -53,19 +53,25 @@ const MemberMap = ({teamId, memberId}) => {
     <ScrollView style={styles.container}>
       <View style={styles.top}>
         <View>
-          <Text style={styles.name}>이름</Text>
+          <Text style={styles.name}>{memberObj.name}</Text>
         </View>
         <View style={styles.progress}>
           <View style={styles.info}>
-            <Text>이름(역할)</Text>
-            <Text>퍼센트</Text>
+            <Text>{memberObj.name}</Text>
+            <Text>
+              {memberObj ? (memberObj.percent * 100).toFixed(1) : null}%
+            </Text>
           </View>
-          <Progress.Bar style={styles.bar} />
+          <View style={styles.bar}>
+            <ProgressBar
+              percent={memberObj ? (memberObj.percent * 100).toFixed(1) : null}
+            />
+          </View>
         </View>
       </View>
       <View style={styles.mapContainer}>
         <View style={styles.maps}>
-          {todos &&
+          {todos && memberObj.percent != 0 ? (
             Object.keys(todos).map(key => {
               return (
                 <MemberMapBubble
@@ -76,7 +82,10 @@ const MemberMap = ({teamId, memberId}) => {
                   nowTodo={nowTodo}
                 />
               );
-            })}
+            })
+          ) : (
+            <Text style={styles.empty}>등록한 계획이 없습니다.</Text>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -122,61 +131,8 @@ const styles = StyleSheet.create({
     height: '70%',
     margin: 50,
   },
-  map: {
-    flexDirection: 'row',
-  },
-  coloredCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  strokedCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'black',
-  },
-  circle: {
-    width: 40,
-    height: 40,
-    borderRadius: 100,
-    borderCurve: 100,
-    backgroundColor: '#D9D9D9',
-    borderColor: '#7D7D7D',
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mapNum: {
-    fontSize: 20,
-    color: 'white',
-  },
-  mapNumB: {
-    color: 'black',
-    fontSize: 20,
-  },
-  plan: {
-    marginLeft: 15,
-  },
-  planTitle: {
+  empty: {
     fontSize: 16,
-    color: 'black',
-  },
-  planDue: {
-    fontSize: 12,
-    color: 'black',
-  },
-  line: {
-    height: 90,
-    width: 2,
-    left: 20,
-  },
-  button: {
-    alignItems: 'center',
+    alignSelf: 'center',
   },
 });

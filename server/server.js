@@ -127,9 +127,12 @@ app.post("/api/createTeam", async (req, res) => {
         teamGoal: "팀플 목표를 설정해보세요.",
       });
 
-    await db.collection("todo").doc(teamId).set({
-      uid: {},
-    });
+    await db
+      .collection("todo")
+      .doc(teamId)
+      .set({
+        [uid]: {},
+      });
 
     let teamObj = {
       teamId,

@@ -34,16 +34,17 @@ const StartNew = () => {
         return;
       }
 
-      const getRandomAlphaNumericId = (length) => {
-        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      const getRandomAlphaNumericId = length => {
+        const characters =
+          'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let randomId = '';
         for (let i = 0; i < length; i++) {
           const randomIndex = Math.floor(Math.random() * characters.length);
           randomId += characters.charAt(randomIndex);
         }
         return randomId;
-      };      
-      
+      };
+
       const newTeamId = getRandomAlphaNumericId(10);
       console.log('newid: ' + newTeamId);
       truncId = newTeamId;
@@ -80,11 +81,11 @@ const StartNew = () => {
       numOfMember,
       description,
     );
-    
+
     await axios
       .post('/api/createTeam', {
         uid: uid,
-        userName: uid,
+        userName: displayName,
         teamId: truncId,
         name,
         lecture,
