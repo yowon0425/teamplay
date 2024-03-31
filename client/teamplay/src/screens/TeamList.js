@@ -61,10 +61,7 @@ const TeamList = () => {
       .post('/api/teamList', {uid})
       .then(res => {
         if (res.data) {
-          const data = JSON.stringify(res.data);
-          console.log('data : ' + data);
           setTeams(res.data);
-          console.log('if 안 teams : ' + teams);
           /* 응답 형식
               {
                 teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]

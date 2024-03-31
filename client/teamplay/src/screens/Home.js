@@ -21,6 +21,8 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
+import HomeProgressBar from '../components/HomeProgressBar';
+import ProgressBar from '../components/ProgressBar';
 
 const Home = ({teamId}) => {
   // 텍스트 테두리 필요
@@ -46,12 +48,14 @@ const Home = ({teamId}) => {
 
   /*팀원 작업 페이지로 이동하는 이벤트*/
   const goMemberPage = uid => {
+    const memberObj = completionRate.find(element => element.key == uid);
     console.log('팀원 작업 페이지로: ');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       member: true,
       teamId,
       memberId: uid,
+      memberObj,
     });
   };
 
@@ -121,9 +125,18 @@ const Home = ({teamId}) => {
           }
         }
       }
-      percent = (numCompleted / numTodo).toFixed(3);
+      if (numTodo != 0) percent = (numCompleted / numTodo).toFixed(3);
+      else percent = 0;
+      try {
+        if (teamInfo) {
+          var memberName = teamInfo.member.find(
+            data => data.uid == key,
+          ).userName;
+        }
+      } catch {}
       let newData = {
         key,
+        name: memberName,
         percent,
         numTodo,
         numCompleted,
@@ -142,7 +155,7 @@ const Home = ({teamId}) => {
     if (numTotalTodo !== 0) {
       console.log('계산결과 : ' + numTotalCompleted / numTotalTodo);
       const percent = numTotalCompleted / numTotalTodo;
-      setTotalPercent(percent);
+      setTotalPercent((percent * 100).toFixed(0));
     }
   }, [numTotalCompleted, numTotalTodo]);
 
@@ -168,12 +181,37 @@ const Home = ({teamId}) => {
                 ))}
               </LinearGradient>
             </Defs>
-            <SvgText fill="url(#grad)" y={80} style={styles.mainPercent}>
-              {(totalPercent * 100).toFixed(0)}%
-            </SvgText>
+            {totalPercent >= 10 && totalPercent <= 99 ? (
+              <SvgText
+                fill="url(#grad)"
+                x={30}
+                y={80}
+                style={styles.mainPercent}
+                stroke="black">
+                {totalPercent}%
+              </SvgText>
+            ) : totalPercent == 100 ? (
+              <SvgText
+                fill="url(#grad)"
+                x={0}
+                y={80}
+                style={styles.mainPercent}
+                stroke="black">
+                {totalPercent}%
+              </SvgText>
+            ) : (
+              <SvgText
+                fill="url(#grad)"
+                x={58}
+                y={80}
+                style={styles.mainPercent}
+                stroke="black">
+                {totalPercent}%
+              </SvgText>
+            )}
           </Svg>
         </View>
-        <Progress.Bar style={styles.mainBar} />
+        <HomeProgressBar percent={totalPercent} />
         <Text style={styles.progressText}>Project Progress...</Text>
       </View>
       <ScrollView style={styles.members}>
@@ -186,24 +224,27 @@ const Home = ({teamId}) => {
               <TouchableOpacity
                 key={data.uid}
                 style={styles.member}
-                onPress={() => goMemberPage(data.uid)}>
+                onPress={() => {
+                  if (data.uid == uid) return goMyPage();
+                  else goMemberPage(data.uid);
+                }}>
                 <View style={styles.memberInfo}>
-                  <Text>{data.userName}</Text>
+                  <Text style={styles.memberText}>{data.userName}</Text>
                   {memberObj ? (
-                    <Text key={data.uid}>
-                      {(memberObj.percent * 100).toFixed(1)}%
-                    </Text>
+                    <>
+                      <Text key={data.uid} style={styles.memberText}>
+                        {(memberObj.percent * 100).toFixed(1)}%
+                      </Text>
+                    </>
                   ) : (
-                    <Text>0%</Text>
+                    <Text style={styles.memberText}>0%</Text>
                   )}
                 </View>
-                <Progress.Bar
-                  style={styles.memberBar}
-                  progress={0.7}
-                  unfilledColor="gray"
-                  color="#FFFFFF"
-                  height={10}
-                />
+                {memberObj ? (
+                  <ProgressBar percent={(memberObj.percent * 100).toFixed(1)} />
+                ) : (
+                  <ProgressBar percent={0} />
+                )}
               </TouchableOpacity>
             );
           })}
@@ -222,6 +263,9 @@ const styles = StyleSheet.create({
   top: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 10,
+    width: '80%',
+    alignSelf: 'center',
   },
   teamName: {
     fontSize: 20,
@@ -232,6 +276,7 @@ const styles = StyleSheet.create({
   goal: {
     fontSize: 16,
     color: 'black',
+    textAlign: 'center',
   },
   teamProgress: {
     alignItems: 'center',
@@ -250,39 +295,6 @@ const styles = StyleSheet.create({
     height: 100,
     marginTop: 10,
   },
-  percentText1: {
-    fontSize: 96,
-    fontWeight: '900',
-    textAlign: 'center',
-    textAlignVertical: 'center',
-  },
-  percentText2: {
-    fontSize: 96,
-    fontWeight: '900',
-    color: 'rgba(255,255,255,0.9)',
-    textShadowColor: 'black',
-    textShadowRadius: 5,
-    textShadowOffset: {width: -1, height: -1},
-    position: 'absolute',
-    top: 0,
-  },
-  percentText3: {
-    fontSize: 96,
-    fontWeight: '900',
-    color: 'black',
-  },
-  percentText4: {
-    fontSize: 96,
-    fontWeight: '900',
-    color: 'black',
-  },
-  mainBar: {
-    width: '80%',
-    height: 30,
-    borderRadius: 30,
-    borderColor: 'black',
-    unfilledColor: 'gray',
-  },
   progressText: {
     margin: 10,
     fontSize: 20,
@@ -300,6 +312,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 5,
+  },
+  memberText: {
+    color: 'black',
   },
   memberBar: {
     width: '100%',

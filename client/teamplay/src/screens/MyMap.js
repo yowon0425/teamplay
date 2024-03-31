@@ -25,6 +25,7 @@ const MyMap = ({teamId}) => {
   const [showMiniModal, setShowMiniModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editNum, setEditNum] = useState();
+  const [numTodo, setNumTodo] = useState(0);
   const [nowTodo, setNowTodo] = useState(0);
   const [numNewTodo, setNumNewTodo] = useState(0);
   const [clickButton, setClickButton] = useState(false);
@@ -57,17 +58,18 @@ const MyMap = ({teamId}) => {
   }, [todos]);
 
   // 데이터 개수 처리 함수
-  var numTodo = 0;
+  var todo = 0;
   var numCompleted = 0;
   const countTodo = () => {
     for (let key in todos) {
-      numTodo += 1;
+      todo += 1;
       if (todos[key].isCompleted == true) {
         numCompleted += 1;
       }
     }
+    setNumTodo(todo);
     setNowTodo(numCompleted + 1);
-    setNumNewTodo(numTodo + 1);
+    setNumNewTodo(todo + 1);
     console.log('전체 투두 : ' + numTodo);
     console.log('완료 투두 : ' + numCompleted);
     console.log('지금 투두 : ' + nowTodo);
@@ -93,7 +95,7 @@ const MyMap = ({teamId}) => {
         ) : null}
         <View style={styles.mapContainer}>
           <View style={styles.maps}>
-            {todos &&
+            {todos && numTodo > 0 ? (
               Object.keys(todos).map(key => {
                 return (
                   <MyMapBubble
@@ -106,7 +108,12 @@ const MyMap = ({teamId}) => {
                     showEditTodo={setShowEditTodo}
                   />
                 );
-              })}
+              })
+            ) : (
+              <Text style={styles.empty}>
+                등록한 계획이 없습니다.{`\n`}메뉴를 눌러 계획을 등록해보세요.
+              </Text>
+            )}
           </View>
         </View>
         <View style={styles.button}>
@@ -287,6 +294,11 @@ const styles = StyleSheet.create({
     height: 90,
     width: 2,
     left: 20,
+  },
+  empty: {
+    fontSize: 16,
+    alignSelf: 'center',
+    textAlign: 'center',
   },
   button: {
     alignItems: 'center',

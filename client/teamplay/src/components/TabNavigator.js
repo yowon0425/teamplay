@@ -59,6 +59,7 @@ const MenuBar = ({route}) => {
               teamId={route.params.teamId}
               memberId={route.params.memberId}
               todoData={route.params.todoData}
+              memberObj={route.params.memberObj}
             />
           ) : (
             <MyMapStackScreen
