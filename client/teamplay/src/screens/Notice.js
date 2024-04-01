@@ -14,6 +14,8 @@ import Entypo from 'react-native-vector-icons/Entypo';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
+import Work from './Work';
+import NoticeCard from '../components/NoticeCard';
 
 const Notice = ({teamId}) => {
   console.log('notice: ' + teamId);
@@ -49,33 +51,31 @@ const Notice = ({teamId}) => {
           <Ionic name="notifications-outline" style={styles.noticeIcon} />
         </TouchableOpacity>
       </View>
-      <View style={styles.category}>
-        <View style={styles.type}>
-          <Text style={styles.typeText}>전체</Text>
-        </View>
-        <View style={styles.type}>
-          <Text style={styles.typeText}>완료</Text>
-        </View>
-        <View style={styles.type}>
-          <Text style={styles.typeText}>공지</Text>
-        </View>
-      </View>
       <ScrollView>
         <View style={styles.noticeList}>
           <LinearGradient style={styles.notice} colors={['#B9E3FC', '#FFFFFF']}>
             <View style={styles.comment}>
-              <Text style={styles.noticeTitle}>알림 제목</Text>
-              <Text style={styles.noticeContent}>
-                일해라 개미들아 오늘은 이거하고 저거할 예정
+              <View style={styles.noticeTop}>
+                <Text style={styles.noticeTitle}>알림 제목</Text>
+                <Text style={{fontSize: 12, color: 'black'}}>
+                  김은영(자료조사)
+                </Text>
+              </View>
+              <Text
+                style={styles.noticeContent}
+                numberOfLines={3}
+                ellipsizeMode="tail">
+                일해라 개미들아 오늘은 이거하고 저거할 예정 글씨 추가 아무말이나
+                해보자 지금은 오후 8시 집가고싶다 이거 글자 넘어가면 어떻게
+                되지? 넘치나 궁금하다 만우절이다 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
               </Text>
-            </View>
-            <View style={styles.etc}>
-              <TouchableOpacity onPress={toggleModal}>
-                <Entypo name="dots-three-vertical" style={styles.dot} />
-              </TouchableOpacity>
-              <Text style={styles.time}>15시간 전</Text>
+              <Ionic name="caret-down-outline" style={styles.more} />
+              <Text style={styles.more}>▽</Text>
+              <Text style={styles.more}>더보기</Text>
+              <Ionic name="chevron-down-outline" style={styles.more} />
             </View>
           </LinearGradient>
+          <NoticeCard />
         </View>
       </ScrollView>
       <Modal visible={isModalVisible} animationType="slide" transparent={true}>
@@ -115,11 +115,11 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   top: {
-    width: '100%',
+    flexDirection: 'row',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'space-between',
-    flexDirection: 'row',
-    padding: 10,
   },
   title: {
     fontSize: 20,
@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
   },
   noticeIcon: {
     fontSize: 24,
+    fontWeight: 'bold',
   },
   category: {
     width: '100%',
@@ -150,51 +151,50 @@ const styles = StyleSheet.create({
   },
   noticeList: {
     width: '100%',
-    height: '80%',
     padding: 5,
     alignItems: 'center',
   },
   notice: {
-    width: 320,
-    height: 100,
+    width: '90%',
     margin: 5,
     padding: 5,
     borderRadius: 10,
     borderColor: 'black',
     borderWidth: 1,
     flexDirection: 'row',
-  },
-  image: {
-    width: 40,
-    height: 40,
-    borderRadius: 100,
-    backgroundColor: 'white',
-    margin: 5,
+    justifyContent: 'space-around',
   },
   comment: {
     flexDirection: 'column',
-    width: 180,
-    height: 100,
+    width: '94%',
     margin: 5,
   },
+  noticeTop: {
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
   noticeTitle: {
-    width: 200,
     height: 30,
     fontSize: 16,
     fontWeight: '500',
     color: 'black',
+    marginBottom: 5,
   },
   noticeContent: {
     fontSize: 12,
     fontWeight: '300',
     color: 'black',
-    width: '90%',
-    height: 60,
+    height: 50,
+    marginBottom: 5,
+  },
+  more: {
+    textAlign: 'center',
+    fontSize: 12,
   },
   etc: {
     width: 65,
-    height: '80%',
-    marginTop: 5,
+    marginVertical: 5,
     paddingRight: 7,
     justifyContent: 'space-between',
     alignItems: 'flex-end',

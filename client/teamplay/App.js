@@ -17,6 +17,7 @@ import LogIn from './src/screens/LogIn';
 import Notice from './src/screens/Notice';
 import MyMap from './src/screens/MyMap';
 import MemberUpload from './src/screens/MemberUpload';
+import MainNotice from './src/screens/MainNotice';
 
 const App = () => {
   return <StackNavigator />;
