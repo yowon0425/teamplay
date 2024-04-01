@@ -14,12 +14,19 @@ import auth from '@react-native-firebase/auth';
 import {Shadow} from 'react-native-shadow-2';
 import {useNavigation} from '@react-navigation/native';
 import TeamCard from '../components/TeamCard';
+import Ionic from 'react-native-vector-icons/Ionicons';
 
 const TeamList = () => {
   console.log('팀리스트로');
   const [showModal, setShowModal] = useState(false);
   const [teams, setTeams] = useState();
   const outside = useRef();
+
+  // 전체 알림 페이지로
+  const openMainNotice = () => {
+    console.log('네비게이터');
+    navigation.push('MainNotice');
+  };
 
   const navigation = useNavigation();
   const openStartNew = () => {
@@ -75,7 +82,11 @@ const TeamList = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <Text style={styles.headerText}> </Text>
         <Text style={styles.headerText}>나의 팀</Text>
+        <TouchableOpacity onPress={openMainNotice}>
+          <Ionic name="notifications-outline" style={styles.noticeIcon} />
+        </TouchableOpacity>
       </View>
       <ScrollView style={styles.teamListContainer}>
         <View style={styles.teamList}>
@@ -137,15 +148,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    width: '100%',
+    width: '85%',
     alignItems: 'center',
-    justifyContent: 'center',
     margin: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   headerText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
+    textAlign: 'center',
+  },
+  noticeIcon: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'black',
+    alignSelf: 'center',
   },
   teamListContainer: {
     width: '100%',
