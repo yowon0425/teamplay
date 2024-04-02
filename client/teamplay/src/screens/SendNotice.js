@@ -5,9 +5,16 @@ import PinkButton from '../components/PinkButton';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import PushNotification from 'react-native-push-notification';
+import { useRoute } from '@react-navigation/native';
 
 const SendNotice = () => {
+  const [title, setTitle] = useState('');
+  const [notificationText, setNotificationText] = useState('');
+  const [teamMembers, setTeamMembers] = useState([]);
 
+  const route = useRoute();
+  const { teamId } = route.params;
+  
   const createChannel = () => {
     PushNotification.createChannel({
       channelId: 'team-channel',
@@ -17,24 +24,56 @@ const SendNotice = () => {
 
   useEffect(() => {
     createChannel();
+    addTeamMember();
   }, [])
 
-
-  const [title, setTitle] = useState('');
-  const [noticeType, setNoticeType] = useState('');
-  const [notificationText, setNotificationText] = useState('');
+  // 팀 멤버 추가
+  const addTeamMember = async (memberData) => {
+    try {
+      const response = await axios.post('/api/teamData/member', {teamId});
+      if (response.data) {
+        setTeamMembers(response.data);
+      } else {
+        // 실패 시의 작업
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleButtonPress = async () => {
+    const {displayName} = auth().currentUser;
+  
+    const addNotice = async () => {
+      console.log('api 호출됨');
+
+      const memberUid = teamMembers.map(member => member.uid);
+
+      console.log('보내는 정보: ' + displayName, teamId, memberUid, title, notificationText);
+
+      await axios
+        .post('/api/addNotice', {
+          writer: displayName,
+          teamId,
+          teamMember: memberUid,
+          title: title,
+          content: notificationText
+        })
+        .catch(err => console.log(err));
+    };
+  
     PushNotification.getChannels(function(channel_ids) {
       console.log(channel_ids);
     })
-
+  
     PushNotification.localNotification({
       channelId: 'team-channel',
       title: title,
       message: notificationText 
     })
-  };
+  
+    addNotice();
+  };  
 
   return (
     <View style={styles.container}>
