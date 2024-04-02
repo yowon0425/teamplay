@@ -893,3 +893,72 @@ app.post("/api/addNotice", async (req, res) => {
     console.log(err);
   }
 });
+
+/* ------------- 알림 받아오기 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: 유저 id
+    teamId: 팀플 id
+  }
+
+  // 응답 형식
+  성공 -> res.data
+  {
+    [ { title: 알림 제목, writer: 작성자, content: 내용, createdAt: 시간 }, ~... ]
+  } 
+  실패 -> isCompleted: false
+*/
+app.post("/api/notice", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId } = req.body;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("notice")
+      .doc(uid)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var noticeData = snapshot.data();
+        return res.json(noticeData[teamId]);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 전체 알림 받아오기 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: 유저 id
+  }
+
+  // 응답 형식
+  성공 -> res.data
+  {
+    [ { title: 알림 제목, writer: 작성자, content: 내용, createdAt: 시간 }, ~... ]
+  } 
+  실패 -> isCompleted: false
+*/
+app.post("/api/totalNotice", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid } = req.body;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("notice")
+      .doc(uid)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var noticeData = snapshot.data();
+        return res.json(noticeData);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
