@@ -53,28 +53,6 @@ const Notice = ({teamId}) => {
       </View>
       <ScrollView>
         <View style={styles.noticeList}>
-          <LinearGradient style={styles.notice} colors={['#B9E3FC', '#FFFFFF']}>
-            <View style={styles.comment}>
-              <View style={styles.noticeTop}>
-                <Text style={styles.noticeTitle}>알림 제목</Text>
-                <Text style={{fontSize: 12, color: 'black'}}>
-                  김은영(자료조사)
-                </Text>
-              </View>
-              <Text
-                style={styles.noticeContent}
-                numberOfLines={3}
-                ellipsizeMode="tail">
-                일해라 개미들아 오늘은 이거하고 저거할 예정 글씨 추가 아무말이나
-                해보자 지금은 오후 8시 집가고싶다 이거 글자 넘어가면 어떻게
-                되지? 넘치나 궁금하다 만우절이다 ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
-              </Text>
-              <Ionic name="caret-down-outline" style={styles.more} />
-              <Text style={styles.more}>▽</Text>
-              <Text style={styles.more}>더보기</Text>
-              <Ionic name="chevron-down-outline" style={styles.more} />
-            </View>
-          </LinearGradient>
           <NoticeCard />
         </View>
       </ScrollView>
