@@ -8,6 +8,8 @@ import {
   Button,
   TouchableOpacity,
   BackHandler,
+  KeyboardAvoidingView,
+  Keyboard,
 } from 'react-native';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -25,10 +27,14 @@ const MyUpload = ({teamId, todoData}) => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadedFile, setUploadedFile] = useState([]);
   const [fileList, setFileList] = useState();
+  const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState();
+  const [clicked, setClicked] = useState(false);
   const {uid} = auth().currentUser;
+  const userName = auth().currentUser.displayName;
   const todoId = todoData.number;
 
+  /* 파일 선택, 업로드 함수 */
   console.log('MyUpload : ' + uid, teamId, todoData);
   const handleFileSelect = async () => {
     try {
@@ -101,9 +107,44 @@ const MyUpload = ({teamId, todoData}) => {
     return uploadTime;
   };
 
+  /* 코멘트 작성 함수 */
+  const handleCommentInputChange = text => {
+    setCommentInput(text);
+  };
+
+  const handleCommentSubmit = async () => {
+    try {
+      if (commentInput.trim() !== '') {
+        if (uid) {
+          const response = await axios.post('/api/addComment', {
+            uid: uid,
+            teamId,
+            commentUser: userName,
+            comment: commentInput,
+            todoId,
+          });
+
+          if (response && response.data && response.data.isCompleted) {
+            console.log('코멘트가 성공적으로 추가되었습니다');
+            setClicked(!clicked);
+          } else {
+            console.log('코멘트 추가 실패');
+          }
+          setCommentInput('');
+        } else {
+          console.error('User is not authenticated');
+        }
+      }
+    } catch (error) {
+      console.error('코멘트 제출 오류:', error);
+    }
+    Keyboard.dismiss(); // 키보드 내리기 메소드
+  };
+
   /* 파일 리스트 불러오기 */
   useEffect(() => {
     getFileInfo();
+    getComments();
     console.log('getFileInfo 실행');
   }, []);
 
@@ -121,54 +162,51 @@ const MyUpload = ({teamId, todoData}) => {
   /* 코멘트 불러오기 */
   useEffect(() => {
     getComments();
-  }, []);
+  }, [clicked]);
 
   const getComments = async () => {
     try {
-      await axios.post('/api/teamData/comment', {teamId}).then(res => {
-        if (res.data) {
-          console.log(res.data[todoId]);
-          setComments(res.data[todoId]);
-        } else {
-          console.log('코멘트를 불러오지 못했습니다.');
-        }
-      });
+      await axios
+        .post('/api/teamData/comment', {teamId, memberId: uid, todoId})
+        .then(res => {
+          if (res.data) {
+            console.log(res.data);
+            setComments(res.data);
+          } else {
+            console.log('코멘트를 불러오지 못했습니다.');
+          }
+        });
     } catch (error) {
       console.log('err: ', error);
     }
   };
 
   return (
-    <SafeAreaView>
-      <View style={styles.container}>
-        <View style={styles.top}>
-          <Text style={styles.task}>Today's Task</Text>
-          <View style={styles.todoLine}>
-            <Text style={styles.todo}>
-              {todoData.content.replace('\n', ' ')}
-            </Text>
-            <Text style={styles.time}>{todoData.deadline}</Text>
-          </View>
-        </View>
-        <View style={styles.line}></View>
-        <ScrollView style={styles.upload}>
-          <View style={styles.uploadContainer}>
-            <Text style={styles.title}>제출 상황</Text>
-            <LinearGradient
-              style={styles.uploadBox}
-              colors={['#B9E3FC', '#FFFFFF']}>
-              <ScrollView style={styles.fileList}>
-                {fileList &&
-                  fileList.map(data => {
-                    return (
-                      <FileInfoLine
-                        key={data.name + data.uploadTime}
-                        file={data}
-                      />
-                    );
-                  })}
-              </ScrollView>
-            </LinearGradient>
+    <View style={styles.container}>
+      <View style={styles.top}>
+        <Text style={styles.todo}>{todoData.content.replace('\n', ' ')}</Text>
+        <Text style={styles.time}>{todoData.deadline}</Text>
+      </View>
+      <View style={styles.line}></View>
+      <ScrollView>
+        <View style={styles.uploadContainer}>
+          <Text style={styles.title}>제출 상황</Text>
+          <LinearGradient
+            style={styles.uploadBox}
+            colors={['#B9E3FC', '#FFFFFF']}>
+            <ScrollView style={styles.fileList}>
+              {fileList &&
+                fileList.map(data => {
+                  return (
+                    <FileInfoLine
+                      key={data.name + data.uploadTime}
+                      file={data}
+                    />
+                  );
+                })}
+            </ScrollView>
+          </LinearGradient>
+          <View style={styles.uploadArea}>
             {selectedFile == null ? (
               <PinkButton
                 text="파일 선택하기"
@@ -195,19 +233,39 @@ const MyUpload = ({teamId, todoData}) => {
                 />
               </>
             )}
-            <View style={styles.comment}>
-              <Text style={styles.title}>코멘트</Text>
-              <View style={styles.bubbles}>
-                {comments &&
-                  Object.keys(comments).map(key => {
-                    return <CommentLine key={key} comment={comments[key]} />;
-                  })}
-              </View>
+          </View>
+          <View style={styles.comment}>
+            <View style={styles.bubbles}>
+              {comments &&
+                comments.map((data, index) => (
+                  <CommentLine
+                    key={index}
+                    owner={userName}
+                    comment={data.comment}
+                    commentUser={data.commentUser}
+                    createdAt={data.createdAt}
+                  />
+                ))}
             </View>
           </View>
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+        </View>
+      </ScrollView>
+      <KeyboardAvoidingView>
+        <View style={styles.message}>
+          <TextInput
+            style={styles.input}
+            placeholder="코멘트 작성하기"
+            value={commentInput}
+            onChangeText={handleCommentInputChange}
+          />
+          <Ionic
+            name="send"
+            style={styles.sendIcon}
+            onPress={handleCommentSubmit}
+          />
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -216,27 +274,17 @@ export default MyUpload;
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    height: '100%',
+    flex: 1,
   },
   top: {
-    width: '100%',
-  },
-  task: {
-    paddingLeft: 15,
-    paddingTop: 10,
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  todoLine: {
+    width: '95%',
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    margin: 10,
   },
   todo: {
-    fontSize: 12,
+    fontSize: 20,
     color: 'black',
     fontWeight: '900',
   },
@@ -248,12 +296,11 @@ const styles = StyleSheet.create({
     width: '95%',
     height: 1,
     backgroundColor: 'black',
-    alignSelf: 'center',
   },
   uploadContainer: {
+    width: '100%',
     alignItems: 'center',
   },
-  upload: {},
   title: {
     fontSize: 16,
     color: 'black',
@@ -263,7 +310,7 @@ const styles = StyleSheet.create({
   },
   uploadBox: {
     width: 330,
-    height: 180,
+    height: 110,
     borderColor: 'black',
     borderWidth: 1,
     marginBottom: 20,
@@ -278,7 +325,11 @@ const styles = StyleSheet.create({
   fileName: {
     fontSize: 12,
     color: 'black',
-    width: '70%',
+  },
+  uploadArea: {
+    marginTop: 10,
+    marginBottom: 15,
+    alignItems: 'center',
   },
   selectedFileBlock: {
     width: 330,
@@ -296,30 +347,18 @@ const styles = StyleSheet.create({
   },
   comment: {
     alignItems: 'center',
-    height: '45%',
-    marginVertical: 40,
+    marginTop: 20,
   },
   bubbles: {},
   commentLine: {
     flexDirection: 'row',
     width: 330,
-    margin: 8,
-    alignItems: 'center',
-  },
-  image: {
-    width: 50,
-    height: 50,
-    borderRadius: 100,
-    backgroundColor: 'skyblue',
-    marginRight: 10,
-    borderColor: 'black',
-    borderWidth: 1,
-    color: '#D9D9D9',
   },
   chatbox: {
     borderRadius: 20,
     padding: 10,
     width: '80%',
+    height: 80,
   },
   chatboxText: {
     fontSize: 16,
@@ -328,21 +367,24 @@ const styles = StyleSheet.create({
   message: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'flex-end',
+    paddingVertical: 10,
   },
   input: {
     fontSize: 16,
     width: 290,
     height: 30,
-    backgroundColor: '#F1F1F1',
+    backgroundColor: '#D9D9D9',
     flexDirection: 'row',
     borderRadius: 10,
-    margin: 5,
+    marginRight: 5,
     paddingLeft: 10,
     paddingVertical: 0,
     color: '#545454',
   },
   sendIcon: {
-    fontSize: 30,
+    fontSize: 24,
     color: '#749DF6',
   },
 });

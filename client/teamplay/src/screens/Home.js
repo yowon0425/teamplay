@@ -127,16 +127,8 @@ const Home = ({teamId}) => {
       }
       if (numTodo != 0) percent = (numCompleted / numTodo).toFixed(3);
       else percent = 0;
-      try {
-        if (teamInfo) {
-          var memberName = teamInfo.member.find(
-            data => data.uid == key,
-          ).userName;
-        }
-      } catch {}
       let newData = {
         key,
-        name: memberName,
         percent,
         numTodo,
         numCompleted,

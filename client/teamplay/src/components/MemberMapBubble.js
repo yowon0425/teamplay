@@ -4,7 +4,14 @@ import MaskedView from '@react-native-masked-view/masked-view';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 
-const MemberMapBubble = ({teamId, memberId, todoData, nowTodo}) => {
+const MemberMapBubble = ({
+  teamId,
+  memberId,
+  memberName,
+  todoData,
+  nowTodo,
+  memberObj,
+}) => {
   const handleEditMode = () => {
     console.log('=======handleEditMode========');
     setEditNum(todoData.number);
@@ -19,7 +26,9 @@ const MemberMapBubble = ({teamId, memberId, todoData, nowTodo}) => {
       member: true,
       teamId,
       memberId,
+      memberName,
       todoData,
+      memberObj,
       params: {
         screen: 'MemberUpload',
       },
