@@ -147,17 +147,11 @@ app.post("/api/createTeam", async (req, res) => {
         teamList: FieldValue.arrayUnion(teamObj),
       });
 
-    let commentObj = {
-      [uid]: {
-        0: [],
-        1: [],
-        2: [],
-        3: [],
-      },
-    };
-
     // comment collection 추가
-    await db.collection("comment").doc(teamId).set(commentObj);
+    await db
+      .collection("comment")
+      .doc(teamId)
+      .set({ [uid]: {} });
 
     res.send({ isCompleted: true });
   } catch (err) {
@@ -236,12 +230,7 @@ app.post("/api/joinTeam", async (req, res) => {
 
     const comment = {
       ...data,
-      [uid]: {
-        0: [],
-        1: [],
-        2: [],
-        3: [],
-      },
+      [uid]: {},
     };
 
     // comment collection 추가
@@ -434,7 +423,7 @@ app.post("/api/upload", upload.any(), async (req, res) => {
     } else {
       newData = {
         ...data[teamId],
-        [todoId]: [JSON.parse(fileInfo)],
+        [todoId]: FieldValue.arrayUnion(JSON.parse(fileInfo)),
       };
     }
 
@@ -442,7 +431,9 @@ app.post("/api/upload", upload.any(), async (req, res) => {
     await db
       .collection("fileList")
       .doc(uid)
-      .update({ [teamId]: newData }); // 같은 투두아이디에 안만들어짐
+      .update({
+        [teamId]: newData,
+      }); // 같은 투두아이디에 안만들어짐
 
     res.send({ uploaded: true });
   } catch (error) {
@@ -573,12 +564,11 @@ app.post("/api/todo", async (req, res) => {
 */
 app.post("/api/addComment", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, teamId, comment, commentUserId, todoId } = req.body;
+  const { uid, teamId, comment, commentUser, todoId } = req.body;
 
   // const comment = {
   //   ...teamData,
   //   [uid]: {
-  //     0: [],
   //     1: [],
   //     2: [],
   //     3: [],
@@ -594,8 +584,31 @@ app.post("/api/addComment", async (req, res) => {
     let dateObj = new Date();
     let date = {
       year: dateObj.getFullYear(),
-      month: dateObj.getMonth() + 1,
-      day: dateObj.getDate(),
+      month: `${
+        dateObj.getMonth() + 1 < 10
+          ? "0" + (new Date().getMonth() + 1)
+          : new Date().getMonth() + 1
+      }`,
+      day: `${
+        dateObj.getDate() < 10
+          ? "0" + new Date().getDate()
+          : new Date().getDate()
+      }`,
+      hour: `${
+        dateObj.getHours() < 10
+          ? "0" + new Date().getHours()
+          : new Date().getHours()
+      }`,
+      minute: `${
+        dateObj.getMinutes() < 10
+          ? "0" + new Date().getMinutes()
+          : new Date().getMinutes()
+      }`,
+      second: `${
+        dateObj.getSeconds() < 10
+          ? "0" + new Date().getSeconds()
+          : new Date().getSeconds()
+      }`,
     };
 
     // 코멘트 업데이트
@@ -603,29 +616,127 @@ app.post("/api/addComment", async (req, res) => {
     if (data[uid].hasOwnProperty(todoId)) {
       // 문서에 todoId가 없을 때 생성 안됨
       newData = {
-        ...data[uid],
-        [todoId]: {
-          ...data[uid][todoId],
-          [commentUserId]: {
-            comment: comment,
-            createdAt: `${date.year}-${date.month}-${date.day}`,
-          },
+        ...data,
+        [uid]: {
+          ...data[uid],
+          [todoId]: [
+            ...data[uid][todoId],
+            {
+              commentUser,
+              comment: comment,
+              createdAt: `${date.year}-${date.month}-${date.day} ${date.hour}:${date.minute}:${date.second}`,
+            },
+          ],
         },
       };
     } else {
       newData = {
-        ...data[uid],
-        [todoId]: {
-          [commentUserId]: {
-            comment: comment,
-            createdAt: `${date.year}-${date.month}-${date.day}`,
-          },
+        ...data,
+        [uid]: {
+          ...data[uid],
+          [todoId]: [
+            {
+              commentUser,
+              comment: comment,
+              createdAt: `${date.year}-${date.month}-${date.day} ${date.hour}:${date.minute}:${date.second}`,
+            },
+          ],
         },
       };
     }
 
     // firestore에 저장
     await db.collection("comment").doc(teamId).set(newData);
+
+    res.send({ isCompleted: true });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- 팀별 comment 받아오기 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+    memberId: 멤버 id
+    todoId: 투두 id
+  }
+
+  // 응답 형식
+  성공 -> res.data
+  {
+      {
+        comment: 내용,
+        commentUser: 코멘트 작성 유저
+        createdAt: 작성일시,
+      },
+      {
+        comment: 내용,
+        commentUser: 코멘트 작성 유저
+        createdAt: 작성일시,
+      },
+      ...
+  }
+  실패 -> isCompleted: false
+*/
+app.post("/api/teamData/comment", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { teamId, memberId, todoId } = req.body;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("comment")
+      .doc(teamId)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var teamData = snapshot.data();
+        return res.json(teamData[memberId][todoId]);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
+/* ------------- comment 삭제 API ------------
+  // req로 받아야하는 데이터 형식
+  {
+    teamId: 팀플 id
+    ownerId: 계획 페이지의 멤버 id
+    todoId: 투두 id
+    comment: 코멘트
+    commentUser: 코멘트 작성 유저
+    createdAt: 작성 시간
+  }
+  
+  // 응답 형식 -> res.data.isCompleted
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false, error: "msg"
+ */
+app.post("/api/deleteComment", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { teamId, ownerId, todoId, comment, commentUser, createdAt } = req.body;
+
+  try {
+    const doc = await db.collection("comment").doc(teamId).get();
+    const data = doc.data();
+
+    const deleteCom = {
+      comment,
+      commentUser,
+      createdAt,
+    };
+
+    // firestore에 새로운 배열로 업데이트
+    await db
+      .collection("comment")
+      .doc(teamId)
+      .update({
+        [`${ownerId}.${todoId}`]: FieldValue.arrayRemove(deleteCom),
+      });
 
     res.send({ isCompleted: true });
   } catch (err) {
@@ -705,52 +816,6 @@ app.post("/api/teamData/todos", async (req, res) => {
     // firestore에서 가져오기
     await db
       .collection("todo")
-      .doc(teamId)
-      .get()
-      .then((snapshot) => {
-        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
-        var teamData = snapshot.data();
-        return res.json(teamData);
-      });
-  } catch (err) {
-    res.send({ isCompleted: false });
-    console.log(err);
-  }
-});
-
-/* ------------- 팀별 comment 받아오기 API -------------
-  // req로 받아야하는 데이터 형식
-  {
-    teamId: 팀플 id
-  }
-
-  // 응답 형식
-  성공 -> res.data
-  {
-    [uid -> 유저id]: {
-      1: {
-        [commnet한 user id]: {
-          comment: 내용,
-          createdAt: 작성일시,
-        },
-        [commnet한 user id]: {
-          comment: 내용,
-          createdAt: 작성일시,
-        }
-      }
-      ....
-    }
-  }
-  실패 -> isCompleted: false
-*/
-app.post("/api/teamData/comment", async (req, res) => {
-  // 요청 데이터 받아오기
-  const teamId = req.body.teamId;
-
-  try {
-    // firestore에서 가져오기
-    await db
-      .collection("comment")
       .doc(teamId)
       .get()
       .then((snapshot) => {
@@ -864,11 +929,31 @@ app.post("/api/addNotice", async (req, res) => {
     let dateObj = new Date();
     let date = {
       year: dateObj.getFullYear(),
-      month: dateObj.getMonth() + 1,
-      day: dateObj.getDate(),
-      hour: dateObj.getHours(),
-      minute: dateObj.getMinutes(),
-      second: dateObj.getSeconds(),
+      month: `${
+        dateObj.getMonth() + 1 < 10
+          ? "0" + (new Date().getMonth() + 1)
+          : new Date().getMonth() + 1
+      }`,
+      day: `${
+        dateObj.getDate() < 10
+          ? "0" + new Date().getDate()
+          : new Date().getDate()
+      }`,
+      hour: `${
+        dateObj.getHours() < 10
+          ? "0" + new Date().getHours()
+          : new Date().getHours()
+      }`,
+      minute: `${
+        dateObj.getMinutes() < 10
+          ? "0" + new Date().getMinutes()
+          : new Date().getMinutes()
+      }`,
+      second: `${
+        dateObj.getSeconds() < 10
+          ? "0" + new Date().getSeconds()
+          : new Date().getSeconds()
+      }`,
     };
 
     let noticeObj = {

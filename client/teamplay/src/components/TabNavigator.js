@@ -26,6 +26,7 @@ const MenuBar = ({route}) => {
         tabBarShowLabel: false,
         headerShown: false,
         tabBarStyle: {},
+        unmountOnBlur: true,
         tabBarIcon: ({focused, size}) => {
           let iconName;
           let color;
@@ -58,6 +59,7 @@ const MenuBar = ({route}) => {
             <MemberMapStackScreen
               teamId={route.params.teamId}
               memberId={route.params.memberId}
+              memberName={route.params.memberName}
               todoData={route.params.todoData}
               memberObj={route.params.memberObj}
             />

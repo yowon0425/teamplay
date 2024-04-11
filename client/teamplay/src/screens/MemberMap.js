@@ -12,7 +12,22 @@ import ProgressBar from '../components/ProgressBar';
 const MemberMap = ({teamId, memberId, memberObj}) => {
   const [todos, setTodos] = useState();
   const [nowTodo, setNowTodo] = useState(0);
+  const [name, setName] = useState('');
   console.log(JSON.stringify(memberObj));
+
+  /* 멤버 이름 가져오기 */
+  const getMember = async () => {
+    await axios
+      .post('/api/teamData/member', {teamId})
+      .then(res => {
+        if (res.data) {
+          var memberName = res.data.find(data => data.uid == memberId).userName;
+          console.log('이름 : ' + JSON.stringify(memberName));
+          setName(memberName);
+        }
+      })
+      .catch(err => console.log(err));
+  };
 
   /* 프로젝트 계획 받아오기 */
   const getTodos = async () => {
@@ -30,6 +45,7 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
 
   useEffect(() => {
     getTodos();
+    getMember();
     console.log('투두 불러오는 함수 실행');
   }, [memberId]);
 
@@ -53,11 +69,11 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
     <ScrollView style={styles.container}>
       <View style={styles.top}>
         <View>
-          <Text style={styles.name}>{memberObj.name}</Text>
+          <Text style={styles.name}>{name}</Text>
         </View>
         <View style={styles.progress}>
           <View style={styles.info}>
-            <Text>{memberObj.name}</Text>
+            <Text>{name}</Text>
             <Text>
               {memberObj ? (memberObj.percent * 100).toFixed(1) : null}%
             </Text>
@@ -71,13 +87,14 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
       </View>
       <View style={styles.mapContainer}>
         <View style={styles.maps}>
-          {todos && memberObj.percent != 0 ? (
+          {todos && memberObj && memberObj.percent != 0 ? (
             Object.keys(todos).map(key => {
               return (
                 <MemberMapBubble
                   key={key}
                   teamId={teamId}
                   memberId={memberId}
+                  memberName={name}
                   todoData={todos[key]}
                   nowTodo={nowTodo}
                 />
