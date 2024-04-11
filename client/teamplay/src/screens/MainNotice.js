@@ -18,6 +18,13 @@ const MainNotice = () => {
   const {uid} = auth().currentUser;
   const [teams, setTeams] = useState();
 
+  const [noticeList, setNoticeList] = useState([]);
+
+  useEffect(() => {
+    getTeams();
+    console.log('팀리스트 불러오는 함수 실행');
+  }, []);
+
   useEffect(() => {
     getTeams();
     console.log('팀리스트 불러오는 함수 실행');
@@ -38,15 +45,40 @@ const MainNotice = () => {
       })
       .catch(err => console.log(err));
   };
+
+  const fetchNoticeList = async () => {
+    try {
+      const response = await axios.post('/api/totalNotice', { uid });
+      setNoticeList(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchNoticeList();
+  }, []);
+
+  const readNotice = async () => {
+    try {
+      const response = await axios.post('/api/totalNotice', { uid });
+      const filteredData = Object.values(response.data).flatMap(team => Object.values(team));
+      setNoticeList(filteredData);
+    } catch (error) {
+      console.log(error);
+    }
+  };  
+
+  useEffect(() => {
+    readNotice();
+  }, []);
+
   return (
     <View>
       <View style={styles.top}>
         <Text style={styles.title}>알림</Text>
       </View>
       <ScrollView horizontal={true} style={styles.category}>
-        <TouchableOpacity style={styles.team}>
-          <Text style={styles.teamText}>전체</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={[styles.team, {borderWidth: 1}]}>
           <LinearGradient
             style={styles.teamGrad}
@@ -65,11 +97,22 @@ const MainNotice = () => {
             );
           })}
       </ScrollView>
-      <ScrollView>
-        <View style={styles.noticeList}>
-          <NoticeCard />
+      {noticeList.length > 0 && (
+        <ScrollView style={{flexGrow: 1}}>
+        <View style={styles.noticeCardContainer}>
+          {noticeList.reverse().map((notice, index) => (
+            <View style={styles.noticeCard} key={index}>
+              <NoticeCard
+                title={notice.title}
+                content={notice.content}
+                writer={notice.writer}
+              />
+            </View>
+          ))}
         </View>
       </ScrollView>
+      
+      )}
     </View>
   );
 };
@@ -142,4 +185,7 @@ const styles = StyleSheet.create({
     padding: 5,
     alignItems: 'center',
   },
+  noticeCardContainer: {
+    alignItems: 'center'
+  }
 });
