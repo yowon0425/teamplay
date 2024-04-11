@@ -22,10 +22,7 @@ const Notice = ({ teamId }) => {
   };
 
   useEffect(() => {
-    fetchNoticeList(); // 알림 리스트 불러오기
-
-    // fetchNoticeList 함수를 useEffect 내부에 정의해야 합니다.
-    // 의존성 배열에 teamId가 추가되어야 합니다.
+    fetchNoticeList();
   }, [teamId]);
 
   const readNotice = async () => {
@@ -33,13 +30,12 @@ const Notice = ({ teamId }) => {
       const { uid } = auth().currentUser;
       const response = await axios.post('/api/notice', { uid, teamId });
       console.log('읽은 알림: ', response.data);
-      fetchNoticeList(); // fetchNoticeList 함수를 호출해야 합니다.
+      fetchNoticeList();
     } catch (error) {
       console.log(error);
     }
   };  
   
-
   // 알림 보내기 페이지로 이동
   const navigation = useNavigation();
   const openSendNotice = () => {
@@ -49,8 +45,8 @@ const Notice = ({ teamId }) => {
 
   useEffect(() => {
     fetchNoticeList();
-    readNotice(); // readNotice 함수는 렌더링 후 호출되어야 합니다.
-  }, [teamId]); // 의존성 배열이 비어있는 경우 한 번만 호출됩니다.
+    readNotice();
+  }, [teamId]);
 
   return (
     <View style={styles.container}>
