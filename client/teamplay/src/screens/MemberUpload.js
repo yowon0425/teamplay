@@ -8,6 +8,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Keyboard,
+  BackHandler,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -15,17 +16,17 @@ import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import FileInfoLine from '../components/FileInfoLine';
 import CommentLine from '../components/CommentLine';
+import {useNavigation} from '@react-navigation/native';
 
 const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
   const [commentInput, setCommentInput] = useState('');
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState();
   const [fileList, setFileList] = useState();
   const [clicked, setClicked] = useState(false);
   const [commentUpdated, setCommentUpdated] = useState(false);
   const {uid} = auth().currentUser;
   const userName = auth().currentUser.displayName;
   const todoId = todoData.number;
-  console.log(memberId, teamId, memberName);
 
   const handleCommentInputChange = text => {
     setCommentInput(text);

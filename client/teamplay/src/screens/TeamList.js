@@ -20,7 +20,6 @@ const TeamList = () => {
   console.log('팀리스트로');
   const [showModal, setShowModal] = useState(false);
   const [teams, setTeams] = useState();
-  const outside = useRef();
 
   // 전체 알림 페이지로
   const openMainNotice = () => {
