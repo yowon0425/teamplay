@@ -21,6 +21,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
   const [comments, setComments] = useState([]);
   const [fileList, setFileList] = useState();
   const [clicked, setClicked] = useState(false);
+  const [commentUpdated, setCommentUpdated] = useState(false);
   const {uid} = auth().currentUser;
   const userName = auth().currentUser.displayName;
   const todoId = todoData.number;
@@ -96,6 +97,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
         .then(res => {
           if (res.data) {
             setComments(res.data);
+            setCommentUpdated(false);
           }
         });
     } catch (error) {
@@ -105,7 +107,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
 
   useEffect(() => {
     getComments();
-  }, [clicked]);
+  }, [clicked, commentUpdated]);
 
   return (
     <View style={styles.container}>
@@ -138,10 +140,14 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
                 comments.map((data, index) => (
                   <CommentLine
                     key={index}
+                    teamId={teamId}
+                    todoId={todoData.number}
+                    ownerId={memberId}
                     owner={memberName}
                     comment={data.comment}
                     commentUser={data.commentUser}
                     createdAt={data.createdAt}
+                    setCommentUpdated={setCommentUpdated}
                   />
                 ))}
             </View>

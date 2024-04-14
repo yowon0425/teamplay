@@ -48,7 +48,7 @@ const MainNotice = () => {
 
   const fetchNoticeList = async () => {
     try {
-      const response = await axios.post('/api/totalNotice', { uid });
+      const response = await axios.post('/api/totalNotice', {uid});
       setNoticeList(response.data);
     } catch (error) {
       console.log(error);
@@ -61,13 +61,15 @@ const MainNotice = () => {
 
   const readNotice = async () => {
     try {
-      const response = await axios.post('/api/totalNotice', { uid });
-      const filteredData = Object.values(response.data).flatMap(team => Object.values(team));
+      const response = await axios.post('/api/totalNotice', {uid});
+      const filteredData = Object.values(response.data).flatMap(team =>
+        Object.values(team),
+      );
       setNoticeList(filteredData);
     } catch (error) {
       console.log(error);
     }
-  };  
+  };
 
   useEffect(() => {
     readNotice();
@@ -99,19 +101,18 @@ const MainNotice = () => {
       </ScrollView>
       {noticeList.length > 0 && (
         <ScrollView style={{flexGrow: 1}}>
-        <View style={styles.noticeCardContainer}>
-          {noticeList.reverse().map((notice, index) => (
-            <View style={styles.noticeCard} key={index}>
-              <NoticeCard
-                title={notice.title}
-                content={notice.content}
-                writer={notice.writer}
-              />
-            </View>
-          ))}
-        </View>
-      </ScrollView>
-      
+          <View style={styles.noticeCardContainer}>
+            {noticeList.reverse().map((notice, index) => (
+              <View style={styles.noticeCard} key={index}>
+                <NoticeCard
+                  title={notice.title}
+                  content={notice.content}
+                  writer={notice.writer}
+                />
+              </View>
+            ))}
+          </View>
+        </ScrollView>
       )}
     </View>
   );
@@ -186,6 +187,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noticeCardContainer: {
-    alignItems: 'center'
-  }
+    alignItems: 'center',
+  },
 });
