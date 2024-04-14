@@ -30,6 +30,7 @@ const MyUpload = ({teamId, todoData}) => {
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState();
   const [clicked, setClicked] = useState(false);
+  const [commentUpdated, setCommentUpdated] = useState(false);
   const {uid} = auth().currentUser;
   const userName = auth().currentUser.displayName;
   const todoId = todoData.number;
@@ -162,7 +163,7 @@ const MyUpload = ({teamId, todoData}) => {
   /* 코멘트 불러오기 */
   useEffect(() => {
     getComments();
-  }, [clicked]);
+  }, [clicked, commentUpdated]);
 
   const getComments = async () => {
     try {
@@ -172,6 +173,7 @@ const MyUpload = ({teamId, todoData}) => {
           if (res.data) {
             console.log(res.data);
             setComments(res.data);
+            setCommentUpdated(false);
           } else {
             console.log('코멘트를 불러오지 못했습니다.');
           }
@@ -240,10 +242,14 @@ const MyUpload = ({teamId, todoData}) => {
                 comments.map((data, index) => (
                   <CommentLine
                     key={index}
+                    teamId={teamId}
+                    todoId={todoData.number}
+                    ownerId={uid}
                     owner={userName}
                     comment={data.comment}
                     commentUser={data.commentUser}
                     createdAt={data.createdAt}
+                    setCommentUpdated={setCommentUpdated}
                   />
                 ))}
             </View>
