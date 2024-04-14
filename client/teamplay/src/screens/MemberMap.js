@@ -1,19 +1,20 @@
 import {StyleSheet, Text, View, ScrollView} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import * as Progress from 'react-native-progress';
 import LinearGradient from 'react-native-linear-gradient';
 import MaskedView from '@react-native-masked-view/masked-view';
 import MenuBar from '../components/TabNavigator';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import MemberMapBubble from '../components/MemberMapBubble';
 import ProgressBar from '../components/ProgressBar';
+import {auth} from '@react-native-firebase/auth';
 
 const MemberMap = ({teamId, memberId, memberObj}) => {
   const [todos, setTodos] = useState();
   const [nowTodo, setNowTodo] = useState(0);
   const [name, setName] = useState('');
-  console.log(JSON.stringify(memberObj));
+  const [memObj, setMemObj] = useState(memberObj);
 
   /* 멤버 이름 가져오기 */
   const getMember = async () => {
@@ -74,20 +75,18 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
         <View style={styles.progress}>
           <View style={styles.info}>
             <Text>{name}</Text>
-            <Text>
-              {memberObj ? (memberObj.percent * 100).toFixed(1) : null}%
-            </Text>
+            <Text>{memObj ? (memObj.percent * 100).toFixed(1) : null}%</Text>
           </View>
           <View style={styles.bar}>
             <ProgressBar
-              percent={memberObj ? (memberObj.percent * 100).toFixed(1) : null}
+              percent={memObj ? (memObj.percent * 100).toFixed(1) : null}
             />
           </View>
         </View>
       </View>
       <View style={styles.mapContainer}>
         <View style={styles.maps}>
-          {todos && memberObj && memberObj.percent != 0 ? (
+          {todos && memObj && memObj.percent != 0 ? (
             Object.keys(todos).map(key => {
               return (
                 <MemberMapBubble
