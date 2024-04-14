@@ -112,7 +112,7 @@ const MainNotice = () => {
               </View>
             ))}
           </View>
-        </ScrollView>
+      </ScrollView>
       )}
     </View>
   );
@@ -126,17 +126,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: 'white',
-    padding: 20,
-    borderRadius: 10,
-    width: '80%', // 모달 창의 가로 너비를 조정할 수 있습니다.
-    alignItems: 'center',
-  },
-  modalText: {
-    fontSize: 18,
-    marginVertical: 10,
   },
   top: {
     width: '100%',
@@ -180,13 +169,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
   },
-  noticeList: {
-    width: '100%',
-    height: '80%',
-    padding: 5,
-    alignItems: 'center',
-  },
   noticeCardContainer: {
     alignItems: 'center',
-  },
+    marginBottom: 100,
+  }
 });
+
