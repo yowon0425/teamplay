@@ -105,8 +105,7 @@ app.post("/api/signup", async (req, res) => {
 */
 app.post("/api/createTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, userName, name, teamId, lecture, numOfMember, description } =
-    req.body;
+  const { uid, userName, name, teamId, lecture, description } = req.body;
 
   try {
     let userObj = {
@@ -121,7 +120,6 @@ app.post("/api/createTeam", async (req, res) => {
         name,
         lecture,
         teamId,
-        numOfMember,
         description,
         member: [userObj],
         teamGoal: "팀플 목표를 설정해보세요.",
@@ -132,6 +130,13 @@ app.post("/api/createTeam", async (req, res) => {
       .doc(teamId)
       .set({
         [uid]: {},
+      });
+
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .update({
+        [teamId]: {},
       });
 
     let teamObj = {
@@ -238,6 +243,20 @@ app.post("/api/joinTeam", async (req, res) => {
       .collection("comment")
       .doc(teamId)
       .set({ ...comment });
+
+    const fileDoc = await db.collection("fileList").doc(uid).get();
+    const fileData = fileDoc.data();
+
+    const files = {
+      ...fileData,
+      [teamId]: {},
+    };
+
+    // fileList에 팀 id 추가
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .set({ ...files });
 
     res.send({ isJoined: true });
   } catch (err) {
@@ -521,7 +540,7 @@ app.post("/api/teamGoal", async (req, res) => {
 */
 app.post("/api/todo", async (req, res) => {
   // 요청 데이터 받아오기
-  const { teamId, memberId, todoData } = req.body;
+  const { uid, teamId, memberId, todoData } = req.body;
 
   try {
     let data = {};
@@ -541,6 +560,23 @@ app.post("/api/todo", async (req, res) => {
 
     // 업데이트
     await db.collection("todo").doc(teamId).update(data);
+
+    // comment collection 추가
+    await db
+      .collection("comment")
+      .doc(teamId)
+      .update({
+        [`${uid}.${todoData.number}`]: [],
+      });
+
+    // fileList collection 추가
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .update({
+        [`${teamId}.${todoData.number}`]: [],
+      });
+
     res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false, error: "error" });

@@ -17,7 +17,6 @@ import auth from '@react-native-firebase/auth';
 const StartNew = () => {
   const [name, setName] = useState('');
   const [lecture, setLecture] = useState('');
-  const [numOfMember, setNumOfMember] = useState('');
   const [description, setDescription] = useState('');
   const [displayText, setDisplayText] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -63,7 +62,6 @@ const StartNew = () => {
     teamId: 팀플 id (랜덤 생성)
     name: 팀플 이름
     leture: 수업 이름
-    numOfMember: 팀원 수
     description: 팀플 설명
   }
 
@@ -73,14 +71,7 @@ const StartNew = () => {
 */
   const createTeam = async () => {
     console.log('api 호출됨');
-    console.log(
-      '보내는 정보: ' + uid,
-      teamId,
-      name,
-      lecture,
-      numOfMember,
-      description,
-    );
+    console.log('보내는 정보: ' + uid, teamId, name, lecture, description);
 
     await axios
       .post('/api/createTeam', {
@@ -89,7 +80,6 @@ const StartNew = () => {
         teamId: truncId,
         name,
         lecture,
-        numOfMember,
         description,
       })
       .then(res => {

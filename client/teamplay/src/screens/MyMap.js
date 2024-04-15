@@ -139,24 +139,30 @@ const MyMap = ({teamId}) => {
             )}
           </View>
         </View>
-        <View style={styles.button}>
-          <PinkButton
-            text="작업 완료"
-            light={true}
-            onPress={() =>
-              Alert.alert('TeamPlay', '작업을 완료하시겠습니까?', [
-                {
-                  text: '취소',
-                  style: 'cancel',
-                },
-                {
-                  text: '확인',
-                  onPress: completeTodo,
-                },
-              ])
-            }
-          />
-        </View>
+        {numTodo > 0 ? (
+          <View style={styles.button}>
+            <PinkButton
+              text="작업 완료"
+              light={true}
+              onPress={() =>
+                Alert.alert('TeamPlay', '작업을 완료하시겠습니까?', [
+                  {
+                    text: '취소',
+                    style: 'cancel',
+                  },
+                  {
+                    text: '확인',
+                    onPress: completeTodo,
+                  },
+                ])
+              }
+            />
+          </View>
+        ) : (
+          <View style={styles.button}>
+            <PinkButton text="작업 완료" light={false} />
+          </View>
+        )}
       </ScrollView>
       <View style={styles.modalBoxContainer}>
         <Modal
