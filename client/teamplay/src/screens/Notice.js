@@ -7,7 +7,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import Ionic from 'react-native-vector-icons/Ionicons';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import NoticeCard from '../components/NoticeCard'; // NoticeCard 컴포넌트 불러오기
@@ -53,6 +53,12 @@ const Notice = ({teamId}) => {
     readNotice();
   }, [teamId]);
 
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNoticeList();
+    }, []),
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.top}>
@@ -64,19 +70,20 @@ const Notice = ({teamId}) => {
       </View>
       <ScrollView>
         <View style={styles.noticeCardContainer}>
-          {noticeList &&
-            noticeList.reverse().map(
-              (
-                notice, // Reverse the order of noticeList
-              ) => (
+          {noticeList ? (
+            noticeList
+              .reverse()
+              .map((notice, index) => (
                 <NoticeCard
-                  key={notice.index}
+                  key={index}
                   title={notice.title}
                   content={notice.content}
                   writer={notice.writer}
                 />
-              ),
-            )}
+              ))
+          ) : (
+            <Text style={styles.empty}>아직 알림이 없습니다.</Text>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -105,6 +112,12 @@ const styles = StyleSheet.create({
   },
   noticeCardContainer: {
     alignItems: 'center', // Center the NoticeCard components horizontally
+  },
+  empty: {
+    fontSize: 16,
+    alignSelf: 'center',
+    textAlign: 'center',
+    marginTop: 100,
   },
 });
 

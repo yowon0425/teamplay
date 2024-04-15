@@ -11,7 +11,7 @@ import {
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import {Shadow} from 'react-native-shadow-2';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import TeamCard from '../components/TeamCard';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
@@ -56,6 +56,12 @@ const TeamList = () => {
     getTeams();
     console.log('팀리스트 불러오는 함수 실행');
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getTeams();
+    }, []),
+  );
 
   const {uid} = auth().currentUser;
   const getTeams = async () => {

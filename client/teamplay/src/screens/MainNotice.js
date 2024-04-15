@@ -99,7 +99,7 @@ const MainNotice = () => {
             );
           })}
       </ScrollView>
-      {noticeList.length > 0 && (
+      {noticeList.length > 0 ? (
         <ScrollView style={{flexGrow: 1}}>
           <View style={styles.noticeCardContainer}>
             {noticeList.reverse().map((notice, index) => (
@@ -112,7 +112,9 @@ const MainNotice = () => {
               </View>
             ))}
           </View>
-      </ScrollView>
+        </ScrollView>
+      ) : (
+        <Text style={styles.empty}>아직 알림이 없습니다.</Text>
       )}
     </View>
   );
@@ -172,6 +174,11 @@ const styles = StyleSheet.create({
   noticeCardContainer: {
     alignItems: 'center',
     marginBottom: 100,
-  }
+  },
+  empty: {
+    fontSize: 16,
+    alignSelf: 'center',
+    textAlign: 'center',
+    marginTop: 100,
+  },
 });
-

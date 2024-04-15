@@ -37,6 +37,7 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
     try {
       await axios
         .post('/api/todo', {
+          uid,
           teamId,
           memberId: uid,
           todoData: {
