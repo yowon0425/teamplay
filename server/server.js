@@ -429,6 +429,58 @@ app.post("/api/teamData/member", async (req, res) => {
   }
 });
 
+/* ------------- 역할 등록/수정 API -------------
+  // req로 받아야하는 데이터 = formData 
+  {
+    uid
+    teamId
+    role
+  }
+
+  // 응답 형식
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
+app.post("/api/role", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId, role } = req.body;
+
+  try {
+    const userDoc = await db.collection("users").doc(uid).get();
+    const userData = userDoc.data();
+
+    const index = userData.teamList.findIndex(
+      (element) => element.teamId == teamId
+    );
+
+    userData.teamList[index] = {
+      ...userData.teamList[index],
+      role,
+    };
+    // user 정보 -> team에 역할 추가
+    await db.collection("users").doc(uid).update(userData);
+
+    const teamListDoc = await db.collection("teamlist").doc(teamId).get();
+    const teamListData = teamListDoc.data();
+
+    const memberIndex = teamListData.member.findIndex(
+      (member) => member.uid == uid
+    );
+
+    teamListData.member[memberIndex] = {
+      ...teamListData.member[memberIndex],
+      role,
+    };
+    // user 정보 -> teamList에 역할 추가
+    await db.collection("teamlist").doc(teamId).update(teamListData);
+
+    res.send({ isCompleted: true });
+  } catch (error) {
+    console.error("Error:", error);
+    res.send({ isCompleted: false });
+  }
+});
+
 /* ------------- 파일 업로드 API -------------
   // req로 받아야하는 데이터 = formData 
   {

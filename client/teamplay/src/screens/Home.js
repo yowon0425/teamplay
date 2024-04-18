@@ -221,7 +221,12 @@ const Home = ({teamId}) => {
                   else goMemberPage(data.uid);
                 }}>
                 <View style={styles.memberInfo}>
-                  <Text style={styles.memberText}>{data.userName}</Text>
+                  <Text style={styles.memberText}>
+                    {data.userName}{' '}
+                    {data.role
+                      ? '(' + data.role.replace('\n', ' ') + ')'
+                      : null}
+                  </Text>
                   {memberObj ? (
                     <>
                       <Text key={data.uid} style={styles.memberText}>
