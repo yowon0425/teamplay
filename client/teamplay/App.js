@@ -18,6 +18,7 @@ import Notice from './src/screens/Notice';
 import MyMap from './src/screens/MyMap';
 import MemberUpload from './src/screens/MemberUpload';
 import MainNotice from './src/screens/MainNotice';
+import Profile from './src/screens/Profile';
 
 const App = () => {
   return <StackNavigator />;
