@@ -87,6 +87,52 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
+/* ------------- 유저 정보 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: user id
+  }
+
+  // 응답 형식 
+  성공 -> res.data
+  {
+    email: 이메일
+    major: 전공
+    name: 이름
+    organization: 대학/소속
+    studentId: 학번
+    teamList: [
+      {
+        description: 팀플설명
+        name: 팀플 이름
+        teamId: team id
+        role: 역할
+      }
+    ]
+  } 
+  실패 -> isCompleted: false
+*/
+app.post("/api/user", async (req, res) => {
+  // 요청 데이터 받아오기
+  const uid = req.body.uid;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("users")
+      .doc(uid)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var userData = snapshot.data();
+        return res.json(userData);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
 /* ------------- 팀플 생성 API -------------
   // req로 받아야하는 데이터 형식
   {

@@ -13,6 +13,7 @@ import MemberMap from '../screens/MemberMap';
 import MyUpload from '../screens/MyUpload';
 import MyMapStackScreen from './MyMapStackScreen';
 import MemberMapStackScreen from './MemberMapStackScreen';
+import Profile from '../screens/Profile';
 
 const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
@@ -42,8 +43,8 @@ const MenuBar = ({route}) => {
           } else if (route.name === 'Calender') {
             iconName = 'today-outline';
             color = focused ? '#484848' : '#CCCCCC';
-          } else if (route.name === 'Message') {
-            iconName = 'chatbubbles-outline';
+          } else if (route.name === 'Profile') {
+            iconName = 'person';
             color = focused ? '#484848' : '#CCCCCC';
           }
 
@@ -76,6 +77,9 @@ const MenuBar = ({route}) => {
       </Tab.Screen>
       <Tab.Screen name="Calender">
         {() => <Calender teamId={route.params.teamId} />}
+      </Tab.Screen>
+      <Tab.Screen name="Profile">
+        {() => <Profile teamId={route.params.teamId} />}
       </Tab.Screen>
     </Tab.Navigator>
   );
