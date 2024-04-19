@@ -6,19 +6,20 @@ import {
   ScrollView,
   Modal,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import NoticeCard from '../components/NoticeCard';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 
 const MainNotice = () => {
-  const {uid} = auth().currentUser;
+  const { uid } = auth().currentUser;
   const [teams, setTeams] = useState();
 
   const [noticeList, setNoticeList] = useState([]);
+  const [clickedTeamId, setClickedTeamId] = useState(null);
 
   useEffect(() => {
     getTeams();
@@ -32,7 +33,7 @@ const MainNotice = () => {
 
   const getTeams = async () => {
     await axios
-      .post('/api/teamList', {uid})
+      .post('/api/teamList', { uid })
       .then(res => {
         if (res.data) {
           setTeams(res.data);
@@ -73,26 +74,80 @@ const MainNotice = () => {
     readNotice();
   }, []);
 
+  const handleTeamClick = async (teamId) => {
+    console.log('handleTeamClick 함수 호출됨:', teamId);
+    try {
+      let response;
+      if (teamId === '전체') {
+        console.log('전체 알림을 가져오는 요청 보냄');
+        readNotice();
+        setClickedTeamId(null); 
+      } else {
+        console.log('특정 팀 알림을 가져오는 요청 보냄');
+        response = await axios.post('/api/notice', { uid, teamId });
+        setClickedTeamId(teamId); // 특정 팀을 클릭했을 때만 clickedTeamId를 설정합니다.
+      }
+      setNoticeList(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  }; 
+  
+   
   return (
     <View>
       <View style={styles.top}>
         <Text style={styles.title}>알림</Text>
       </View>
       <ScrollView horizontal={true} style={styles.category}>
-        <TouchableOpacity style={[styles.team, {borderWidth: 1}]}>
-          <LinearGradient
-            style={styles.teamGrad}
-            colors={['#749DF6', '#B9E3FC']}>
-            <Text style={styles.teamText}>전체</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-        {teams &&
+        <TouchableOpacity
+  style={[
+    styles.team,
+  ]}
+  onPress={() => handleTeamClick('전체')}>
+  <View style={styles.teamContent}>
+    {clickedTeamId === null ? (
+      <LinearGradient
+        colors={['#749DF6', '#B9E3FC']}
+        style={styles.linearGradient}>
+        <Text numberOfLines={1} style={styles.teamText}>
+          전체
+        </Text>
+      </LinearGradient>
+    ) : (
+      <Text numberOfLines={1} style={styles.teamText}>
+        전체
+      </Text>
+    )}
+  </View>
+</TouchableOpacity>
+
+
+    {teams &&
           teams.map(data => {
             return (
-              <TouchableOpacity key={data.teamId} style={styles.team}>
-                <Text numberOfLines={1} style={styles.teamText}>
-                  {data.name}
-                </Text>
+              <TouchableOpacity
+                key={data.teamId}
+                style={[
+                  styles.team,
+                  clickedTeamId === data.teamId && styles.clickedTeam,
+                ]}
+                onPress={() => handleTeamClick(data.teamId)}>
+                <View style={styles.teamContent}>
+                  {clickedTeamId === data.teamId ? (
+                    <LinearGradient
+                      colors={['#749DF6', '#B9E3FC']}
+                      style={styles.linearGradient}>
+                      <Text numberOfLines={1} style={styles.teamText}>
+                        {data.name}
+                      </Text>
+                    </LinearGradient>
+                  ) : (
+                    <Text numberOfLines={1} style={styles.teamText}>
+                      {data.name}
+                    </Text>
+                  )}
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -153,16 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#D9D9D9',
     margin: 5,
-  },
-  teamGrad: {
-    width: 88,
-    height: 28,
-    borderRadius: 50,
-    zIndex: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   teamText: {
     fontSize: 16,
@@ -171,5 +217,21 @@ const styles = StyleSheet.create({
   noticeCardContainer: {
     alignItems: 'center',
     marginBottom: 100,
-  }
+  },
+  defaultTeam: {
+    backgroundColor: '#D9D9D9',
+  },
+  linearGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  teamContent: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
