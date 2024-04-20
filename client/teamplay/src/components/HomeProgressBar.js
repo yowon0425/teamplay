@@ -26,7 +26,7 @@ const HomeProgressBar = ({percent}) => {
   return (
     <View style={styles.barContainer}>
       <View style={styles.barBackground}>
-        {percent !== 0 ? (
+        {percent != 0 ? (
           <Animated.View style={[styles.bar, {width}]}>
             <LinearGradient
               style={styles.barGrad}

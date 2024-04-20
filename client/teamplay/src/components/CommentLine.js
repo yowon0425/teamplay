@@ -1,14 +1,42 @@
-import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Alert, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import Entypo from 'react-native-vector-icons/Entypo';
-import {auth} from '@react-native-firebase/auth';
+import auth from '@react-native-firebase/auth';
 import {Shadow} from 'react-native-shadow-2';
+import Modal from 'react-native-modal';
+import axios from 'axios';
 
-const CommentLine = ({owner, comment, commentUser, createdAt}) => {
+const CommentLine = ({
+  teamId,
+  todoId,
+  ownerId,
+  owner,
+  comment,
+  commentUser,
+  createdAt,
+  setCommentUpdated,
+}) => {
   const [showMiniModal, setShowMiniModal] = useState(false);
-  console.log(owner);
-  console.log(comment);
+  const userName = auth().currentUser.displayName;
+  const deleteComment = async () => {
+    await axios
+      .post('/api/deleteComment', {
+        teamId,
+        ownerId,
+        todoId,
+        comment,
+        commentUser,
+        createdAt,
+      })
+      .then(res => {
+        if (res.data) {
+          setCommentUpdated(true);
+        } else {
+        }
+      })
+      .catch(err => console.log(err));
+  };
   return (
     <View style={styles.commentLine}>
       <LinearGradient style={styles.chatbox} colors={['#E9E9EB', '#FFFFFF']}>
@@ -30,39 +58,53 @@ const CommentLine = ({owner, comment, commentUser, createdAt}) => {
             )}
             <Text style={styles.time}>{createdAt}</Text>
           </View>
-          <View style={{flexDirection: 'column'}}>
-            <TouchableOpacity onPress={() => setShowMiniModal(!showMiniModal)}>
-              <Entypo name="dots-three-vertical" style={styles.dot} />
-            </TouchableOpacity>
-            <View style={{backgroundColor: 'yellow'}}>
-              <Modal
-                animationType="fade"
-                visible={showMiniModal}
-                transparent={true}
-                onRequestClose={() => setShowMiniModal(!showMiniModal)}
+          {commentUser == userName ? (
+            <View style={{flexDirection: 'column'}}>
+              <TouchableOpacity
                 onPress={() => setShowMiniModal(!showMiniModal)}>
-                <View style={styles.modalOverlay}>
-                  <TouchableOpacity
-                    style={styles.modalView}
-                    onPress={() => setShowMiniModal(!showMiniModal)}>
-                    <Shadow>
-                      <View style={[styles.modalView, {height: 40}]}>
-                        <TouchableOpacity
-                          onPress={() => {
-                            setShowMiniModal(!showMiniModal);
-                          }}
-                          style={styles.modalTextContainer}>
-                          <Text style={styles.modalText}>삭제</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </Shadow>
-                  </TouchableOpacity>
-                </View>
-              </Modal>
+                <Entypo name="dots-three-vertical" style={styles.dot} />
+              </TouchableOpacity>
             </View>
-          </View>
+          ) : null}
         </View>
         <Text style={styles.chatboxText}>{comment}</Text>
+        <Modal
+          animationIn="fadeIn"
+          animationOut="fadeOut"
+          isVisible={showMiniModal}
+          coverScreen={false}
+          backdropColor={null}
+          onRequestClose={() => setShowMiniModal(!showMiniModal)}
+          onPress={() => setShowMiniModal(!showMiniModal)}
+          onBackdropPress={() => setShowMiniModal(!showMiniModal)}>
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity
+              style={styles.modalView}
+              onPress={() => setShowMiniModal(!showMiniModal)}>
+              <Shadow>
+                <View style={[styles.modalView, {height: 40}]}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShowMiniModal(!showMiniModal);
+                      Alert.alert('TeamPlay', '코멘트를 삭제하시겠습니까?', [
+                        {
+                          text: '취소',
+                          style: 'cancel',
+                        },
+                        {
+                          text: '확인',
+                          onPress: deleteComment,
+                        },
+                      ]);
+                    }}
+                    style={styles.modalTextContainer}>
+                    <Text style={styles.modalText}>삭제</Text>
+                  </TouchableOpacity>
+                </View>
+              </Shadow>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </LinearGradient>
     </View>
   );
@@ -113,7 +155,7 @@ const styles = StyleSheet.create({
 
   // 미니모달 스타일
   modalOverlay: {
-    backgroundColor: 'pink',
+    alignItems: 'flex-end',
   },
   modalView: {
     backgroundColor: 'white',
@@ -137,7 +179,6 @@ const styles = StyleSheet.create({
 
   // 모달 위치 설정
   modalContainer: {
-    alignItems: 'baseline',
     justifyContent: 'flex-end',
   },
 });

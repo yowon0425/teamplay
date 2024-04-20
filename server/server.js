@@ -87,6 +87,52 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
+/* ------------- 유저 정보 API -------------
+  // req로 받아야하는 데이터 형식
+  {
+    uid: user id
+  }
+
+  // 응답 형식 
+  성공 -> res.data
+  {
+    email: 이메일
+    major: 전공
+    name: 이름
+    organization: 대학/소속
+    studentId: 학번
+    teamList: [
+      {
+        description: 팀플설명
+        name: 팀플 이름
+        teamId: team id
+        role: 역할
+      }
+    ]
+  } 
+  실패 -> isCompleted: false
+*/
+app.post("/api/user", async (req, res) => {
+  // 요청 데이터 받아오기
+  const uid = req.body.uid;
+
+  try {
+    // firestore에서 가져오기
+    await db
+      .collection("users")
+      .doc(uid)
+      .get()
+      .then((snapshot) => {
+        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
+        var userData = snapshot.data();
+        return res.json(userData);
+      });
+  } catch (err) {
+    res.send({ isCompleted: false });
+    console.log(err);
+  }
+});
+
 /* ------------- 팀플 생성 API -------------
   // req로 받아야하는 데이터 형식
   {
@@ -105,8 +151,7 @@ app.post("/api/signup", async (req, res) => {
 */
 app.post("/api/createTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, userName, name, teamId, lecture, numOfMember, description } =
-    req.body;
+  const { uid, userName, name, teamId, lecture, description } = req.body;
 
   try {
     let userObj = {
@@ -121,7 +166,6 @@ app.post("/api/createTeam", async (req, res) => {
         name,
         lecture,
         teamId,
-        numOfMember,
         description,
         member: [userObj],
         teamGoal: "팀플 목표를 설정해보세요.",
@@ -132,6 +176,13 @@ app.post("/api/createTeam", async (req, res) => {
       .doc(teamId)
       .set({
         [uid]: {},
+      });
+
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .update({
+        [teamId]: {},
       });
 
     let teamObj = {
@@ -238,6 +289,20 @@ app.post("/api/joinTeam", async (req, res) => {
       .collection("comment")
       .doc(teamId)
       .set({ ...comment });
+
+    const fileDoc = await db.collection("fileList").doc(uid).get();
+    const fileData = fileDoc.data();
+
+    const files = {
+      ...fileData,
+      [teamId]: {},
+    };
+
+    // fileList에 팀 id 추가
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .set({ ...files });
 
     res.send({ isJoined: true });
   } catch (err) {
@@ -361,6 +426,58 @@ app.post("/api/teamData/member", async (req, res) => {
   } catch (err) {
     res.send({ isCompleted: false });
     console.log(err);
+  }
+});
+
+/* ------------- 역할 등록/수정 API -------------
+  // req로 받아야하는 데이터 = formData 
+  {
+    uid
+    teamId
+    role
+  }
+
+  // 응답 형식
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
+*/
+app.post("/api/role", async (req, res) => {
+  // 요청 데이터 받아오기
+  const { uid, teamId, role } = req.body;
+
+  try {
+    const userDoc = await db.collection("users").doc(uid).get();
+    const userData = userDoc.data();
+
+    const index = userData.teamList.findIndex(
+      (element) => element.teamId == teamId
+    );
+
+    userData.teamList[index] = {
+      ...userData.teamList[index],
+      role,
+    };
+    // user 정보 -> team에 역할 추가
+    await db.collection("users").doc(uid).update(userData);
+
+    const teamListDoc = await db.collection("teamlist").doc(teamId).get();
+    const teamListData = teamListDoc.data();
+
+    const memberIndex = teamListData.member.findIndex(
+      (member) => member.uid == uid
+    );
+
+    teamListData.member[memberIndex] = {
+      ...teamListData.member[memberIndex],
+      role,
+    };
+    // user 정보 -> teamList에 역할 추가
+    await db.collection("teamlist").doc(teamId).update(teamListData);
+
+    res.send({ isCompleted: true });
+  } catch (error) {
+    console.error("Error:", error);
+    res.send({ isCompleted: false });
   }
 });
 
@@ -521,7 +638,7 @@ app.post("/api/teamGoal", async (req, res) => {
 */
 app.post("/api/todo", async (req, res) => {
   // 요청 데이터 받아오기
-  const { teamId, memberId, todoData } = req.body;
+  const { uid, teamId, memberId, todoData } = req.body;
 
   try {
     let data = {};
@@ -541,6 +658,23 @@ app.post("/api/todo", async (req, res) => {
 
     // 업데이트
     await db.collection("todo").doc(teamId).update(data);
+
+    // comment collection 추가
+    await db
+      .collection("comment")
+      .doc(teamId)
+      .update({
+        [`${uid}.${todoData.number}`]: [],
+      });
+
+    // fileList collection 추가
+    await db
+      .collection("fileList")
+      .doc(uid)
+      .update({
+        [`${teamId}.${todoData.number}`]: [],
+      });
+
     res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false, error: "error" });

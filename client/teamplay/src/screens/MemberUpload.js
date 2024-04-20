@@ -8,6 +8,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Keyboard,
+  BackHandler,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -15,16 +16,17 @@ import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import FileInfoLine from '../components/FileInfoLine';
 import CommentLine from '../components/CommentLine';
+import {useNavigation} from '@react-navigation/native';
 
 const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
   const [commentInput, setCommentInput] = useState('');
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState();
   const [fileList, setFileList] = useState();
   const [clicked, setClicked] = useState(false);
+  const [commentUpdated, setCommentUpdated] = useState(false);
   const {uid} = auth().currentUser;
   const userName = auth().currentUser.displayName;
   const todoId = todoData.number;
-  console.log(memberId, teamId, memberName);
 
   const handleCommentInputChange = text => {
     setCommentInput(text);
@@ -96,6 +98,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
         .then(res => {
           if (res.data) {
             setComments(res.data);
+            setCommentUpdated(false);
           }
         });
     } catch (error) {
@@ -105,7 +108,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
 
   useEffect(() => {
     getComments();
-  }, [clicked]);
+  }, [clicked, commentUpdated]);
 
   return (
     <View style={styles.container}>
@@ -138,10 +141,14 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
                 comments.map((data, index) => (
                   <CommentLine
                     key={index}
+                    teamId={teamId}
+                    todoId={todoData.number}
+                    ownerId={memberId}
                     owner={memberName}
                     comment={data.comment}
                     commentUser={data.commentUser}
                     createdAt={data.createdAt}
+                    setCommentUpdated={setCommentUpdated}
                   />
                 ))}
             </View>

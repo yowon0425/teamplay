@@ -1,5 +1,4 @@
 import {
-  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -12,6 +11,7 @@ import PinkButton from './PinkButton';
 import DatePicker from 'react-native-date-picker';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
+import Modal from 'react-native-modal';
 
 const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
   const {uid} = auth().currentUser;
@@ -37,6 +37,7 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
     try {
       await axios
         .post('/api/todo', {
+          uid,
           teamId,
           memberId: uid,
           todoData: {
@@ -71,103 +72,103 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
 
   return (
     <Modal
-      visible={isVisible}
-      animationType="slide"
-      statusBarTranslucent={false}
-      transparent={true}
-      onRequestClose={() => showTodo(false)}>
-      <TouchableOpacity style={styles.modalOverlay}>
-        <View style={styles.modalScreen}>
-          <View style={styles.header}>
-            <Text style={styles.title}> </Text>
-            <Text style={styles.title}>계획 등록</Text>
-            <TouchableOpacity
-              onPress={() => {
-                showTodo(false);
-              }}>
-              <Text style={styles.x}>X</Text>
-            </TouchableOpacity>
+      isVisible={isVisible}
+      swipeDirection={['down']}
+      useNativeDriverForBackdrop
+      onSwipeComplete={() => showTodo(false)}
+      onBackdropPress={() => showTodo(false)}
+      onBackButtonPress={() => showTodo(false)}
+      style={styles.modal}>
+      <View style={styles.modalScreen}>
+        <View style={styles.header}>
+          <Text style={styles.title}> </Text>
+          <Text style={styles.title}>계획 등록</Text>
+          <TouchableOpacity
+            onPress={() => {
+              showTodo(false);
+            }}>
+            <Text style={styles.x}>X</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.contentContainer}>
+          <View style={styles.inputName}>
+            <Text style={styles.text}>계획 이름</Text>
+            <Text style={styles.text}>기한</Text>
           </View>
-          <View style={styles.contentContainer}>
-            <View style={styles.inputName}>
-              <Text style={styles.text}>계획 이름</Text>
-              <Text style={styles.text}>기한</Text>
-            </View>
-            <View style={styles.inputBox}>
-              <TextInput
-                style={styles.input}
-                onChangeText={text => setContent(text)}
-              />
-              <View style={styles.boxLine}>
-                <View style={styles.pickerLine}>
-                  <TouchableOpacity
-                    style={styles.picker}
-                    onPressIn={() => setDateOpen(true)}>
-                    <Text style={styles.inputText}>
-                      {date.toISOString().slice(0, 10)}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.picker}
-                    onPressIn={() => setTimeOpen(true)}>
-                    <Text style={styles.inputText}>
-                      {time.toLocaleTimeString('ko-KR', {
-                        hour: '2-digit',
-                        hour12: true,
-                        minute: '2-digit',
-                      })}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <DatePicker
-                  modal
-                  mode="date"
-                  title="날짜 선택"
-                  open={dateOpen}
-                  date={date}
-                  locale="ko"
-                  cancelText="취소"
-                  confirmText="확인"
-                  minimumDate={initialDate}
-                  onConfirm={date => {
-                    setDateOpen(false);
-                    setDate(date);
-                    console.log(date);
-                  }}
-                  onCancel={() => {
-                    setDateOpen(false);
-                  }}
-                />
-                <DatePicker
-                  modal
-                  mode="time"
-                  title="시간 선택"
-                  open={timeOpen}
-                  date={date}
-                  locale="ko"
-                  cancelText="취소"
-                  confirmText="확인"
-                  onConfirm={time => {
-                    setTimeOpen(false);
-                    setTime(time);
-                    console.log(time);
-                  }}
-                  onCancel={() => {
-                    setTimeOpen(false);
-                  }}
-                />
+          <View style={styles.inputBox}>
+            <TextInput
+              style={styles.input}
+              onChangeText={text => setContent(text)}
+            />
+            <View style={styles.boxLine}>
+              <View style={styles.pickerLine}>
+                <TouchableOpacity
+                  style={styles.picker}
+                  onPressIn={() => setDateOpen(true)}>
+                  <Text style={styles.inputText}>
+                    {date.toISOString().slice(0, 10)}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.picker}
+                  onPressIn={() => setTimeOpen(true)}>
+                  <Text style={styles.inputText}>
+                    {time.toLocaleTimeString('ko-KR', {
+                      hour: '2-digit',
+                      hour12: true,
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </TouchableOpacity>
               </View>
+              <DatePicker
+                modal
+                mode="date"
+                title="날짜 선택"
+                open={dateOpen}
+                date={date}
+                locale="ko"
+                cancelText="취소"
+                confirmText="확인"
+                minimumDate={initialDate}
+                onConfirm={date => {
+                  setDateOpen(false);
+                  setDate(date);
+                  console.log(date);
+                }}
+                onCancel={() => {
+                  setDateOpen(false);
+                }}
+              />
+              <DatePicker
+                modal
+                mode="time"
+                title="시간 선택"
+                open={timeOpen}
+                date={date}
+                locale="ko"
+                cancelText="취소"
+                confirmText="확인"
+                onConfirm={time => {
+                  setTimeOpen(false);
+                  setTime(time);
+                  console.log(time);
+                }}
+                onCancel={() => {
+                  setTimeOpen(false);
+                }}
+              />
             </View>
-          </View>
-          <View style={styles.footer}>
-            {content && date && time ? (
-              <PinkButton text="완료" light={true} onPress={addTodo} />
-            ) : (
-              <PinkButton text="완료" light={false} />
-            )}
           </View>
         </View>
-      </TouchableOpacity>
+        <View style={styles.footer}>
+          {content && date && time ? (
+            <PinkButton text="완료" light={true} onPress={addTodo} />
+          ) : (
+            <PinkButton text="완료" light={false} />
+          )}
+        </View>
+      </View>
     </Modal>
   );
 };
@@ -175,10 +176,9 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
 export default NewTodoModal;
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
+  modal: {
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    margin: 0,
   },
   modalScreen: {
     width: '100%',

@@ -7,20 +7,19 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  Modal,
 } from 'react-native';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import {Shadow} from 'react-native-shadow-2';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import TeamCard from '../components/TeamCard';
 import Ionic from 'react-native-vector-icons/Ionicons';
+import Modal from 'react-native-modal';
 
 const TeamList = () => {
   console.log('팀리스트로');
   const [showModal, setShowModal] = useState(false);
   const [teams, setTeams] = useState();
-  const outside = useRef();
 
   // 전체 알림 페이지로
   const openMainNotice = () => {
@@ -51,16 +50,18 @@ const TeamList = () => {
 
   const modalClose = e => {
     setShowModal(false);
-    if (e.target == outside.current) {
-      console.log(showModal);
-      setShowModal(false);
-    }
   };
 
   useEffect(() => {
     getTeams();
     console.log('팀리스트 불러오는 함수 실행');
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getTeams();
+    }, []),
+  );
 
   const {uid} = auth().currentUser;
   const getTeams = async () => {
@@ -111,32 +112,29 @@ const TeamList = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      <View style={styles.modalContainer}>
-        <Modal
-          style={styles.modal}
-          animationType="fade"
-          visible={showModal}
-          transparent={true}
-          onRequestClose={modalClose}
-          ref={outside}
-          onPress={modalClose}>
-          <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-              <TouchableOpacity
-                onPress={openStartNew}
-                style={styles.modalTextContainer}>
-                <Text style={styles.modalText}>새 팀 만들기</Text>
-              </TouchableOpacity>
-              <View style={styles.line} />
-              <TouchableOpacity
-                onPress={openStartJoin}
-                style={styles.modalTextContainer}>
-                <Text style={styles.modalText}>팀 참가하기</Text>
-              </TouchableOpacity>
-            </View>
+      <Modal
+        style={styles.modal}
+        animationIn="fadeIn"
+        animationOut="fadeOut"
+        isVisible={showModal}
+        onBackdropPress={modalClose}
+        onBackButtonPress={modalClose}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <TouchableOpacity
+              onPress={openStartNew}
+              style={styles.modalTextContainer}>
+              <Text style={styles.modalText}>새 팀 만들기</Text>
+            </TouchableOpacity>
+            <View style={styles.line} />
+            <TouchableOpacity
+              onPress={openStartJoin}
+              style={styles.modalTextContainer}>
+              <Text style={styles.modalText}>팀 참가하기</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -227,14 +225,10 @@ const styles = StyleSheet.create({
   shadow: {
     width: '100%',
   },
-  modalContainer: {
-    backgroundColor: 'red',
-  },
-  centeredView: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+  modal: {
     alignItems: 'center',
     justifyContent: 'center',
+    margin: 0,
   },
   modalView: {
     backgroundColor: 'white',

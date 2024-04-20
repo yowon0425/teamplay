@@ -75,6 +75,29 @@ const MyMap = ({teamId}) => {
     console.log('지금 투두 : ' + nowTodo);
   };
 
+  /* 계획 완료하기 */
+  const completeTodo = async () => {
+    await axios
+      .post('/api/changeTodo', {
+        teamId,
+        memberId: uid,
+        newContent: {
+          number: nowTodo,
+          content: todos[nowTodo].content,
+          deadline: todos[nowTodo].deadline,
+          isCompleted: true,
+        },
+      })
+      .then(res => {
+        if (res.data) {
+          console.log('계획 완료');
+          setClickButton(true);
+        } else {
+        }
+      })
+      .catch(err => console.log(err));
+  };
+
   return (
     <View>
       <ScrollView style={styles.container}>
@@ -116,9 +139,30 @@ const MyMap = ({teamId}) => {
             )}
           </View>
         </View>
-        <View style={styles.button}>
-          <PinkButton text="작업 완료" light={false} />
-        </View>
+        {numTodo > 0 ? (
+          <View style={styles.button}>
+            <PinkButton
+              text="작업 완료"
+              light={true}
+              onPress={() =>
+                Alert.alert('TeamPlay', '작업을 완료하시겠습니까?', [
+                  {
+                    text: '취소',
+                    style: 'cancel',
+                  },
+                  {
+                    text: '확인',
+                    onPress: completeTodo,
+                  },
+                ])
+              }
+            />
+          </View>
+        ) : (
+          <View style={styles.button}>
+            <PinkButton text="작업 완료" light={false} />
+          </View>
+        )}
       </ScrollView>
       <View style={styles.modalBoxContainer}>
         <Modal
@@ -155,29 +199,27 @@ const MyMap = ({teamId}) => {
           </TouchableOpacity>
         </Modal>
       </View>
-      <View style={styles.modalContainer}>
-        <NewTodoModal
+      <NewTodoModal
+        teamId={teamId}
+        showTodo={setShowNewTodo}
+        isVisible={showNewTodo}
+        num={numNewTodo}
+        editMode={editMode}
+        setEditMode={setEditMode}
+        setClickButton={setClickButton}
+      />
+      {editMode && todos[editNum] ? (
+        <EditTodoModal
           teamId={teamId}
-          showTodo={setShowNewTodo}
-          isVisible={showNewTodo}
-          num={numNewTodo}
+          showTodo={setShowEditTodo}
+          isVisible={showEditTodo}
+          todoData={editNum ? todos[editNum] : null}
+          num={editNum}
           editMode={editMode}
           setEditMode={setEditMode}
           setClickButton={setClickButton}
         />
-        {editMode && todos[editNum] ? (
-          <EditTodoModal
-            teamId={teamId}
-            showTodo={setShowEditTodo}
-            isVisible={showEditTodo}
-            todoData={editNum ? todos[editNum] : null}
-            num={editNum}
-            editMode={editMode}
-            setEditMode={setEditMode}
-            setClickButton={setClickButton}
-          />
-        ) : null}
-      </View>
+      ) : null}
     </View>
   );
 };

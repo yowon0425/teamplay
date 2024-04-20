@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+} from 'react-native';
 import Ionic from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import NoticeCard from '../components/NoticeCard'; // NoticeCard 컴포넌트 불러오기
 
-const Notice = ({ teamId }) => {
+const Notice = ({teamId}) => {
   console.log('notice: ' + teamId);
   const [noticeList, setNoticeList] = useState([]);
 
   // 알림 리스트 불러오는 함수
   const fetchNoticeList = async () => {
     try {
-      const { uid } = auth().currentUser;
-      const response = await axios.post('/api/notice', { uid, teamId });
+      const {uid} = auth().currentUser;
+      const response = await axios.post('/api/notice', {uid, teamId});
       setNoticeList(response.data); // 알림 리스트 설정
     } catch (error) {
       console.log(error);
@@ -27,26 +33,31 @@ const Notice = ({ teamId }) => {
 
   const readNotice = async () => {
     try {
-      const { uid } = auth().currentUser;
-      const response = await axios.post('/api/notice', { uid, teamId });
-      console.log('읽은 알림: ', response.data);
+      const {uid} = auth().currentUser;
+      const response = await axios.post('/api/notice', {uid, teamId});
       fetchNoticeList();
     } catch (error) {
       console.log(error);
     }
-  };  
-  
+  };
+
   // 알림 보내기 페이지로 이동
   const navigation = useNavigation();
   const openSendNotice = () => {
     console.log('네비게이터');
-    navigation.navigate('SendNotice', { teamId });
+    navigation.navigate('SendNotice', {teamId});
   };
 
   useEffect(() => {
     fetchNoticeList();
     readNotice();
   }, [teamId]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchNoticeList();
+    }, []),
+  );
 
   return (
     <View style={styles.container}>
@@ -59,15 +70,20 @@ const Notice = ({ teamId }) => {
       </View>
       <ScrollView>
         <View style={styles.noticeCardContainer}>
-          {noticeList &&
-            noticeList.reverse().map(notice => ( // Reverse the order of noticeList
-              <NoticeCard
-                key={notice.index}
-                title={notice.title}
-                content={notice.content}
-                writer={notice.writer}
-              />
-            ))}
+          {noticeList ? (
+            noticeList
+              .reverse()
+              .map((notice, index) => (
+                <NoticeCard
+                  key={index}
+                  title={notice.title}
+                  content={notice.content}
+                  writer={notice.writer}
+                />
+              ))
+          ) : (
+            <Text style={styles.empty}>아직 알림이 없습니다.</Text>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -96,6 +112,12 @@ const styles = StyleSheet.create({
   },
   noticeCardContainer: {
     alignItems: 'center', // Center the NoticeCard components horizontally
+  },
+  empty: {
+    fontSize: 16,
+    alignSelf: 'center',
+    textAlign: 'center',
+    marginTop: 100,
   },
 });
 
