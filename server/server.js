@@ -2,8 +2,9 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const { db, bucket, admin } = require("./firebase");
+const { db, bucket, admin, storage } = require("./firebase");
 const multer = require("multer");
+const { getDownloadURL } = require("firebase-admin/storage");
 const { FieldValue } = admin.firestore;
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -496,6 +497,8 @@ app.post("/api/upload", upload.any(), async (req, res) => {
   const { uid, teamId, todoId, fileInfo } = req.body;
   console.log(uid, fileInfo);
   const file = req.files[0];
+  console.log(req.files);
+  fileName = decodeURIComponent(file.originalname);
   try {
     // 필요한 메타데이터 정의
     const metadata = {
@@ -507,15 +510,22 @@ app.post("/api/upload", upload.any(), async (req, res) => {
       cacheControl: "public, max-age=31536000",
     };
 
+    const fileNameWithDate =
+      fileName.split(".")[0] +
+      "_" +
+      JSON.parse(fileInfo).uploadTime.replace(/:/g, "") +
+      "." +
+      fileName.split(".")[1];
+
     // file 읽기
-    const tempFilePath = `/tmp/${uid}-${file.originalname}`;
+    const tempFilePath = `/tmp/${uid}-${fileName}`;
     await fs.writeFile(tempFilePath, file.buffer);
 
     // firebase storage에 업로드 하기
     await bucket.upload(tempFilePath, {
       // Support for HTTP requests made with `Accept-Encoding: gzip`
       gzip: true,
-      destination: uid + "/" + file.originalname,
+      destination: uid + "/" + fileNameWithDate,
       metadata: metadata,
     });
 
@@ -556,6 +566,26 @@ app.post("/api/upload", upload.any(), async (req, res) => {
   } catch (error) {
     console.error("Error uploading file:", error);
     res.send({ uploaded: false });
+  }
+});
+
+/* ------------- 파일 다운로드 API ----------- 
+  // req로 받아야하는 데이터 형식
+*/
+app.post("/api/download", async (req, res) => {
+  const { uid, name, uploadTime } = req.body;
+  const fileRef = bucket.file(
+    `${uid}/${name.split(".")[0]}_${uploadTime.replace(/:/g, "")}.${
+      name.split(".")[1]
+    }`
+  );
+  try {
+    await getDownloadURL(fileRef).then((url) => {
+      res.send({ url });
+    });
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    res.send({ download: false });
   }
 });
 
