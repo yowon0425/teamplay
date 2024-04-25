@@ -17,9 +17,11 @@ admin.initializeApp({
 
 const db = firestore.getFirestore();
 const bucket = admin.storage().bucket();
+const storage = fstorage.getStorage();
 
 module.exports = {
   db,
   bucket,
   admin,
+  storage,
 };

@@ -62,14 +62,15 @@ const MyUpload = ({teamId, todoData}) => {
       formData.append('file', {
         uri: selectedFile.uri,
         type: selectedFile.type,
-        name: selectedFile.name,
+        name: encodeURIComponent(selectedFile.name),
         date: new Date(),
       });
 
       const fileInfo = {
         name: selectedFile.name,
-        uploadTime: handleAddEvent(),
+        uploadTime: handleAddUploadTime(),
         uri: selectedFile.uri,
+        visibleTime: handleAddVisibleTime(),
       };
 
       formData.append('uid', uid);
@@ -93,17 +94,41 @@ const MyUpload = ({teamId, todoData}) => {
     }
   };
 
-  const handleAddEvent = () => {
+  const handleAddUploadTime = () => {
+    const date = new Date();
+    const uploadTime =
+      date.getFullYear() +
+      '-' +
+      `${
+        date.getMonth() + 1 < 10
+          ? '0' + (date.getMonth() + 1)
+          : date.getMonth() + 1
+      }` +
+      '-' +
+      `${date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}` +
+      ' ' +
+      `${date.getHours() < 10 ? '0' + date.getHours() : date.getHours()}` +
+      ':' +
+      `${
+        date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()
+      }` +
+      ':' +
+      `${date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds()}`;
+
+    return uploadTime;
+  };
+
+  const handleAddVisibleTime = () => {
     const date = new Date();
     const uploadTime =
       date.getMonth() +
       1 +
       '/' +
-      date.getDate() +
+      `${date.getDate() < 10 ? '0' + date.getDate() : date.getDate()}` +
       ' ' +
-      date.getHours() +
+      `${date.getHours() < 10 ? '0' + date.getHours() : date.getHours()}` +
       ':' +
-      date.getMinutes();
+      `${date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()}`;
 
     return uploadTime;
   };
