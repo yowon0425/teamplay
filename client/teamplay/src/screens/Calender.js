@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,12 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import {Calendar, LocaleConfig} from 'react-native-calendars';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import LinearGradient from 'react-native-linear-gradient';
+import axios from 'axios';
+import auth from '@react-native-firebase/auth';
+import { useRoute } from '@react-navigation/native';
 
 LocaleConfig.locales['fr'] = {
   monthNames: [
@@ -70,81 +73,124 @@ LocaleConfig.locales['fr'] = {
 };
 LocaleConfig.defaultLocale = 'fr';
 
-class CalendarScreen extends Component {
-  state = {
-    selectedDate: '',
-    isTextInputVisible: false,
-    eventText: '',
-    selectedTime: new Date(),
-    events: {},
-    showTimePicker: false,
+const CalendarScreen = ({ teamId }) => {
+  const [selectedDate, setSelectedDate] = useState('');
+  const [isTextInputVisible, setIsTextInputVisible] = useState(false);
+  const [eventText, setEventText] = useState('');
+  const [selectedTime, setSelectedTime] = useState(new Date());
+  const [events, setEvents] = useState({});
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const { uid } = auth().currentUser;
+
+  // 이벤트 핸들러 함수들
+  const handleDayPress = day => {
+    setSelectedDate(day.dateString);
+    setIsTextInputVisible(false);
+    setShowTimePicker(true);
   };
 
-  handleDayPress = day => {
-    this.setState({
-      selectedDate: day.dateString,
-      isTextInputVisible: false,
-      showTimePicker: true,
-    });
-  };
-
-  handleAddEvent = () => {
-    const {selectedDate, selectedTime, eventText, events} = this.state;
-
+  const handleAddEvent = async () => {
     if (selectedDate && eventText) {
-      const updatedEvents = {...events};
+      const updatedEvents = { ...events };
       const dateTime = `${selectedDate}`;
       if (!updatedEvents[dateTime]) {
         updatedEvents[dateTime] = [];
       }
-
+  
       const formattedTime = selectedTime.toLocaleTimeString([], {
         hour: '2-digit',
         minute: '2-digit',
         hour12: false,
       });
+  
       const formattedEvent = `${formattedTime} ${eventText}`;
-
-      updatedEvents[dateTime].push({text: formattedEvent, time: selectedTime});
-
-      this.setState({
-        events: updatedEvents,
-        eventText: '',
-        isTextInputVisible: false,
-        showTimePicker: false,
-      });
-    }
-  };
-
-  handleTimeChange = (event, selectedTime) => {
-    if (event.type === 'set') {
-      this.setState({
-        selectedTime,
-        showTimePicker: false,
-        isTextInputVisible: true,
-      });
-    } else {
-      this.setState({showTimePicker: false});
-    }
-  };
-
-  handleDeleteEvent = (dateTime, index) => {
-    const updatedEvents = {...this.state.events};
-    const eventsOnDateTime = updatedEvents[dateTime];
-
-    if (eventsOnDateTime && eventsOnDateTime.length > index) {
-      eventsOnDateTime.splice(index, 1);
-
-      if (eventsOnDateTime.length === 0) {
-        delete updatedEvents[dateTime];
+  
+      updatedEvents[dateTime].push({ text: formattedEvent, time: formattedTime });
+  
+      try {
+        const res = await axios.post('/api/addCalender', {
+          uid,
+          teamId,
+          name: eventText,
+          date: selectedDate,
+          time: formattedTime
+        });
+  
+        if (res.data) {
+          console.log('성공');
+          console.log(teamId, uid, eventText);
+          setEvents(updatedEvents);
+          setEventText('');
+          setIsTextInputVisible(false);
+          setShowTimePicker(false);
+        } else {
+          // 실패 시 할 작업
+        }
+      } catch (err) {
+        console.error('Error adding event:', err);
       }
+    }
+  };
+  
 
-      this.setState({events: updatedEvents});
+  const handleTimeChange = (event, selectedTime) => {
+    if (event.type === 'set') {
+      setSelectedTime(selectedTime);
+      setShowTimePicker(false);
+      setIsTextInputVisible(true);
+    } else {
+      setShowTimePicker(false);
     }
   };
 
-  renderDay = date => {
-    const eventsOnDate = this.state.events[date.dateString];
+  const handleDeleteEvent = async (dateTime, index) => {
+    const updatedEvents = { ...events };
+    const eventsOnDateTime = updatedEvents[dateTime];
+  
+    if (eventsOnDateTime && eventsOnDateTime.length > index && eventsOnDateTime[index]) {
+      const eventToDelete = eventsOnDateTime[index];
+  
+      if (eventToDelete && eventToDelete.time) {
+        eventsOnDateTime.splice(index, 1);
+  
+        if (eventsOnDateTime.length === 0) {
+          delete updatedEvents[dateTime];
+        }
+  
+        setEvents(updatedEvents);
+  
+        try {
+          console.log(eventToDelete.text.split(' ')[1], selectedDate);
+          const res = await axios.post('/api/deleteCalender', {
+            uid,
+            teamId,
+            name: eventToDelete.text.split(' ')[1], // 이벤트의 설명 또는 이름으로 변경
+            date: selectedDate,
+            time: eventToDelete.time,
+          });
+  
+          if (res.data) {
+            // 성공 시 할 작업
+          } else {
+            // 실패 시 할 작업
+          }
+        } catch (err) {
+          // 에러 시 할 작업
+          console.error('이벤트 삭제 중 오류 발생:', err);
+        }
+      } else {
+        console.error('이벤트 삭제 중 오류 발생: 이벤트 정보가 올바르게 설정되지 않았습니다.');
+      }
+    } else {
+      console.error('이벤트 삭제 중 오류 발생: 이벤트 정보가 유효하지 않습니다.');
+    }
+  };  
+    
+
+  // 렌더링 함수들
+  const renderDay = date => {
+    const eventsOnDate = events[date.dateString];
 
     // Use toLocaleDateString to format the date string
     const formattedDate = new Date(date.dateString).toLocaleDateString({
@@ -157,7 +203,7 @@ class CalendarScreen extends Component {
     };
 
     return (
-      <TouchableOpacity onPress={() => this.handleDayPress(date)}>
+      <TouchableOpacity onPress={() => handleDayPress(date)}>
         <LinearGradient
           colors={['#FFB8D0', '#FEE5E1']}
           style={styles.circleContainer}>
@@ -171,7 +217,7 @@ class CalendarScreen extends Component {
           eventsOnDate.map((event, index) => (
             <View key={index} style={styles.eventContainer}>
               <TouchableOpacity
-                onPress={() => this.handleDeleteEvent(date.dateString, index)}>
+                onPress={() => handleDeleteEvent(date.dateString, index)}>
                 <Text style={styles.deleteText}>X</Text>
               </TouchableOpacity>
               <Text style={styles.eventText}>{`${event.text}`}</Text>
@@ -181,84 +227,77 @@ class CalendarScreen extends Component {
     );
   };
 
-  render() {
-    const currentDate = new Date();
-    const currentDateString = currentDate.toISOString().split('T')[0];
+  // 렌더링
+  const currentDate = new Date();
+  const currentDateString = currentDate.toISOString().split('T')[0];
 
-    const markedDates = Object.keys(this.state.events).reduce(
-      (acc, dateTime) => {
-        const [date] = dateTime.split(' ');
-        acc[date] = {
-          marked: true,
-          dotColor: '#FFB8D0',
-          selectedColor: '#FFB8D0',
-        };
-        return acc;
-      },
-      {},
-    );
+  const markedDates = Object.keys(events).reduce((acc, dateTime) => {
+    const [date] = dateTime.split(' ');
+    acc[date] = {
+      marked: true,
+      dotColor: '#FFB8D0',
+      selectedColor: '#FFB8D0',
+    };
+    return acc;
+  }, {});
 
-    return (
-      <KeyboardAvoidingView
-        style={{flex: 1}}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        enabled>
-        <ScrollView style={{flex: 1}}>
-          <View
-            style={{paddingTop: 50, flex: 1, justifyContent: 'space-between'}}>
-            <Calendar
-              current={currentDateString}
-              monthFormat={'MMMM'}
-              onDayPress={this.handleDayPress}
-              markedDates={markedDates}
-              theme={{
-                arrowColor: 'gray',
-                todayTextColor: 'black',
-                calendarBackground: 'transparent', // Set the background color to transparent
-              }}
-              renderDay={this.renderDay}
-              style={{backgroundColor: 'transparent'}}
-            />
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      enabled>
+      <ScrollView style={{ flex: 1 }}>
+        <View
+          style={{ paddingTop: 50, flex: 1, justifyContent: 'space-between' }}>
+          <Calendar
+            current={currentDateString}
+            monthFormat={'MMMM'}
+            onDayPress={handleDayPress}
+            markedDates={markedDates}
+            theme={{
+              arrowColor: 'gray',
+              todayTextColor: 'black',
+              calendarBackground: 'transparent', // Set the background color to transparent
+            }}
+            renderDay={renderDay}
+            style={{ backgroundColor: 'transparent' }}
+          />
 
-            {this.state.isTextInputVisible && (
-              <View style={styles.textInputContainer}>
-                <TextInput
-                  style={styles.textInput}
-                  placeholder="일정을 입력하세요..."
-                  value={this.state.eventText}
-                  onChangeText={text => this.setState({eventText: text})}
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  keyboardType="default"
-                />
-                <TouchableOpacity
-                  style={styles.addButton}
-                  onPress={this.handleAddEvent}>
-                  <Text style={{fontSize: 24, color: 'white'}}>+</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-            {this.state.showTimePicker && (
-              <DateTimePicker
-                value={this.state.selectedTime}
-                mode="time"
-                is24Hour={false}
-                display="spinner"
-                onChange={this.handleTimeChange}
+          {isTextInputVisible && (
+            <View style={styles.textInputContainer}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="일정을 입력하세요..."
+                value={eventText}
+                onChangeText={text => setEventText(text)}
+                autoCorrect={false}
+                autoCapitalize="none"
+                keyboardType="default"
               />
-            )}
-            <EventList
-              events={this.state.events}
-              onDeleteEvent={this.handleDeleteEvent}
+              <TouchableOpacity
+                style={styles.addButton}
+                onPress={handleAddEvent}>
+                <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {showTimePicker && (
+            <DateTimePicker
+              value={selectedTime}
+              mode="time"
+              is24Hour={false}
+              display="spinner"
+              onChange={handleTimeChange}
             />
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    );
-  }
-}
+          )}
+          <EventList events={events} onDeleteEvent={handleDeleteEvent} />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
 
-const EventList = ({events, onDeleteEvent}) => {
+const EventList = ({ events, onDeleteEvent }) => {
   const sortedDateTimes = Object.keys(events).sort();
 
   return (
