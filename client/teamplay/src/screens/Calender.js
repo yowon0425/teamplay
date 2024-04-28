@@ -158,6 +158,7 @@ const CalendarScreen = ({ teamId }) => {
           delete updatedEvents[dateTime];
         }
   
+        // 이벤트를 삭제한 후 바로 events 상태를 업데이트
         setEvents(updatedEvents);
   
         try {
@@ -171,10 +172,11 @@ const CalendarScreen = ({ teamId }) => {
           });
   
           if (res.data) {
-            // 성공 시 할 작업
+            // 성공 시 상태 업데이트
+            setEvents(updatedEvents);
           } else {
             // 실패 시 할 작업
-          }
+          }          
         } catch (err) {
           // 에러 시 할 작업
           console.error('이벤트 삭제 중 오류 발생:', err);
@@ -185,10 +187,30 @@ const CalendarScreen = ({ teamId }) => {
     } else {
       console.error('이벤트 삭제 중 오류 발생: 이벤트 정보가 유효하지 않습니다.');
     }
-  };  
-    
+};
 
-  // 렌더링 함수들
+  const readAlarm = async (uid, teamId) => {
+    try {
+      const response = await axios.post('/api/calender', {uid, teamId});
+      const eventData = response.data;
+
+      const updatedEvents = {};
+      Object.keys(eventData).forEach(key => {
+        const event = eventData[key];
+        const { name, date, time } = event;
+        if (!updatedEvents[date]) {
+          updatedEvents[date] = [];
+        }
+        updatedEvents[date].push({ text: `${time} ${name}`, time: time });
+      });
+      setEvents(updatedEvents);
+    } catch (error) {
+      console.log(error);
+    }
+  };  
+
+  readAlarm(uid, teamId);
+
   const renderDay = date => {
     const eventsOnDate = events[date.dateString];
 
