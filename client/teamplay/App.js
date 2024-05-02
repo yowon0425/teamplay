@@ -1,27 +1,50 @@
-import {View, Text} from 'react-native';
-import React from 'react';
-
-import Main from './src/screens/Main';
-import StartNew from './src/screens/StartNew';
-import StartJoin from './src/screens/StartJoin';
-import Home from './src/screens/Home';
-import MemberMap from './src/screens/MemberMap';
-import Calender from './src/screens/Calender';
-import MyUpload from './src/screens/MyUpload';
-import SendNotice from './src/screens/SendNotice';
+import React, { useEffect } from 'react';
+import { View, Text } from 'react-native';
 import StackNavigator from './src/components/StackNavigator';
-import {NavigationContainer} from '@react-navigation/native';
-import MenuBar from './src/components/TabNavigator';
-import TeamList from './src/screens/TeamList';
-import LogIn from './src/screens/LogIn';
-import Notice from './src/screens/Notice';
-import MyMap from './src/screens/MyMap';
-import MemberUpload from './src/screens/MemberUpload';
-import MainNotice from './src/screens/MainNotice';
-import Profile from './src/screens/Profile';
+import messaging from '@react-native-firebase/messaging';
 
 const App = () => {
-  return <StackNavigator />;
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log(remoteMessage);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    requestUserPermission();
+  }, []);
+
+  const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || 
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    
+    if (enabled) {
+      return getToken();
+    }
+  };
+
+  const getToken = async () => {
+    const fcmToken = await messaging().getToken();
+    console.log('디바이스 토큰값');
+    console.log(fcmToken);
+    dispatch(set_deviceToken(fcmToken));
+  };
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      console.log(remoteMessage);
+      pushNoti.displayNoti(remoteMessage);  // 위에서 작성한 함수로 넘겨준다
+    });
+
+    return unsubscribe;
+  }, []);
+
+  return (
+    <StackNavigator />
+  );
 };
 
 export default App;
