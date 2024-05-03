@@ -6,6 +6,7 @@ const { db, bucket, admin, storage } = require("./firebase");
 const multer = require("multer");
 const { getDownloadURL } = require("firebase-admin/storage");
 const { FieldValue } = admin.firestore;
+const serviceAccount = require("./teamplay-a0079-firebase-adminsdk-wgp5n-99c4de8b25.json");
 
 const upload = multer({ storage: multer.memoryStorage() });
 const fs = require("fs").promises;
@@ -36,6 +37,24 @@ app.use(cors());
 app.get("/", (req, res) => {
   res.send("response completed!");
 });
+
+// 서버 토큰 값 받아서 메세지 푸시하기
+/*app.get("/:token", (req, res) => {
+  const message = {
+    data: {},
+    token: req.params.token,
+  };
+
+  admin
+    .messaging()
+    .send(message)
+    .then((res) => {
+      console.log("Successfully sent message:", res);
+    })
+    .catch((err) => {
+      console.log("Error sending message:", err);
+    });
+});*/
 
 // 서버 실행: node server.js
 app.listen(PORT, () => {
@@ -1082,11 +1101,24 @@ app.post("/api/calender", async (req, res) => {
   }
 });
 
-/* ------------- 알림 생성 API ------------
+/* ------------- 알림 보내기 API ------------
+ // req로 받아야하는 데이터 형식
+  {
+    tokens: 팀원들의 토큰
+    writer: 보내는 사람 이름
+    teamId: 팀플 id
+    teamMember: [멤버 uid 배열]
+    title: 알림 제목,
+    content: 알림 내용
+  }
+
+  // 응답 형식
+  성공 -> isCompleted: true
+  실패 -> isCompleted: false
  */
-app.post("/api/addNotice", async (req, res) => {
+app.post("/api/sendNotice", async (req, res) => {
   // 요청 데이터 받아오기
-  const { writer, teamId, teamMember, title, content } = req.body;
+  const { tokens, writer, teamId, teamMember, title, content } = req.body;
 
   try {
     // date 객체
@@ -1135,6 +1167,24 @@ app.post("/api/addNotice", async (req, res) => {
           [teamId]: FieldValue.arrayUnion(noticeObj),
         });
     });
+
+    // fcm을 통해 푸시알림 보내기
+    let message = {
+      tokens,
+      notification: {
+        title,
+        body: content,
+      },
+    };
+    await admin
+      .messaging()
+      .sendEachForMulticast(message)
+      .then((res) => {
+        console.log(
+          "Messages were sent successfully:",
+          res.responses[0].success
+        );
+      });
 
     res.send({ isCompleted: true });
   } catch (err) {

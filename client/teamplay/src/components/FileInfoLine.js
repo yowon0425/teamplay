@@ -1,4 +1,5 @@
 import {
+  Alert,
   Linking,
   Platform,
   StyleSheet,
@@ -61,7 +62,20 @@ const FileInfoLine = ({file}) => {
 
   return (
     <View>
-      <TouchableOpacity style={styles.file} onPress={handleFileDownload}>
+      <TouchableOpacity
+        style={styles.file}
+        onPress={() => {
+          Alert.alert('TeamPlay', '파일을 다운로드하시겠습니까?', [
+            {
+              text: '취소',
+              style: 'cancel',
+            },
+            {
+              text: '확인',
+              onPress: handleFileDownload,
+            },
+          ]);
+        }}>
         <Text style={styles.fileName}>{file.name}</Text>
         <Text style={styles.time}>{file.visibleTime}</Text>
       </TouchableOpacity>
