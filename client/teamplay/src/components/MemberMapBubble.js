@@ -23,7 +23,6 @@ const MemberMapBubble = ({
     console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
-      member: true,
       teamId,
       memberId,
       memberName,

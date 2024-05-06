@@ -56,7 +56,7 @@ const MenuBar = ({route}) => {
       </Tab.Screen>
       <Tab.Screen name="Maps">
         {() =>
-          route.params.member ? (
+          route.params.memberId ? (
             <MemberMapStackScreen
               teamId={route.params.teamId}
               memberId={route.params.memberId}

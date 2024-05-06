@@ -1,10 +1,5 @@
 import {StyleSheet, Text, View, ScrollView} from 'react-native';
 import React, {memo, useEffect, useState} from 'react';
-import * as Progress from 'react-native-progress';
-import LinearGradient from 'react-native-linear-gradient';
-import MaskedView from '@react-native-masked-view/masked-view';
-import MenuBar from '../components/TabNavigator';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import MemberMapBubble from '../components/MemberMapBubble';
 import ProgressBar from '../components/ProgressBar';
