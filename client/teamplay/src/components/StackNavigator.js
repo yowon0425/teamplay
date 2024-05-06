@@ -36,20 +36,7 @@ Stack Navigator
 
 const Stack = createNativeStackNavigator();
 
-// 하드웨어 뒤로가기 제어
 const StackNavigator = () => {
-  /*useEffect(() => {
-    const backAction = () => {
-      return true;
-    };
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      backAction,
-    );
-
-    return () => backHandler.remove();
-  }, []);*/
-
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Main">
