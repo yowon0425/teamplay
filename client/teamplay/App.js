@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text } from 'react-native';
 import StackNavigator from './src/components/StackNavigator';
 import messaging from '@react-native-firebase/messaging';
 
 const App = () => {
+  const [fcmToken, setFcmToken] = useState(null);
+
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       console.log(remoteMessage);
@@ -18,19 +20,19 @@ const App = () => {
 
   const requestUserPermission = async () => {
     const authStatus = await messaging().requestPermission();
-    const enabled = authStatus === messaging.AuthorizationStatus.AUTHORIZED || 
-    authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-    
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
     if (enabled) {
-      return getToken();
+      getToken();
     }
   };
 
   const getToken = async () => {
-    const fcmToken = await messaging().getToken();
-    console.log('디바이스 토큰값');
-    console.log(fcmToken);
-    dispatch(set_deviceToken(fcmToken));
+    const token = await messaging().getToken();
+    console.log('디바이스 토큰값:', token);
+    setFcmToken(token);
   };
 
   useEffect(() => {
@@ -43,7 +45,7 @@ const App = () => {
   }, []);
 
   return (
-    <StackNavigator />
+    <StackNavigator fcmToken={fcmToken} />
   );
 };
 
