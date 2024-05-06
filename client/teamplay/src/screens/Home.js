@@ -41,7 +41,6 @@ const Home = ({teamId}) => {
     console.log('내 작업 페이지로, ' + teamId);
     navigation.navigate('MenuBar', {
       screen: 'Maps',
-      member: false,
       teamId,
     });
   };
@@ -52,10 +51,12 @@ const Home = ({teamId}) => {
     console.log('팀원 작업 페이지로: ');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
-      member: true,
       teamId,
       memberId: uid,
       memberObj,
+      params: {
+        screen: 'MemberMap',
+      },
     });
   };
 

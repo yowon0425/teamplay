@@ -1104,7 +1104,7 @@ app.post("/api/calender", async (req, res) => {
 /* ------------- 알림 보내기 API ------------
  // req로 받아야하는 데이터 형식
   {
-    tokens: 팀원들의 토큰
+    tokens: [팀원들의 토큰 배열]
     writer: 보내는 사람 이름
     teamId: 팀플 id
     teamMember: [멤버 uid 배열]
@@ -1115,7 +1115,7 @@ app.post("/api/calender", async (req, res) => {
   // 응답 형식
   성공 -> isCompleted: true
   실패 -> isCompleted: false
- */
+*/
 app.post("/api/sendNotice", async (req, res) => {
   // 요청 데이터 받아오기
   const { tokens, writer, teamId, teamMember, title, content } = req.body;
