@@ -7,7 +7,7 @@ import auth from '@react-native-firebase/auth';
 import PushNotification from 'react-native-push-notification';
 import { useRoute } from '@react-navigation/native';
 
-const SendNotice = () => {
+const SendNotice = ({ fcmToken }) => {
   const [title, setTitle] = useState('');
   const [notificationText, setNotificationText] = useState('');
   const [teamMembers, setTeamMembers] = useState([]);
@@ -49,10 +49,11 @@ const SendNotice = () => {
 
       const memberUid = teamMembers.map(member => member.uid);
 
-      console.log('보내는 정보: ' + displayName, teamId, memberUid, title, notificationText);
+      console.log('보내는 정보: ' + fcmToken, displayName, teamId, memberUid, title, notificationText);
 
       await axios
-        .post('/api/addNotice', {
+        .post('/api/sendNotice', {
+          tokens: fcmToken,
           writer: displayName,
           teamId,
           teamMember: memberUid,
