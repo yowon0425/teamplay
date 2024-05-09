@@ -62,15 +62,15 @@ const Notice = ({teamId}) => {
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Text style={styles.title}> </Text>
+        <View style={{width: 22}} />
         <Text style={styles.title}>알림</Text>
         <TouchableOpacity onPress={openSendNotice}>
           <Ionic name="notifications-outline" style={styles.noticeIcon} />
         </TouchableOpacity>
       </View>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.noticeCardContainer}>
-          {noticeList ? (
+          {noticeList.length > 0 ? (
             noticeList
               .reverse()
               .map((notice, index) => (
@@ -95,20 +95,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   top: {
+    width: '90%',
     flexDirection: 'row',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 5,
     alignItems: 'center',
     justifyContent: 'space-between',
+    margin: 10,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 20,
     color: 'black',
-    fontWeight: '900',
+    fontWeight: 'bold',
   },
   noticeIcon: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
+    color: 'black',
   },
   noticeCardContainer: {
     alignItems: 'center', // Center the NoticeCard components horizontally

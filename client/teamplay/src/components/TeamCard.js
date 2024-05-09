@@ -54,11 +54,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
+    textAlign: 'center',
   },
   teamDescription: {
     marginTop: 10,
     color: 'black',
     alignSelf: 'center',
+    textAlign: 'center',
   },
   buttonContainer: {
     marginTop: 20,

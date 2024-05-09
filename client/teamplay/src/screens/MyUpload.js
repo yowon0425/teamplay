@@ -215,13 +215,15 @@ const MyUpload = ({teamId, todoData}) => {
         <Text style={styles.time}>{todoData.deadline}</Text>
       </View>
       <View style={styles.line}></View>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.uploadContainer}>
           <Text style={styles.title}>제출 상황</Text>
           <LinearGradient
             style={styles.uploadBox}
             colors={['#B9E3FC', '#FFFFFF']}>
-            <ScrollView style={styles.fileList}>
+            <ScrollView
+              style={styles.fileList}
+              showsVerticalScrollIndicator={false}>
               {fileList &&
                 fileList.map(data => {
                   return (
@@ -286,6 +288,7 @@ const MyUpload = ({teamId, todoData}) => {
           <TextInput
             style={styles.input}
             placeholder="코멘트 작성하기"
+            multiline={true}
             value={commentInput}
             onChangeText={handleCommentInputChange}
           />
@@ -308,7 +311,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   top: {
-    width: '95%',
+    width: '90%',
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',

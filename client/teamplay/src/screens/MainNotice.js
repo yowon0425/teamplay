@@ -6,16 +6,16 @@ import {
   ScrollView,
   Modal,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import NoticeCard from '../components/NoticeCard';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 
 const MainNotice = () => {
-  const { uid } = auth().currentUser;
+  const {uid} = auth().currentUser;
   const [teams, setTeams] = useState();
 
   const [noticeList, setNoticeList] = useState([]);
@@ -33,7 +33,7 @@ const MainNotice = () => {
 
   const getTeams = async () => {
     await axios
-      .post('/api/teamList', { uid })
+      .post('/api/teamList', {uid})
       .then(res => {
         if (res.data) {
           setTeams(res.data);
@@ -76,56 +76,55 @@ const MainNotice = () => {
     readNotice();
   }, []);
 
-  const handleTeamClick = async (teamId) => {
+  const handleTeamClick = async teamId => {
     console.log('handleTeamClick 함수 호출됨:', teamId);
     try {
       let response;
       if (teamId === '전체') {
         console.log('전체 알림을 가져오는 요청 보냄');
         readNotice();
-        setClickedTeamId(null); 
+        setClickedTeamId(null);
       } else {
         console.log('특정 팀 알림을 가져오는 요청 보냄');
-        response = await axios.post('/api/notice', { uid, teamId });
+        response = await axios.post('/api/notice', {uid, teamId});
         setClickedTeamId(teamId); // 특정 팀을 클릭했을 때만 clickedTeamId를 설정합니다.
       }
       setNoticeList(response.data);
     } catch (error) {
       console.log(error);
     }
-  }; 
-  
-   
+  };
+
   return (
     <View>
       <View style={styles.top}>
         <Text style={styles.title}>알림</Text>
       </View>
-      <ScrollView horizontal={true} style={styles.category}>
+      <ScrollView
+        horizontal={true}
+        style={styles.category}
+        showsHorizontalScrollIndicator={false}>
         <TouchableOpacity
-  style={[
-    styles.team,
-  ]}
-  onPress={() => handleTeamClick('전체')}>
-  <View style={styles.teamContent}>
-    {clickedTeamId === null ? (
-      <LinearGradient
-        colors={['#749DF6', '#B9E3FC']}
-        style={styles.linearGradient}>
-        <Text numberOfLines={1} style={styles.teamText}>
-          전체
-        </Text>
-      </LinearGradient>
-    ) : (
-      <Text numberOfLines={1} style={styles.teamText}>
-        전체
-      </Text>
-    )}
-  </View>
-</TouchableOpacity>
+          style={[styles.team]}
+          onPress={() => handleTeamClick('전체')}>
+          <View style={styles.teamContent}>
+            {clickedTeamId === null ? (
+              <LinearGradient
+                colors={['#749DF6', '#B9E3FC']}
+                style={styles.linearGradient}>
+                <Text numberOfLines={1} style={styles.teamText}>
+                  전체
+                </Text>
+              </LinearGradient>
+            ) : (
+              <Text numberOfLines={1} style={styles.teamText}>
+                전체
+              </Text>
+            )}
+          </View>
+        </TouchableOpacity>
 
-
-    {teams &&
+        {teams &&
           teams.map(data => {
             return (
               <TouchableOpacity
@@ -155,7 +154,7 @@ const MainNotice = () => {
           })}
       </ScrollView>
       {noticeList.length > 0 ? (
-        <ScrollView style={{flexGrow: 1}}>
+        <ScrollView style={{flexGrow: 1}} showsVerticalScrollIndicator={false}>
           <View style={styles.noticeCardContainer}>
             {noticeList.reverse().map((notice, index) => (
               <View style={styles.noticeCard} key={index}>
@@ -212,6 +211,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 5,
+    backgroundColor: '#D9D9D9',
   },
   teamText: {
     fontSize: 16,
@@ -230,6 +230,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
   },
   teamContent: {
     width: '100%',
