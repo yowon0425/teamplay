@@ -30,8 +30,6 @@ const MyMap = ({teamId}) => {
   const [numNewTodo, setNumNewTodo] = useState(0);
   const [clickButton, setClickButton] = useState(false);
 
-  // 계획 없을 때 수정할 수 없게 오류처리 필요
-
   /* 프로젝트 계획 받아오기 */
   const getTodos = async () => {
     await axios
@@ -100,9 +98,9 @@ const MyMap = ({teamId}) => {
 
   return (
     <View>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <View style={styles.top}>
-          <Text style={styles.title}> </Text>
+          <View style={{width: 22}} />
           <Text style={styles.title}>프로젝트 계획</Text>
           <TouchableOpacity onPress={() => setShowMiniModal(!showMiniModal)}>
             <Entypo name="dots-three-vertical" style={styles.dot} />
@@ -139,7 +137,7 @@ const MyMap = ({teamId}) => {
             )}
           </View>
         </View>
-        {numTodo > 0 ? (
+        {numTodo > 0 && numTodo >= nowTodo ? (
           <View style={styles.button}>
             <PinkButton
               text="작업 완료"
@@ -176,7 +174,11 @@ const MyMap = ({teamId}) => {
             style={styles.modalOverlay}
             onPress={() => setShowMiniModal(!showMiniModal)}>
             <Shadow>
-              <View style={[styles.modalView, {height: 80}]}>
+              <View
+                style={[
+                  styles.modalView,
+                  {height: todos && numTodo > 0 ? 80 : 40},
+                ]}>
                 <TouchableOpacity
                   onPress={() => {
                     setShowMiniModal(!showMiniModal);
@@ -185,15 +187,19 @@ const MyMap = ({teamId}) => {
                   style={styles.modalTextContainer}>
                   <Text style={styles.modalText}>계획 등록</Text>
                 </TouchableOpacity>
-                <View style={styles.modalLine} />
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowMiniModal(!showMiniModal);
-                    setEditMode(true);
-                  }}
-                  style={styles.modalTextContainer}>
-                  <Text style={styles.modalText}>계획 수정</Text>
-                </TouchableOpacity>
+                {todos && numTodo > 0 ? (
+                  <>
+                    <View style={styles.modalLine} />
+                    <TouchableOpacity
+                      onPress={() => {
+                        setShowMiniModal(!showMiniModal);
+                        setEditMode(true);
+                      }}
+                      style={styles.modalTextContainer}>
+                      <Text style={styles.modalText}>계획 수정</Text>
+                    </TouchableOpacity>
+                  </>
+                ) : null}
               </View>
             </Shadow>
           </TouchableOpacity>
@@ -230,11 +236,13 @@ const styles = StyleSheet.create({
   // 화면 스타일
   container: {},
   top: {
-    width: '100%',
+    alignSelf: 'center',
+    width: '90%',
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 5,
+    margin: 10,
   },
   notice: {
     padding: 5,
@@ -251,7 +259,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     color: 'black',
-    margin: 10,
   },
   dot: {
     fontSize: 20,

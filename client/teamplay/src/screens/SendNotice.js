@@ -1,34 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, TextInput } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
+import {Picker} from '@react-native-picker/picker';
 import PinkButton from '../components/PinkButton';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import PushNotification from 'react-native-push-notification';
-import { useRoute } from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
-const SendNotice = ({ fcmToken }) => {
+const SendNotice = ({fcmToken}) => {
   const [title, setTitle] = useState('');
   const [notificationText, setNotificationText] = useState('');
   const [teamMembers, setTeamMembers] = useState([]);
 
   const route = useRoute();
-  const { teamId } = route.params;
-  
+  const {teamId} = route.params;
+  console.log(fcmToken);
+
+  const navigation = useNavigation();
+
   const createChannel = () => {
     PushNotification.createChannel({
       channelId: 'team-channel',
       channelName: 'Team Channel',
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     createChannel();
     addTeamMember();
-  }, [])
+  }, []);
 
   // 팀 멤버 추가
-  const addTeamMember = async (memberData) => {
+  const addTeamMember = async memberData => {
     try {
       const response = await axios.post('/api/teamData/member', {teamId});
       if (response.data) {
@@ -43,13 +54,20 @@ const SendNotice = ({ fcmToken }) => {
 
   const handleButtonPress = async () => {
     const {displayName} = auth().currentUser;
-  
+
     const addNotice = async () => {
       console.log('api 호출됨');
 
       const memberUid = teamMembers.map(member => member.uid);
 
-      console.log('보내는 정보: ' + fcmToken, displayName, teamId, memberUid, title, notificationText);
+      console.log(
+        '보내는 정보: ' + fcmToken,
+        displayName,
+        teamId,
+        memberUid,
+        title,
+        notificationText,
+      );
 
       await axios
         .post('/api/sendNotice', {
@@ -58,54 +76,71 @@ const SendNotice = ({ fcmToken }) => {
           teamId,
           teamMember: memberUid,
           title: title,
-          content: notificationText
+          content: notificationText,
         })
         .catch(err => console.log(err));
     };
-  
-    PushNotification.getChannels(function(channel_ids) {
+
+    PushNotification.getChannels(function (channel_ids) {
       console.log(channel_ids);
-    })
-  
+    });
+
     PushNotification.localNotification({
       channelId: 'team-channel',
       title: title,
-      message: notificationText 
-    })
-  
+      message: notificationText,
+    });
+
     addNotice();
-  };  
+    navigation.goBack();
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>알림 보내기</Text>
-      <View style={styles.inputContainer}>
-        <View style={styles.inputLine}>
-          <Text style={styles.text}>알림 제목</Text>
-          <TextInput
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={{width: 22}} />
+          <Text style={styles.title}>알림 보내기</Text>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.goBack();
+            }}>
+            <Text style={{fontSize: 20}}>X</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.inputContainer}>
+          <View style={styles.inputLine}>
+            <Text style={styles.text}>알림 제목</Text>
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={setTitle}
+            />
+          </View>
+          <View style={styles.inputLine}>
+            <Text style={styles.text}>알림 내용</Text>
+            <TextInput
+              style={styles.commentInput}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+              value={notificationText}
+              onChangeText={setNotificationText}
+            />
+          </View>
+        </View>
+        {title && notificationText ? (
+          <PinkButton
             style={styles.input}
-            value={title}
-            onChangeText={setTitle}
+            text="알림 보내기"
+            light={true}
+            onPress={handleButtonPress}
           />
-        </View>
-        <View style={styles.inputLine}>
-          <Text style={styles.text}>알림 내용</Text>
-          <TextInput
-            style={styles.commentInput}
-            multiline
-            numberOfLines={4}
-            value={notificationText}
-            onChangeText={setNotificationText}
-          />
-        </View>
+        ) : (
+          <PinkButton text="알림 보내기" light={false} />
+        )}
       </View>
-      <PinkButton
-        style={styles.input}
-        text="알림 보내기"
-        light={true}
-        onPress={handleButtonPress}
-      />
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -116,6 +151,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  header: {
+    width: '90%',
+    paddingHorizontal: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginBottom: 20,
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -123,7 +167,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   inputContainer: {
-    width: '80%',
+    width: '90%',
     marginBottom: 30,
   },
   inputLine: {

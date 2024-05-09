@@ -6,7 +6,6 @@ const { db, bucket, admin, storage } = require("./firebase");
 const multer = require("multer");
 const { getDownloadURL } = require("firebase-admin/storage");
 const { FieldValue } = admin.firestore;
-const serviceAccount = require("./teamplay-a0079-firebase-adminsdk-wgp5n-99c4de8b25.json");
 
 const upload = multer({ storage: multer.memoryStorage() });
 const fs = require("fs").promises;
@@ -250,17 +249,7 @@ app.post("/api/joinTeam", async (req, res) => {
   let name = "";
   let description = "";
 
-  try {
-    await axios
-      .post("http://127.0.0.1:4000/api/teamData", { teamId })
-      .then((res) => {
-        name = res.data.name;
-        description = res.data.description;
-      })
-      .catch((err) => {
-        res.send({ errorMsg: "존재하지 않는 팀입니다." });
-      });
-
+  const joinTeam = async () => {
     let teamObj = {
       teamId,
       name,
@@ -323,8 +312,37 @@ app.post("/api/joinTeam", async (req, res) => {
       .collection("fileList")
       .doc(uid)
       .set({ ...files });
+  };
 
-    res.send({ isJoined: true });
+  try {
+    await axios
+      .post("http://127.0.0.1:4000/api/teamData", { teamId })
+      .then((teams) => {
+        if (
+          teams.data &&
+          teams.data.member.filter((e) => {
+            return e.uid == uid;
+          }).length < 1
+        ) {
+          name = teams.data.name;
+          description = teams.data.description;
+          joinTeam();
+          res.send({ isJoined: true });
+        } else if (
+          teams.data.member.filter((e) => {
+            return e.uid == uid;
+          }).length > 0
+        ) {
+          console.log("이미 참가");
+          res.send({ errorMsg: "이미 참가한 팀입니다." });
+        } else {
+          res.send({ errorMsg: "존재하지 않는 팀입니다." });
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        res.send({ errorMsg: "존재하지 않는 팀입니다." });
+      });
   } catch (err) {
     res.send({ isJoined: false });
     console.log(err);
