@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,12 @@ import {
   Platform,
   TouchableOpacity,
 } from 'react-native';
-import {Calendar, LocaleConfig} from 'react-native-calendars';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
+import { useRoute } from '@react-navigation/native';
 
 LocaleConfig.locales['ko-KR'] = {
   monthNames: [
@@ -64,7 +65,7 @@ LocaleConfig.locales['ko-KR'] = {
 };
 LocaleConfig.defaultLocale = 'ko-KR';
 
-const CalendarScreen = ({teamId}) => {
+const CalendarScreen = ({ teamId }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [isTextInputVisible, setIsTextInputVisible] = useState(false);
   const [eventText, setEventText] = useState('');
@@ -72,7 +73,7 @@ const CalendarScreen = ({teamId}) => {
   const [events, setEvents] = useState({});
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const {uid} = auth().currentUser;
+  const { uid } = auth().currentUser;
 
   // 이벤트 핸들러 함수들
   const handleDayPress = (day) => {
@@ -83,7 +84,7 @@ const CalendarScreen = ({teamId}) => {
 
   const handleAddEvent = async () => {
     if (selectedDate && eventText) {
-      const updatedEvents = {...events};
+      const updatedEvents = { ...events };
       const dateTime = `${selectedDate}`;
       if (!updatedEvents[dateTime]) {
         updatedEvents[dateTime] = [];
@@ -96,6 +97,8 @@ const CalendarScreen = ({teamId}) => {
       });
 
       const formattedEvent = `${formattedTime} ${eventText}`;
+
+      updatedEvents[dateTime].push({ text: formattedEvent, time: formattedTime });
 
       try {
         const res = await axios.post('/api/addCalender', {
@@ -133,14 +136,10 @@ const CalendarScreen = ({teamId}) => {
   };
 
   const handleDeleteEvent = async (dateTime, index) => {
-    const updatedEvents = {...events};
+    const updatedEvents = { ...events };
     const eventsOnDateTime = updatedEvents[dateTime];
 
-    if (
-      eventsOnDateTime &&
-      eventsOnDateTime.length > index &&
-      eventsOnDateTime[index]
-    ) {
+    if (eventsOnDateTime && eventsOnDateTime.length > index && eventsOnDateTime[index]) {
       const eventToDelete = eventsOnDateTime[index];
 
       if (eventToDelete && eventToDelete.time) {
@@ -179,38 +178,12 @@ const CalendarScreen = ({teamId}) => {
           }
         } else {
           console.error('사용자 정보를 가져올 수 없습니다.');
-        // 이벤트를 삭제한 후 바로 events 상태를 업데이트
-        setEvents(updatedEvents);
-
-        try {
-          console.log(eventToDelete.text.split(' ')[1], selectedDate);
-          const res = await axios.post('/api/deleteCalender', {
-            uid,
-            teamId,
-            name: eventToDelete.text.split(' ')[1], // 이벤트의 설명 또는 이름으로 변경
-            date: selectedDate,
-            time: eventToDelete.time,
-          });
-
-          if (res.data) {
-            // 성공 시 상태 업데이트
-            setEvents(updatedEvents);
-          } else {
-            // 실패 시 할 작업
-          }
-        } catch (err) {
-          // 에러 시 할 작업
-          console.error('이벤트 삭제 중 오류 발생:', err);
         }
       } else {
-        console.error(
-          '이벤트 삭제 중 오류 발생: 이벤트 정보가 올바르게 설정되지 않았습니다.',
-        );
+        console.error('이벤트 삭제 중 오류 발생: 이벤트 정보가 올바르게 설정되지 않았습니다.');
       }
     } else {
-      console.error(
-        '이벤트 삭제 중 오류 발생: 이벤트 정보가 유효하지 않습니다.',
-      );
+      console.error('이벤트 삭제 중 오류 발생: 이벤트 정보가 유효하지 않습니다.');
     }
   };
 
@@ -222,11 +195,11 @@ const CalendarScreen = ({teamId}) => {
       const updatedEvents = {};
       Object.keys(eventData).forEach((key) => {
         const event = eventData[key];
-        const {name, date, time} = event;
+        const { name, date, time } = event;
         if (!updatedEvents[date]) {
           updatedEvents[date] = [];
         }
-        updatedEvents[date].push({text: `${time} ${name}`, time: time});
+        updatedEvents[date].push({ text: `${time} ${name}`, time: time });
       });
       setEvents(updatedEvents);
     } catch (error) {
@@ -291,7 +264,7 @@ const CalendarScreen = ({teamId}) => {
 
   return (
     <KeyboardAvoidingView
-      style={{flex: 1}}
+      style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       enabled>
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
@@ -310,7 +283,7 @@ const CalendarScreen = ({teamId}) => {
               calendarBackground: 'transparent', // Set the background color to transparent
             }}
             renderDay={renderDay}
-            style={{backgroundColor: 'transparent'}}
+            style={{ backgroundColor: 'transparent' }}
           />
 
           {isTextInputVisible && (
@@ -327,7 +300,7 @@ const CalendarScreen = ({teamId}) => {
               <TouchableOpacity
                 style={styles.addButton}
                 onPress={handleAddEvent}>
-                <Text style={{fontSize: 24, color: 'white'}}>+</Text>
+                <Text style={{ fontSize: 24, color: 'white' }}>+</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -347,7 +320,7 @@ const CalendarScreen = ({teamId}) => {
   );
 };
 
-const EventList = ({events, onDeleteEvent}) => {
+const EventList = ({ events, onDeleteEvent }) => {
   const sortedDateTimes = Object.keys(events).sort();
 
   return (
