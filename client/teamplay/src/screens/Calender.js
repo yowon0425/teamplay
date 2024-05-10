@@ -49,18 +49,18 @@ LocaleConfig.locales['ko-KR'] = {
   dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
   today: '오늘',
   monthNames: [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
+    '1월',
+    '2월',
+    '3월',
+    '4월',
+    '5월',
+    '6월',
+    '7월',
+    '8월',
+    '9월',
+    '10월',
+    '11월',
+    '12월',
   ],
 };
 LocaleConfig.defaultLocale = 'ko-KR';
@@ -211,11 +211,13 @@ const CalendarScreen = ({ teamId }) => {
 
   const renderDay = (date) => {
     const eventsOnDate = events[date.dateString];
-    const formattedDate = new Date(date.dateString).toLocaleDateString('en', {
+    const formattedDate = new Date(date.dateString).toLocaleDateString('ko-KR', {
+      year: 'numeric',
       month: 'long',
       day: 'numeric',
+      weekday: 'short', // 요일 추가
     });
-    
+  
     const containerStyle = {
       backgroundColor: 'transparent',
     };
@@ -327,9 +329,10 @@ const EventList = ({ events, onDeleteEvent }) => {
         <View key={dateTime}>
           <View style={styles.dayTop}>
             <Text style={styles.dayText}>
-              {new Date(dateTime).toLocaleDateString('en', {
-                month: 'short',
+              {new Date(dateTime).toLocaleDateString('ko-KR', {
+                month: 'long',
                 day: 'numeric',
+                weekday: 'long',
               })}
             </Text>
             <View style={styles.separator} />
@@ -424,12 +427,12 @@ const styles = StyleSheet.create({
   },
   Text1: {
     fontSize: 14,
-    textAlign: 'right', // 월과 일을 오른쪽으로 정렬
+    left: '20%',
     marginRight: 20,
   },
   Text2: {
     fontSize: 14,
-    textAlign: 'right', // 월과 일을 오른쪽으로 정렬
+    left: '60%',
     color: 'black',
   },
   separator: {
