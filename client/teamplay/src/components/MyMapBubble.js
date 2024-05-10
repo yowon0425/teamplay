@@ -13,14 +13,12 @@ const MyMapBubble = ({
   showEditTodo,
 }) => {
   const handleEditMode = () => {
-    console.log('=======handleEditMode========');
     setEditNum(todoData.number);
     showEditTodo(true);
   };
 
   const navigation = useNavigation();
   const openMyUpload = () => {
-    console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       teamId,

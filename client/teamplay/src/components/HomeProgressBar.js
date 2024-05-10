@@ -1,4 +1,4 @@
-import {Animated, StyleSheet, Text, View} from 'react-native';
+import {Animated, StyleSheet, View} from 'react-native';
 import React, {useEffect, useRef} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 

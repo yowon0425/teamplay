@@ -41,20 +41,32 @@ const FileInfoLine = ({file}) => {
               notification: true,
               path: `${dirToSave}/${file.name}`,
             }).fetch('GET', res.data.url);
-            ToastAndroid.showWithGravity(
-              '파일 다운로드에 성공했습니다.',
-              ToastAndroid.SHORT,
-              ToastAndroid.BOTTOM,
-            );
+            if (Platform.OS === 'android') {
+              ToastAndroid.showWithGravity(
+                '파일 다운로드에 성공했습니다.',
+                ToastAndroid.SHORT,
+                ToastAndroid.BOTTOM,
+              );
+            } else {
+              Alert.alert('Teamplay', '파일 다운로드에 성공했습니다.', [
+                {text: '확인'},
+              ]);
+            }
           } catch {
             Linking.openURL(res.data.url);
           }
         } else {
-          ToastAndroid.showWithGravity(
-            '파일 다운로드에 실패했습니다.',
-            ToastAndroid.SHORT,
-            ToastAndroid.BOTTOM,
-          );
+          if (Platform.OS === 'android') {
+            ToastAndroid.showWithGravity(
+              '파일 다운로드에 실패했습니다.',
+              ToastAndroid.SHORT,
+              ToastAndroid.BOTTOM,
+            );
+          } else {
+            Alert.alert('Teamplay', '파일 다운로드에 실패했습니다.', [
+              {text: '확인'},
+            ]);
+          }
         }
       })
       .catch(err => console.log(err));
@@ -79,7 +91,7 @@ const FileInfoLine = ({file}) => {
         <Text style={styles.fileName}>{file.name}</Text>
         <Text style={styles.time}>{file.visibleTime}</Text>
       </TouchableOpacity>
-      <View style={styles.line}></View>
+      <View style={styles.line} />
     </View>
   );
 };

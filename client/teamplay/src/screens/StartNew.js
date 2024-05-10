@@ -10,10 +10,9 @@ import {
   TouchableOpacity,
   Share,
   ToastAndroid,
+  Platform,
+  Alert,
 } from 'react-native';
-import Button from '../components/PinkButton';
-import {v4 as uuidv4} from 'uuid';
-import {getRandomBase64} from 'react-native-get-random-values';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
@@ -67,11 +66,15 @@ const StartNew = () => {
         message: `[Teamplay]\n팀플 ID로 팀플에 참여하세요!\n팀플 ID : ${teamId}`,
       });
     } catch {
-      ToastAndroid.showWithGravity(
-        '공유에 실패했습니다.',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-      );
+      if (Platform.OS === 'android') {
+        ToastAndroid.showWithGravity(
+          '공유에 실패했습니다.',
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM,
+        );
+      } else {
+        Alert.alert('Teamplay', '공유에 실패했습니다.', [{text: '확인'}]);
+      }
     }
   };
   // API 호출
@@ -113,9 +116,23 @@ const StartNew = () => {
           console.log('Team created successfully.');
         } else {
           console.log('Team creation failed.');
+          if (Platform.OS === 'android') {
+            ToastAndroid.showWithGravity(
+              '팀플 생성에 실패했습니다.',
+              ToastAndroid.SHORT,
+              ToastAndroid.BOTTOM,
+            );
+          } else {
+            Alert.alert('Teamplay', '팀플 생성에 실패했습니다.', [
+              {text: '확인'},
+            ]);
+          }
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        Alert.alert('Error', err);
+      });
   };
 
   return (

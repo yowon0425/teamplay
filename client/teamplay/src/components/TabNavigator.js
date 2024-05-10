@@ -1,6 +1,4 @@
-import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Notice from '../screens/Notice';
 import Home from '../screens/Home';
@@ -13,7 +11,7 @@ import Profile from '../screens/Profile';
 const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
   const params = JSON.stringify(route);
-  console.log('route: ' + params);
+
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({

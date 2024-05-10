@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
-import {useRoute} from '@react-navigation/native';
 
 LocaleConfig.locales['ko-KR'] = {
   monthNames: [

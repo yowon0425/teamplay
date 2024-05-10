@@ -108,7 +108,7 @@ const EditTodoModal = ({
           </TouchableOpacity>
         </View>
         <View style={styles.contentContainer}>
-          <View style={styles.inputName}>
+          <View>
             <Text style={styles.text}>계획 이름</Text>
             <Text style={styles.text}>기한</Text>
           </View>
@@ -226,7 +226,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 3,
   },
-  inputName: {},
   inputBox: {
     alignItems: 'flex-end',
     justifyContent: 'center',

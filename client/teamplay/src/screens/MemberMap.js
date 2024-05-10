@@ -1,9 +1,8 @@
-import {StyleSheet, Text, View, ScrollView} from 'react-native';
-import React, {memo, useEffect, useState} from 'react';
+import {StyleSheet, Text, View, ScrollView, Alert} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import MemberMapBubble from '../components/MemberMapBubble';
 import ProgressBar from '../components/ProgressBar';
-import {auth} from '@react-native-firebase/auth';
 
 const MemberMap = ({teamId, memberId, memberObj}) => {
   const [todos, setTodos] = useState();
@@ -11,6 +10,7 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
   const [memObj, setMemObj] = useState(memberObj);
+  const [errorMsg, setErrorMsg] = useState('');
 
   /* 멤버 이름 가져오기 */
   const getMember = async () => {
@@ -20,7 +20,6 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
         if (res.data) {
           var memberName = res.data.find(data => data.uid == memberId).userName;
           var memberRole = res.data.find(data => data.uid == memberId).role;
-          console.log('이름 : ' + JSON.stringify(memberName));
           setName(memberName);
           setRole(memberRole);
         }
@@ -35,17 +34,20 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
       .then(res => {
         if (res.data) {
           setTodos(res.data[memberId]);
+          setErrorMsg('');
         } else {
-          // 실패 시 할 작업
+          setErrorMsg('계획을 불러오지 못했습니다.');
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        Alert.alert('Error', err);
+      });
   };
 
   useEffect(() => {
     getTodos();
     getMember();
-    console.log('투두 불러오는 함수 실행');
   }, [memberId]);
 
   useEffect(() => {
@@ -61,11 +63,10 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
       }
     }
     setNowTodo(numCompleted + 1);
-    console.log('지금 투두 : ' + nowTodo);
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView showsVerticalScrollIndicator={false}>
       <View style={styles.top}>
         <View>
           <Text style={styles.name}>{name}</Text>
@@ -102,7 +103,9 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
               );
             })
           ) : (
-            <Text style={styles.empty}>등록한 계획이 없습니다.</Text>
+            <Text style={styles.empty}>
+              {errorMsg != '' ? errorMsg : '등록한 계획이 없습니다.'}
+            </Text>
           )}
         </View>
       </View>
@@ -113,7 +116,6 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
 export default MemberMap;
 
 const styles = StyleSheet.create({
-  container: {},
   top: {
     width: '100%',
     alignItems: 'center',
