@@ -65,7 +65,7 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.top}>
         <View>
           <Text style={styles.name}>{name}</Text>
@@ -117,11 +117,12 @@ const styles = StyleSheet.create({
   top: {
     width: '100%',
     alignItems: 'center',
+    padding: 10,
+    justifyContent: 'center',
   },
   name: {
     fontSize: 20,
     color: 'black',
-    margin: 10,
   },
   progress: {
     width: '100%',
@@ -147,7 +148,8 @@ const styles = StyleSheet.create({
   maps: {
     width: '75%',
     height: '70%',
-    margin: 50,
+    margin: 30,
+    padding: 10,
   },
   empty: {
     fontSize: 16,

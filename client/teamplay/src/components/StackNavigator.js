@@ -36,7 +36,7 @@ Stack Navigator
 
 const Stack = createNativeStackNavigator();
 
-const StackNavigator = () => {
+const StackNavigator = ({fcmToken}) => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Main">
@@ -75,11 +75,9 @@ const StackNavigator = () => {
           component={MainNotice}
           options={{headerShown: false}}
         />
-        <Stack.Screen
-          name="SendNotice"
-          component={SendNotice}
-          options={{headerShown: false}}
-        />
+        <Stack.Screen name="SendNotice" options={{headerShown: false}}>
+          {() => <SendNotice fcmToken={fcmToken} />}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

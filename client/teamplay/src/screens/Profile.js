@@ -147,6 +147,7 @@ const Profile = ({teamId}) => {
             <Text style={styles.text}>역할</Text>
             <TextInput
               style={styles.input}
+              maxLength={14}
               onChangeText={text => setRole(text)}
               defaultValue={
                 role != '아직 역할을 설정하지 않았습니다'

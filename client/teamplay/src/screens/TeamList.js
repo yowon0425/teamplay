@@ -112,13 +112,15 @@ const TeamList = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}> </Text>
+        <View style={{width: 22}} />
         <Text style={styles.headerText}>나의 팀</Text>
         <TouchableOpacity onPress={openMainNotice}>
           <Ionic name="notifications-outline" style={styles.noticeIcon} />
         </TouchableOpacity>
       </View>
-      <ScrollView style={styles.teamListContainer}>
+      <ScrollView
+        style={styles.teamListContainer}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.teamList}>
           {teams &&
             teams.map(data => {
@@ -175,8 +177,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    width: '85%',
+    width: '90%',
     alignItems: 'center',
+    paddingHorizontal: 5,
     margin: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -185,13 +188,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    textAlign: 'center',
   },
   noticeIcon: {
     fontSize: 22,
     fontWeight: 'bold',
     color: 'black',
-    alignSelf: 'center',
   },
   teamListContainer: {
     width: '100%',
