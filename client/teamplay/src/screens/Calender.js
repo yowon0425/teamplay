@@ -451,6 +451,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   deleteButton: {
-    marginLeft: 'auto',
+    marginLeft: 'auto'
   },
 });
