@@ -15,7 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 
-LocaleConfig.locales.fr = {
+LocaleConfig.locales['ko-KR'] = {
   monthNames: [
     '1월',
     '2월',
@@ -44,16 +44,8 @@ LocaleConfig.locales.fr = {
     '11월',
     '12월',
   ],
-  dayNames: [
-    '일요일',
-    '월요일',
-    '화요일',
-    '수요일',
-    '목요일',
-    '금요일',
-    '토요일',
-  ],
-  dayNamesShort: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
+  dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+  dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
   today: '오늘',
   monthNames: [
     'January',
@@ -70,7 +62,7 @@ LocaleConfig.locales.fr = {
     'December',
   ],
 };
-LocaleConfig.defaultLocale = 'fr';
+LocaleConfig.defaultLocale = 'ko-KR';
 
 const CalendarScreen = ({teamId}) => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -83,7 +75,7 @@ const CalendarScreen = ({teamId}) => {
   const {uid} = auth().currentUser;
 
   // 이벤트 핸들러 함수들
-  const handleDayPress = day => {
+  const handleDayPress = (day) => {
     setSelectedDate(day.dateString);
     setIsTextInputVisible(false);
     setShowTimePicker(true);
@@ -104,8 +96,6 @@ const CalendarScreen = ({teamId}) => {
       });
 
       const formattedEvent = `${formattedTime} ${eventText}`;
-
-      updatedEvents[dateTime].push({text: formattedEvent, time: formattedTime});
 
       try {
         const res = await axios.post('/api/addCalender', {
@@ -160,6 +150,35 @@ const CalendarScreen = ({teamId}) => {
           delete updatedEvents[dateTime];
         }
 
+        // 이벤트를 삭제한 후 상태를 업데이트합니다.
+        setEvents(updatedEvents);
+
+        // 현재 사용자의 UID를 가져옵니다.
+        const currentUser = auth().currentUser;
+        if (currentUser) {
+          const uid = currentUser.uid;
+
+          try {
+            console.log(eventToDelete.text.split(' ')[1], dateTime);
+            const res = await axios.post('/api/deleteCalender', {
+              uid,
+              teamId,
+              name: eventToDelete.text.split(' ')[1],
+              date: dateTime,
+              time: eventToDelete.time,
+            });
+
+            if (res.data) {
+              // 성공 시 아무 작업도 하지 않습니다.
+            } else {
+              // 실패 시 할 작업
+            }
+          } catch (err) {
+            // 에러 시 할 작업
+            console.error('이벤트 삭제 중 오류 발생:', err);
+          }
+        } else {
+          console.error('사용자 정보를 가져올 수 없습니다.');
         // 이벤트를 삭제한 후 바로 events 상태를 업데이트
         setEvents(updatedEvents);
 
@@ -197,11 +216,11 @@ const CalendarScreen = ({teamId}) => {
 
   const readAlarm = async (uid, teamId) => {
     try {
-      const response = await axios.post('/api/calender', {uid, teamId});
+      const response = await axios.post('/api/calender', { uid, teamId });
       const eventData = response.data;
 
       const updatedEvents = {};
-      Object.keys(eventData).forEach(key => {
+      Object.keys(eventData).forEach((key) => {
         const event = eventData[key];
         const {name, date, time} = event;
         if (!updatedEvents[date]) {
@@ -217,19 +236,17 @@ const CalendarScreen = ({teamId}) => {
 
   readAlarm(uid, teamId);
 
-  const renderDay = date => {
+  const renderDay = (date) => {
     const eventsOnDate = events[date.dateString];
-
-    // Use toLocaleDateString to format the date string
-    const formattedDate = new Date(date.dateString).toLocaleDateString({
-      weekday: 'long',
+    const formattedDate = new Date(date.dateString).toLocaleDateString('en', {
+      month: 'long',
       day: 'numeric',
     });
-
+    
     const containerStyle = {
-      backgroundColor: 'transparent', // Set the background color to transparent
+      backgroundColor: 'transparent',
     };
-
+  
     return (
       <TouchableOpacity onPress={() => handleDayPress(date)}>
         <LinearGradient
@@ -241,7 +258,7 @@ const CalendarScreen = ({teamId}) => {
             </Text>
           </View>
         </LinearGradient>
-        {eventsOnDate &&
+        {eventsOnDate && eventsOnDate.length > 0 && (
           eventsOnDate.map((event, index) => (
             <View key={index} style={styles.eventContainer}>
               <TouchableOpacity
@@ -250,10 +267,11 @@ const CalendarScreen = ({teamId}) => {
               </TouchableOpacity>
               <Text style={styles.eventText}>{`${event.text}`}</Text>
             </View>
-          ))}
+          ))
+        )}
       </TouchableOpacity>
     );
-  };
+  };  
 
   // 렌더링
   const currentDate = new Date();
@@ -274,11 +292,11 @@ const CalendarScreen = ({teamId}) => {
       style={{flex: 1}}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       enabled>
-      <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
+      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.title}>일정</Text>
         </View>
-        <View style={{flex: 1, justifyContent: 'space-between'}}>
+        <View style={{ flex: 1, justifyContent: 'space-between' }}>
           <Calendar
             current={currentDateString}
             monthFormat={'MMMM'}
@@ -299,7 +317,7 @@ const CalendarScreen = ({teamId}) => {
                 style={styles.textInput}
                 placeholder="일정을 입력하세요..."
                 value={eventText}
-                onChangeText={text => setEventText(text)}
+                onChangeText={(text) => setEventText(text)}
                 autoCorrect={false}
                 autoCapitalize="none"
                 keyboardType="default"
@@ -337,8 +355,8 @@ const EventList = ({events, onDeleteEvent}) => {
           <View style={styles.dayTop}>
             <Text style={styles.dayText}>
               {new Date(dateTime).toLocaleDateString('en', {
+                month: 'short',
                 day: 'numeric',
-                weekday: 'long',
               })}
             </Text>
             <View style={styles.separator} />
@@ -348,12 +366,8 @@ const EventList = ({events, onDeleteEvent}) => {
               key={`${dateTime}_${eventIndex}`}
               style={styles.eventContainer}>
               <View style={styles.eventTextContainer}>
-                <Text style={styles.Text1}>{`${
-                  event.text.split(' ')[0]
-                }`}</Text>
-                <Text style={styles.Text2}>{`${
-                  event.text.split(' ')[1]
-                }`}</Text>
+                <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
+                <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
               </View>
               <TouchableOpacity
                 onPress={() => onDeleteEvent(dateTime, eventIndex)}
@@ -437,12 +451,12 @@ const styles = StyleSheet.create({
   },
   Text1: {
     fontSize: 14,
-    left: '20%',
+    textAlign: 'right', // 월과 일을 오른쪽으로 정렬
     marginRight: 20,
   },
   Text2: {
     fontSize: 14,
-    left: '60%',
+    textAlign: 'right', // 월과 일을 오른쪽으로 정렬
     color: 'black',
   },
   separator: {
