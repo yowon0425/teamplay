@@ -7,7 +7,6 @@ import {useNavigation} from '@react-navigation/native';
 const TeamCard = ({team}) => {
   const navigation = useNavigation();
   const openHome = () => {
-    console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Home',
       teamId: team.teamId,
@@ -54,11 +53,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'black',
+    textAlign: 'center',
   },
   teamDescription: {
     marginTop: 10,
     color: 'black',
     alignSelf: 'center',
+    textAlign: 'center',
   },
   buttonContainer: {
     marginTop: 20,

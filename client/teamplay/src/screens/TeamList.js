@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   View,
@@ -22,6 +22,8 @@ const TeamList = () => {
   console.log('팀리스트로');
   const [showModal, setShowModal] = useState(false);
   const [teams, setTeams] = useState();
+  const [errorMsg, setErrorMsg] = useState('');
+  const {uid} = auth().currentUser;
 
   /* 하드웨어 뒤로가기 제어 */
   useEffect(() => {
@@ -50,28 +52,27 @@ const TeamList = () => {
     };
   }, []);
 
+  const navigation = useNavigation();
   // 전체 알림 페이지로
   const openMainNotice = () => {
-    console.log('네비게이터');
     navigation.push('MainNotice');
   };
-
-  const navigation = useNavigation();
+  // 새 팀 만들기로
   const openStartNew = () => {
-    console.log('네비게이터');
     navigation.push('StartNew', {
       userName: {uid},
     });
     setShowModal(false);
   };
+  // 팀 참가하기로
   const openStartJoin = () => {
-    console.log('네비게이터');
     navigation.push('StartJoin', {
       userName: {uid},
     });
     setShowModal(false);
   };
 
+  // 모달 제어
   const modalOpen = () => {
     console.log(showModal);
     setShowModal(true);
@@ -81,9 +82,9 @@ const TeamList = () => {
     setShowModal(false);
   };
 
+  /* 팀리스트 불러오기 */
   useEffect(() => {
     getTeams();
-    console.log('팀리스트 불러오는 함수 실행');
   }, []);
 
   useFocusEffect(
@@ -92,38 +93,46 @@ const TeamList = () => {
     }, []),
   );
 
-  const {uid} = auth().currentUser;
   const getTeams = async () => {
     await axios
       .post('/api/teamList', {uid})
       .then(res => {
         if (res.data) {
           setTeams(res.data);
+          setErrorMsg('');
           /* 응답 형식
               {
                 teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
               }
           */
+        } else {
+          setErrorMsg('팀 리스트 불러오기에 실패했습니다.');
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        Alert.alert('Error', err);
+      });
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}> </Text>
+        <View style={{width: 22}} />
         <Text style={styles.headerText}>나의 팀</Text>
         <TouchableOpacity onPress={openMainNotice}>
           <Ionic name="notifications-outline" style={styles.noticeIcon} />
         </TouchableOpacity>
       </View>
-      <ScrollView style={styles.teamListContainer}>
+      <ScrollView
+        style={styles.teamListContainer}
+        showsVerticalScrollIndicator={false}>
         <View style={styles.teamList}>
           {teams &&
             teams.map(data => {
               return <TeamCard key={data.teamId} team={data} />;
             })}
+          {errorMsg != '' ? errorMsg : null}
           <TouchableOpacity onPress={modalOpen} style={styles.teamBlock}>
             <Shadow
               style={styles.shadow}
@@ -175,8 +184,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    width: '85%',
+    width: '90%',
     alignItems: 'center',
+    paddingHorizontal: 5,
     margin: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -185,13 +195,11 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
-    textAlign: 'center',
   },
   noticeIcon: {
     fontSize: 22,
     fontWeight: 'bold',
     color: 'black',
-    alignSelf: 'center',
   },
   teamListContainer: {
     width: '100%',

@@ -29,17 +29,12 @@ const EditTodoModal = ({
   const [time, setTime] = useState(initialDate);
   const [dateOpen, setDateOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
-  const [isCompleted, setIsCompleted] = useState();
 
   useEffect(() => {
     setContent(todoData.content);
     setDate(initialDate);
     setTime(initialDate);
   }, [todoData]);
-
-  useEffect(() => {
-    showTodo(false);
-  }, [isCompleted]);
 
   const editTodo = async () => {
     const selectedDue =
@@ -73,7 +68,6 @@ const EditTodoModal = ({
           } else {
             console.log('수정 실패');
           }
-          setIsCompleted(res.data);
         })
         .catch(err => console.log(err));
     } catch (err) {
@@ -114,7 +108,7 @@ const EditTodoModal = ({
           </TouchableOpacity>
         </View>
         <View style={styles.contentContainer}>
-          <View style={styles.inputName}>
+          <View>
             <Text style={styles.text}>계획 이름</Text>
             <Text style={styles.text}>기한</Text>
           </View>
@@ -232,7 +226,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 3,
   },
-  inputName: {},
   inputBox: {
     alignItems: 'flex-end',
     justifyContent: 'center',

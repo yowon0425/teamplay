@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -24,6 +25,7 @@ const Notice = ({teamId}) => {
       setNoticeList(response.data); // 알림 리스트 설정
     } catch (error) {
       console.log(error);
+      Alert.alert('Error', error);
     }
   };
 
@@ -37,14 +39,13 @@ const Notice = ({teamId}) => {
       const response = await axios.post('/api/notice', {uid, teamId});
       fetchNoticeList();
     } catch (error) {
-      console.log(error);
+      Alert.alert('Error', error);
     }
   };
 
   // 알림 보내기 페이지로 이동
   const navigation = useNavigation();
   const openSendNotice = () => {
-    console.log('네비게이터');
     navigation.navigate('SendNotice', {teamId});
   };
 
@@ -62,15 +63,15 @@ const Notice = ({teamId}) => {
   return (
     <View style={styles.container}>
       <View style={styles.top}>
-        <Text style={styles.title}> </Text>
+        <View style={{width: 22}} />
         <Text style={styles.title}>알림</Text>
         <TouchableOpacity onPress={openSendNotice}>
           <Ionic name="notifications-outline" style={styles.noticeIcon} />
         </TouchableOpacity>
       </View>
-      <ScrollView>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.noticeCardContainer}>
-          {noticeList ? (
+          {noticeList.length > 0 ? (
             noticeList
               .reverse()
               .map((notice, index) => (
@@ -95,23 +96,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   top: {
+    width: '90%',
     flexDirection: 'row',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 5,
     alignItems: 'center',
     justifyContent: 'space-between',
+    margin: 10,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 20,
     color: 'black',
-    fontWeight: '900',
-  },
-  noticeIcon: {
-    fontSize: 24,
     fontWeight: 'bold',
   },
+  noticeIcon: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: 'black',
+  },
   noticeCardContainer: {
-    alignItems: 'center', // Center the NoticeCard components horizontally
+    alignItems: 'center',
   },
   empty: {
     fontSize: 16,

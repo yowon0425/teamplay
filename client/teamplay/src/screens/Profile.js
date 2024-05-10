@@ -1,4 +1,5 @@
 import {
+  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -11,7 +12,6 @@ import axios from 'axios';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import PinkButton from '../components/PinkButton';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 
 const Profile = ({teamId}) => {
   const {uid} = auth().currentUser;
@@ -35,16 +35,15 @@ const Profile = ({teamId}) => {
             setRole(found.role);
           }
         } else {
-          console.log(error);
+          console.log('error');
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => Alert.alert('Error', err));
   };
 
   useEffect(() => {
     getUserInfo();
     setClicked(false);
-    console.log(JSON.stringify(role));
   }, [clicked]);
 
   useEffect(() => {
@@ -61,11 +60,11 @@ const Profile = ({teamId}) => {
           setIsVisible(false);
           setClicked(true);
         } else {
-          console.log(error);
+          console.log('error');
           setIsVisible(false);
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => Alert.alert('Error', err));
   };
 
   return (
@@ -147,6 +146,7 @@ const Profile = ({teamId}) => {
             <Text style={styles.text}>역할</Text>
             <TextInput
               style={styles.input}
+              maxLength={14}
               onChangeText={text => setRole(text)}
               defaultValue={
                 role != '아직 역할을 설정하지 않았습니다'

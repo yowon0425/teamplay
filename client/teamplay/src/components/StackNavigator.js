@@ -1,7 +1,5 @@
-import {BackHandler, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect} from 'react';
+import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import LogIn from '../screens/LogIn';
 import TeamList from '../screens/TeamList';
 import {NavigationContainer} from '@react-navigation/native';
@@ -9,8 +7,6 @@ import Main from '../screens/Main';
 import MenuBar from './TabNavigator';
 import StartNew from '../screens/StartNew';
 import StartJoin from '../screens/StartJoin';
-import MemberMap from '../screens/MemberMap';
-import MyUpload from '../screens/MyUpload';
 import SendNotice from '../screens/SendNotice';
 import MainNotice from '../screens/MainNotice';
 
@@ -36,7 +32,7 @@ Stack Navigator
 
 const Stack = createNativeStackNavigator();
 
-const StackNavigator = () => {
+const StackNavigator = ({fcmToken}) => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Main">
@@ -75,16 +71,12 @@ const StackNavigator = () => {
           component={MainNotice}
           options={{headerShown: false}}
         />
-        <Stack.Screen
-          name="SendNotice"
-          component={SendNotice}
-          options={{headerShown: false}}
-        />
+        <Stack.Screen name="SendNotice" options={{headerShown: false}}>
+          {() => <SendNotice fcmToken={fcmToken} />}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
 };
 
 export default StackNavigator;
-
-const styles = StyleSheet.create({});

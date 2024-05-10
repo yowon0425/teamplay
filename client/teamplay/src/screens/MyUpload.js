@@ -3,13 +3,11 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
   TextInput,
-  Button,
   TouchableOpacity,
-  BackHandler,
   KeyboardAvoidingView,
   Keyboard,
+  Alert,
 } from 'react-native';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -17,15 +15,12 @@ import auth from '@react-native-firebase/auth';
 import React, {useEffect, useState} from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import axios from 'axios';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import FileInfoLine from '../components/FileInfoLine';
 import PinkButton from '../components/PinkButton';
-import {useNavigation} from '@react-navigation/native';
 import CommentLine from './../components/CommentLine';
 
 const MyUpload = ({teamId, todoData}) => {
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadedFile, setUploadedFile] = useState([]);
   const [fileList, setFileList] = useState();
   const [commentInput, setCommentInput] = useState('');
   const [comments, setComments] = useState();
@@ -90,6 +85,7 @@ const MyUpload = ({teamId, todoData}) => {
         getFileInfo();
       } catch (error) {
         console.error('Error uploading file to server:', error);
+        Alert.alert('Error', error);
       }
     }
   };
@@ -171,17 +167,20 @@ const MyUpload = ({teamId, todoData}) => {
   useEffect(() => {
     getFileInfo();
     getComments();
-    console.log('getFileInfo 실행');
   }, []);
 
   const getFileInfo = async () => {
     try {
       await axios.post('/api/fileList', {uid}).then(res => {
-        console.log('fileList-> ', res.data[teamId][todoId]);
-        setFileList(res.data[teamId][todoId]);
+        if (res.data) {
+          setFileList(res.data[teamId][todoId]);
+        } else {
+          Alert.alert('Teamplay', '파일을 불러오지 못했습니다.');
+        }
       });
     } catch (error) {
       console.error('err:', error);
+      Alert.alert('Error', error);
     }
   };
 
@@ -205,6 +204,7 @@ const MyUpload = ({teamId, todoData}) => {
         });
     } catch (error) {
       console.log('err: ', error);
+      Alert.alert('Error', error);
     }
   };
 
@@ -214,14 +214,16 @@ const MyUpload = ({teamId, todoData}) => {
         <Text style={styles.todo}>{todoData.content.replace('\n', ' ')}</Text>
         <Text style={styles.time}>{todoData.deadline}</Text>
       </View>
-      <View style={styles.line}></View>
-      <ScrollView>
+      <View style={styles.line} />
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.uploadContainer}>
           <Text style={styles.title}>제출 상황</Text>
           <LinearGradient
             style={styles.uploadBox}
             colors={['#B9E3FC', '#FFFFFF']}>
-            <ScrollView style={styles.fileList}>
+            <ScrollView
+              style={styles.fileList}
+              showsVerticalScrollIndicator={false}>
               {fileList &&
                 fileList.map(data => {
                   return (
@@ -262,7 +264,7 @@ const MyUpload = ({teamId, todoData}) => {
             )}
           </View>
           <View style={styles.comment}>
-            <View style={styles.bubbles}>
+            <View>
               {comments &&
                 comments.map((data, index) => (
                   <CommentLine
@@ -286,6 +288,7 @@ const MyUpload = ({teamId, todoData}) => {
           <TextInput
             style={styles.input}
             placeholder="코멘트 작성하기"
+            multiline={true}
             value={commentInput}
             onChangeText={handleCommentInputChange}
           />
@@ -308,7 +311,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   top: {
-    width: '95%',
+    width: '90%',
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
@@ -380,7 +383,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 20,
   },
-  bubbles: {},
   commentLine: {
     flexDirection: 'row',
     width: 330,

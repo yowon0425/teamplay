@@ -7,12 +7,16 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  TouchableOpacity,
+  Share,
+  ToastAndroid,
+  Platform,
+  Alert,
 } from 'react-native';
-import Button from '../components/PinkButton';
-import {v4 as uuidv4} from 'uuid';
-import {getRandomBase64} from 'react-native-get-random-values';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
+import {useNavigation} from '@react-navigation/native';
+import PinkButton from '../components/PinkButton';
 
 const StartNew = () => {
   const [name, setName] = useState('');
@@ -23,6 +27,7 @@ const StartNew = () => {
   const [teamId, setTeamId] = useState('');
   var truncId;
   const {uid, displayName} = auth().currentUser;
+  const navigation = useNavigation();
 
   const handleButtonPress = async () => {
     try {
@@ -53,6 +58,25 @@ const StartNew = () => {
       createTeam();
     } catch {}
   };
+
+  /* 팀 아이디 공유하기 */
+  const onShareId = async () => {
+    try {
+      await Share.share({
+        message: `[Teamplay]\n팀플 ID로 팀플에 참여하세요!\n팀플 ID : ${teamId}`,
+      });
+    } catch {
+      if (Platform.OS === 'android') {
+        ToastAndroid.showWithGravity(
+          '공유에 실패했습니다.',
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM,
+        );
+      } else {
+        Alert.alert('Teamplay', '공유에 실패했습니다.', [{text: '확인'}]);
+      }
+    }
+  };
   // API 호출
   /* ------------- 팀플 생성 API -------------
   // req로 받아야하는 데이터 형식
@@ -73,108 +97,129 @@ const StartNew = () => {
     console.log('api 호출됨');
     console.log('보내는 정보: ' + uid, teamId, name, lecture, description);
 
+    let eName = name.replace(/(?:\n\r|\n|\r)/g, ' ');
+    let eLecture = lecture.replace(/(?:\n\r|\n|\r)/g, ' ');
+    let eDescription = description.trim();
+    console.log(eName, eLecture, eDescription);
+
     await axios
       .post('/api/createTeam', {
         uid: uid,
         userName: displayName,
         teamId: truncId,
-        name,
-        lecture,
-        description,
+        name: eName,
+        lecture: eLecture,
+        description: eDescription,
       })
       .then(res => {
         if (res.data.isCompleted) {
           console.log('Team created successfully.');
         } else {
           console.log('Team creation failed.');
+          if (Platform.OS === 'android') {
+            ToastAndroid.showWithGravity(
+              '팀플 생성에 실패했습니다.',
+              ToastAndroid.SHORT,
+              ToastAndroid.BOTTOM,
+            );
+          } else {
+            Alert.alert('Teamplay', '팀플 생성에 실패했습니다.', [
+              {text: '확인'},
+            ]);
+          }
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        Alert.alert('Error', err);
+      });
   };
 
-  /*const response = await axios.post('/api/createTeam', {
-    uid: userObj.uid,
-        userName: userObj.userName,
-        name,
-        lecture,
-        teamId: truncatedTeamId,
-        numOfMember,
-        description,
-      };
-      console.log('api 요청 data -> ', data);
-
-      // API 호출
-      await axios
-        .post('/api/createTeam', {
-          uid: userObj.uid,
-          userName: userObj.userName,
-          name,
-          lecture,
-          teamId: truncatedTeamId,
-          numOfMember,
-          description,
-        })
-        .then(res => {
-          if (res.data.isCompleted) {
-            console.log('Team created successfully.');
-          } else {
-            console.log('Team creation failed.');
-          }
-        });
-    } catch (err) {
-      console.log('[error]: ', err);
-    }
-  };*/
-
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior="padding"
-      keyboardVerticalOffset={-150}>
-      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <View style={styles.container}>
-          <Text style={{fontSize: 20, color: 'black'}}>
-            새로운 팀플 시작하기
-          </Text>
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior="padding"
+        keyboardVerticalOffset={-150}>
+        <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.goBack();
+            }}>
+            <Text style={{fontSize: 20}}>X</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.contentContainer}>
+          {submitted ? null : (
+            <>
+              <Text style={styles.headerText}>새로운 팀플 시작하기</Text>
+              <Text style={{marginBottom: 30}}>
+                팀플에 대한 정보를 입력하세요.
+              </Text>
+            </>
+          )}
 
           {submitted ? (
-            <Text style={styles.headerText}>
-              새로운 팀플 개설이 {'\n'} 완료되었습니다! {'\n'} {'\n'}팀 ID:{' '}
-              {teamId} {'\n'} {'\n'}
-            </Text>
+            <>
+              <Text style={styles.headerText}>
+                새로운 팀플 개설이{'\n'}완료되었습니다!
+              </Text>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 16,
+                  color: 'black',
+                  marginTop: 60,
+                }}>
+                팀원들에게 팀플 ID를 공유하고{'\n'}팀플을 시작하세요!
+              </Text>
+              <Text style={styles.teamId}>{teamId}</Text>
+              <PinkButton text="공유하기" light={true} onPress={onShareId} />
+            </>
           ) : (
             <View style={styles.container}>
-              <Text>팀플에 대한 정보를 입력하세요.</Text>
               <TextInput
                 style={styles.input}
-                placeholder="            팀플명 입력            "
+                placeholder="팀플명 입력"
                 value={name}
+                numberOfLines={1}
+                maxLength={14}
                 onChangeText={text => setName(text)}
               />
               <TextInput
                 style={styles.input}
-                placeholder="            수업명 입력            "
+                placeholder="수업명 입력"
                 value={lecture}
+                numberOfLines={1}
+                maxLength={14}
                 onChangeText={text => setLecture(text)}
               />
               <TextInput
-                style={styles.input}
-                placeholder="            팀플 설명 입력            "
+                style={[styles.input, {height: 80}]}
+                placeholder="팀플 설명 입력"
+                multiline={true}
+                numberOfLines={3}
+                maxLength={20}
                 value={description}
                 onChangeText={text => setDescription(text)}
               />
-              <Button
-                style={styles.input}
-                text="시작하기"
-                light={true}
-                onPress={handleButtonPress}
-              />
+              <View style={styles.button}>
+                {name && lecture && description ? (
+                  <PinkButton
+                    text="시작하기"
+                    light={true}
+                    onPress={handleButtonPress}
+                  />
+                ) : (
+                  <PinkButton text="시작하기" light={false} />
+                )}
+              </View>
               <Text style={{marginTop: 10}}>{displayText}</Text>
             </View>
           )}
         </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -182,22 +227,48 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: '10%',
+  },
+  header: {
+    width: '90%',
+    paddingHorizontal: 5,
+    margin: 10,
+    alignItems: 'flex-end',
+    marginBottom: 50,
+  },
+  contentContainer: {
+    alignItems: 'center',
   },
   headerText: {
     fontSize: 30,
     fontWeight: 'bold',
     color: 'black',
     textAlign: 'center',
+    marginBottom: 5,
+  },
+  teamId: {
+    fontSize: 20,
+    backgroundColor: '#D2D2D2',
+    color: 'black',
+    borderRadius: 10,
+    width: 200,
+    height: 40,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    margin: 60,
   },
   input: {
-    width: '100%',
-    height: 40,
+    borderRadius: 10,
+    borderColor: '#6C6C6C',
     borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 5,
-    paddingLeft: 10,
-    marginVertical: 10,
+    width: 200,
+    height: 40,
+    fontSize: 14,
+    padding: 5,
+    margin: 10,
+    textAlign: 'center',
+  },
+  button: {
+    margin: 50,
   },
 });
 

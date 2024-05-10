@@ -3,7 +3,7 @@ import React from 'react';
 import {Shadow} from 'react-native-shadow-2';
 
 const PinkButton = ({text, light, onPress}) => {
-  /* 
+  /*
   text prop은 버튼 안에 써 있는 문구를 받아옴
   light는 버튼이 누를 수 있는 상태인지 아닌지 볼 수 있음
   light가 true이면 누를 수 있는 분홍색 버튼, false이면 누를 수 없는 회색 버튼 상태임
