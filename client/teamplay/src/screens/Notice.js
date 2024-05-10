@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
@@ -24,6 +25,7 @@ const Notice = ({teamId}) => {
       setNoticeList(response.data); // 알림 리스트 설정
     } catch (error) {
       console.log(error);
+      Alert.alert('Error', error);
     }
   };
 
@@ -37,14 +39,13 @@ const Notice = ({teamId}) => {
       const response = await axios.post('/api/notice', {uid, teamId});
       fetchNoticeList();
     } catch (error) {
-      console.log(error);
+      Alert.alert('Error', error);
     }
   };
 
   // 알림 보내기 페이지로 이동
   const navigation = useNavigation();
   const openSendNotice = () => {
-    console.log('네비게이터');
     navigation.navigate('SendNotice', {teamId});
   };
 
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   noticeCardContainer: {
-    alignItems: 'center', // Center the NoticeCard components horizontally
+    alignItems: 'center',
   },
   empty: {
     fontSize: 16,

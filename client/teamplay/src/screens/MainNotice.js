@@ -4,13 +4,11 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  Modal,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import NoticeCard from '../components/NoticeCard';
-import {useNavigation} from '@react-navigation/native';
-import Ionic from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 
@@ -22,13 +20,8 @@ const MainNotice = () => {
   const [clickedTeamId, setClickedTeamId] = useState(null);
 
   useEffect(() => {
+    // 팀리스트 불러오는 함수 실행
     getTeams();
-    console.log('팀리스트 불러오는 함수 실행');
-  }, []);
-
-  useEffect(() => {
-    getTeams();
-    console.log('팀리스트 불러오는 함수 실행');
   }, []);
 
   const getTeams = async () => {
@@ -38,13 +31,13 @@ const MainNotice = () => {
         if (res.data) {
           setTeams(res.data);
           /* 응답 형식
-                  {
-                    teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
-                  }
-              */
+              {
+                teamList: [ { teamId: '21212', name: '팀플이름', description: '팀플 설명~~' } ]
+              }
+          */
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => Alert.alert('Error', err));
   };
 
   const fetchNoticeList = async () => {
@@ -77,7 +70,6 @@ const MainNotice = () => {
   }, []);
 
   const handleTeamClick = async teamId => {
-    console.log('handleTeamClick 함수 호출됨:', teamId);
     try {
       let response;
       if (teamId === '전체') {

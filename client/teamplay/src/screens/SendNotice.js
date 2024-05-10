@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
-import {Picker} from '@react-native-picker/picker';
 import PinkButton from '../components/PinkButton';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
@@ -56,18 +56,7 @@ const SendNotice = ({fcmToken}) => {
     const {displayName} = auth().currentUser;
 
     const addNotice = async () => {
-      console.log('api 호출됨');
-
       const memberUid = teamMembers.map(member => member.uid);
-
-      console.log(
-        '보내는 정보: ' + fcmToken,
-        displayName,
-        teamId,
-        memberUid,
-        title,
-        notificationText,
-      );
 
       await axios
         .post('/api/sendNotice', {
@@ -81,15 +70,19 @@ const SendNotice = ({fcmToken}) => {
         .catch(err => console.log(err));
     };
 
-    PushNotification.getChannels(function (channel_ids) {
-      console.log(channel_ids);
-    });
+    try {
+      PushNotification.getChannels(function (channel_ids) {
+        console.log(channel_ids);
+      });
 
-    PushNotification.localNotification({
-      channelId: 'team-channel',
-      title: title,
-      message: notificationText,
-    });
+      PushNotification.localNotification({
+        channelId: 'team-channel',
+        title: title,
+        message: notificationText,
+      });
+    } catch (err) {
+      Alert.alert('Error', err);
+    }
 
     addNotice();
     navigation.goBack();

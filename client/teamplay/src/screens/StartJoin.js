@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from 'react-native';
-import Button from '../components/PinkButton';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
@@ -53,9 +53,6 @@ await axios.post('/api/API이름', {
     const {uid, displayName} = auth().currentUser;
 
     const joinTeam = async () => {
-      console.log('api 호출됨');
-      console.log('보내는 정보: ' + uid, displayName, teamId);
-
       await axios
         .post('/api/joinTeam', {
           uid,
@@ -73,7 +70,10 @@ await axios.post('/api/API이름', {
             setErrorMsg('팀 참가에 실패했습니다.');
           }
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          Alert.alert('Error', err);
+        });
     };
 
     setSubmitted(true);

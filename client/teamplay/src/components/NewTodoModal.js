@@ -1,8 +1,8 @@
 import {
+  Alert,
   StyleSheet,
   Text,
   TextInput,
-  Touchable,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -33,7 +33,6 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
         hour12: false,
         minute: '2-digit',
       });
-    console.log('addtodo 안');
     try {
       await axios
         .post('/api/todo', {
@@ -50,18 +49,16 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
         .then(res => {
           if (res.data) {
             console.log('계획 등록');
-            console.log({
-              teamId,
-              memberId: uid,
-            });
           } else {
             console.log('등록 실패');
+            Alert.alert('Teamplay', '계획 등록에 실패했습니다.');
           }
           setIsCompleted(res.data);
         })
         .catch(err => console.log(err));
     } catch (err) {
       console.log('catch: ' + err);
+      Alert.alert('Error', err);
     }
     setClickButton(true);
   };
@@ -91,7 +88,7 @@ const NewTodoModal = ({teamId, isVisible, showTodo, num, setClickButton}) => {
           </TouchableOpacity>
         </View>
         <View style={styles.contentContainer}>
-          <View style={styles.inputName}>
+          <View>
             <Text style={styles.text}>계획 이름</Text>
             <Text style={styles.text}>기한</Text>
           </View>
@@ -208,7 +205,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 3,
   },
-  inputName: {},
   inputBox: {
     alignItems: 'flex-end',
     justifyContent: 'center',

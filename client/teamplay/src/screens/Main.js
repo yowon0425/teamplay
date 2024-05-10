@@ -1,5 +1,5 @@
 import {StyleSheet, Text, View} from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import GoogleLogin from '../components/GoogleLogin';
 

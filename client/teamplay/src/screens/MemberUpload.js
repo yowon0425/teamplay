@@ -4,11 +4,10 @@ import {
   Text,
   View,
   ScrollView,
-  Image,
   TextInput,
   KeyboardAvoidingView,
   Keyboard,
-  BackHandler,
+  Alert,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
@@ -16,7 +15,6 @@ import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import FileInfoLine from '../components/FileInfoLine';
 import CommentLine from '../components/CommentLine';
-import {useNavigation} from '@react-navigation/native';
 
 const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
   const [commentInput, setCommentInput] = useState('');
@@ -46,14 +44,6 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
             todoId,
           });
 
-          console.log(
-            '보내는 정보 ' + memberId,
-            teamId,
-            uid,
-            commentInput,
-            todoId,
-          );
-
           if (response && response.data && response.data.isCompleted) {
             console.log('코멘트가 성공적으로 추가되었습니다');
             setClicked(!clicked);
@@ -75,7 +65,6 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
   useEffect(() => {
     getFileInfo();
     getComments();
-    console.log('getFileInfo 실행');
   }, []);
 
   const getFileInfo = async () => {
@@ -83,10 +72,12 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
       await axios.post('/api/fileList', {uid: memberId}).then(res => {
         if (res.data) {
           setFileList(res.data[teamId][todoId]);
+        } else {
+          Alert.alert('Teamplay', '파일을 불러오지 못했습니다.');
         }
       });
     } catch (error) {
-      console.error('err:', error);
+      Alert.alert('Error', error);
     }
   };
 
@@ -102,7 +93,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
           }
         });
     } catch (error) {
-      console.log('Err: ', error);
+      Alert.alert('Error', error);
     }
   };
 
@@ -116,7 +107,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
         <Text style={styles.todo}>{todoData.content.replace('\n', ' ')}</Text>
         <Text style={styles.time}>{todoData.deadline}</Text>
       </View>
-      <View style={styles.line}></View>
+      <View style={styles.line} />
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.upload}>
           <Text style={styles.title}>제출 상황</Text>
@@ -138,7 +129,7 @@ const MemberUpload = ({teamId, memberId, memberName, todoData}) => {
             </ScrollView>
           </LinearGradient>
           <View style={styles.comment}>
-            <View style={styles.bubbles}>
+            <View>
               {comments &&
                 comments.map((data, index) => (
                   <CommentLine
@@ -237,7 +228,6 @@ const styles = StyleSheet.create({
   comment: {
     alignItems: 'center',
   },
-  bubbles: {},
   commentLine: {
     flexDirection: 'row',
     width: 330,

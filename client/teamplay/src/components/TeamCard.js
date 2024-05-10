@@ -7,7 +7,6 @@ import {useNavigation} from '@react-navigation/native';
 const TeamCard = ({team}) => {
   const navigation = useNavigation();
   const openHome = () => {
-    console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Home',
       teamId: team.teamId,

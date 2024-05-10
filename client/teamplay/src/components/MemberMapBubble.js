@@ -12,15 +12,8 @@ const MemberMapBubble = ({
   nowTodo,
   memberObj,
 }) => {
-  const handleEditMode = () => {
-    console.log('=======handleEditMode========');
-    setEditNum(todoData.number);
-    showEditTodo(true);
-  };
-
   const navigation = useNavigation();
   const openMemberUpload = () => {
-    console.log('네비게이터');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       teamId,
@@ -35,7 +28,7 @@ const MemberMapBubble = ({
   };
 
   return (
-    /* 
+    /*
     완료 -> 색칠된 동그라미
     완료X -> 지금 해야함 -> 테두리 색칠된 동그라미
           -> 나머지 -> 회색 동그라미

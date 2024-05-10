@@ -29,6 +29,7 @@ const MyMap = ({teamId}) => {
   const [nowTodo, setNowTodo] = useState(0);
   const [numNewTodo, setNumNewTodo] = useState(0);
   const [clickButton, setClickButton] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   /* 프로젝트 계획 받아오기 */
   const getTodos = async () => {
@@ -37,17 +38,16 @@ const MyMap = ({teamId}) => {
       .then(res => {
         if (res.data) {
           setTodos(res.data[uid]);
-          console.log(res.data[uid]);
+          setErrorMsg('');
         } else {
-          // 실패 시 할 작업
+          setErrorMsg('계획을 불러오지 못했습니다.');
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => Alert.alert('Error', err));
   };
 
   useEffect(() => {
     getTodos();
-    console.log('투두 불러오는 함수 실행');
     setClickButton(false);
   }, [editMode, clickButton]);
 
@@ -68,9 +68,6 @@ const MyMap = ({teamId}) => {
     setNumTodo(todo);
     setNowTodo(numCompleted + 1);
     setNumNewTodo(todo + 1);
-    console.log('전체 투두 : ' + numTodo);
-    console.log('완료 투두 : ' + numCompleted);
-    console.log('지금 투두 : ' + nowTodo);
   };
 
   /* 계획 완료하기 */
@@ -91,14 +88,19 @@ const MyMap = ({teamId}) => {
           console.log('계획 완료');
           setClickButton(true);
         } else {
+          Alert.alert(
+            'Teamplay',
+            '작업 완료 처리에 실패했습니다.\n다시 시도해주세요.',
+            [{text: '확인'}],
+          );
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => Alert.alert('Error', err));
   };
 
   return (
     <View>
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.top}>
           <View style={{width: 22}} />
           <Text style={styles.title}>프로젝트 계획</Text>
@@ -132,7 +134,9 @@ const MyMap = ({teamId}) => {
               })
             ) : (
               <Text style={styles.empty}>
-                등록한 계획이 없습니다.{`\n`}메뉴를 눌러 계획을 등록해보세요.
+                {errorMsg != ''
+                  ? errorMsg
+                  : '등록한 계획이 없습니다.\n메뉴를 눌러 계획을 등록해보세요.'}
               </Text>
             )}
           </View>
@@ -156,7 +160,7 @@ const MyMap = ({teamId}) => {
               }
             />
           </View>
-        ) : (
+        ) : numTodo == 0 ? null : (
           <View style={styles.button}>
             <PinkButton text="작업 완료" light={false} />
           </View>
@@ -164,7 +168,6 @@ const MyMap = ({teamId}) => {
       </ScrollView>
       <View style={styles.modalBoxContainer}>
         <Modal
-          style={styles.modal}
           animationType="fade"
           visible={showMiniModal}
           transparent={true}
@@ -234,7 +237,6 @@ export default MyMap;
 
 const styles = StyleSheet.create({
   // 화면 스타일
-  container: {},
   top: {
     alignSelf: 'center',
     width: '90%',
@@ -348,6 +350,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     alignSelf: 'center',
     textAlign: 'center',
+    marginVertical: 100,
   },
   button: {
     alignItems: 'center',
@@ -387,12 +390,5 @@ const styles = StyleSheet.create({
     height: 1,
     width: '95%',
     backgroundColor: '#E8E8E8',
-  },
-
-  // 모달 위치 설정
-  modalContainer: {
-    alignItems: 'baseline',
-    justifyContent: 'flex-end',
-    flex: 1,
   },
 });

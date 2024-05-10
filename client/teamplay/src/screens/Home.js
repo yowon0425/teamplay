@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ToastAndroid,
   Share,
+  Platform,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -23,8 +25,6 @@ import ProgressBar from '../components/ProgressBar';
 import Icon from 'react-native-vector-icons/SimpleLineIcons';
 
 const Home = ({teamId}) => {
-  // 텍스트 테두리 필요
-  // 팀 목표 입력 페이지 만들기
   const [teamInfo, setTeamInfo] = useState([]);
   const [todos, setTodos] = useState();
   const [completionRate, setCompletionRate] = useState([]);
@@ -36,7 +36,6 @@ const Home = ({teamId}) => {
   /*내 작업 페이지로 이동하는 이벤트*/
   const navigation = useNavigation();
   const goMyPage = () => {
-    console.log('내 작업 페이지로, ' + teamId);
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       teamId,
@@ -46,7 +45,6 @@ const Home = ({teamId}) => {
   /*팀원 작업 페이지로 이동하는 이벤트*/
   const goMemberPage = uid => {
     const memberObj = completionRate.find(element => element.key == uid);
-    console.log('팀원 작업 페이지로: ');
     navigation.navigate('MenuBar', {
       screen: 'Maps',
       teamId,
@@ -74,8 +72,20 @@ const Home = ({teamId}) => {
             member: [{userName: oo, uid: oo}, {...}]
           }
           */
-          /* 멤버 역할 입력받는 페이지 필요 */
           setTeamInfo(res.data);
+        } else {
+          console.log(res);
+          if (Platform.OS == 'android') {
+            ToastAndroid.showWithGravity(
+              '팀 정보를 받아오지 못했습니다.',
+              ToastAndroid.SHORT,
+              ToastAndroid.BOTTOM,
+            );
+          } else {
+            Alert.alert('Teamplay', '팀 정보를 받아오지 못했습니다.', [
+              {text: '확인'},
+            ]);
+          }
         }
       })
       .catch(err => console.log(err));
@@ -89,7 +99,6 @@ const Home = ({teamId}) => {
         if (res.data) {
           setTodos(res.data);
         } else {
-          // 실패 시 할 작업
         }
       })
       .catch(err => console.log(err));
@@ -98,7 +107,6 @@ const Home = ({teamId}) => {
   useEffect(() => {
     getTeamInfo();
     getTodos();
-    console.log('투두 불러오는 함수 실행');
   }, []);
 
   useEffect(() => {
@@ -106,7 +114,6 @@ const Home = ({teamId}) => {
   }, [todos]);
 
   // 데이터 개수 처리 함수
-  //var totalPercent = 0;
   const countTodo = () => {
     let total = 0;
     let completed = 0;
@@ -124,27 +131,25 @@ const Home = ({teamId}) => {
           }
         }
       }
-      if (numTodo != 0) percent = (numCompleted / numTodo).toFixed(3);
-      else percent = 0;
+      if (numTodo != 0) {
+        percent = (numCompleted / numTodo).toFixed(3);
+      } else {
+        percent = 0;
+      }
       let newData = {
         key,
         percent,
         numTodo,
         numCompleted,
-      }; // 데이터 구조 생각해보기
-      console.log(newData);
+      };
       completionRate.push(newData);
-      console.log('전체 투두 : ' + numTodo);
-      console.log('완료 투두 : ' + numCompleted);
     }
-    console.log('comRate: ' + JSON.stringify(completionRate));
     setNumTotalTodo(total);
     setNumTotalCompleted(completed);
   };
 
   useEffect(() => {
     if (numTotalTodo !== 0) {
-      console.log('계산결과 : ' + numTotalCompleted / numTotalTodo);
       const percent = numTotalCompleted / numTotalTodo;
       setTotalPercent((percent * 100).toFixed(0));
     }
@@ -157,11 +162,15 @@ const Home = ({teamId}) => {
         message: `[Teamplay]\n팀플 ID로 팀플에 참여하세요!\n팀플 ID : ${teamId}`,
       });
     } catch {
-      ToastAndroid.showWithGravity(
-        '공유에 실패했습니다.',
-        ToastAndroid.SHORT,
-        ToastAndroid.BOTTOM,
-      );
+      if (Platform.OS === 'android') {
+        ToastAndroid.showWithGravity(
+          '공유에 실패했습니다.',
+          ToastAndroid.SHORT,
+          ToastAndroid.BOTTOM,
+        );
+      } else {
+        Alert.alert('Teamplay', '공유에 실패했습니다.', [{text: '확인'}]);
+      }
     }
   };
 
@@ -239,8 +248,11 @@ const Home = ({teamId}) => {
                   key={data.uid}
                   style={styles.member}
                   onPress={() => {
-                    if (data.uid == uid) return goMyPage();
-                    else goMemberPage(data.uid);
+                    if (data.uid == uid) {
+                      return goMyPage();
+                    } else {
+                      goMemberPage(data.uid);
+                    }
                   }}>
                   <View style={styles.memberInfo}>
                     <Text style={styles.memberText}>
