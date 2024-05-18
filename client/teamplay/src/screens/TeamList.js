@@ -9,6 +9,8 @@ import {
   ScrollView,
   Alert,
   BackHandler,
+  Platform,
+  ActionSheetIOS,
 } from 'react-native';
 import axios from 'axios';
 import auth from '@react-native-firebase/auth';
@@ -115,10 +117,45 @@ const TeamList = () => {
       });
   };
 
+  /* 로그아웃 함수 */
+  const handleLogOut = () => {
+    if (Platform.OS === 'android') {
+      Alert.alert('Teamplay', '로그아웃 하시겠습니까?', [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '확인',
+          onPress: () => {
+            auth().signOut();
+            navigation.navigate('Main');
+          },
+        },
+      ]);
+    } else {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['취소', '로그아웃'],
+          destructiveButtonIndex: 1,
+          cancelButtonIndex: 0,
+        },
+        buttonIndex => {
+          if (buttonIndex === 0) {
+          } else {
+            auth().signOut();
+          }
+        },
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <View style={{width: 22}} />
+        <TouchableOpacity onPress={handleLogOut}>
+          <Ionic name="log-out-outline" style={styles.logOutIcon} />
+        </TouchableOpacity>
         <Text style={styles.headerText}>나의 팀</Text>
         <TouchableOpacity onPress={openMainNotice}>
           <Ionic name="notifications-outline" style={styles.noticeIcon} />
@@ -198,6 +235,11 @@ const styles = StyleSheet.create({
   },
   noticeIcon: {
     fontSize: 22,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  logOutIcon: {
+    fontSize: 25,
     fontWeight: 'bold',
     color: 'black',
   },

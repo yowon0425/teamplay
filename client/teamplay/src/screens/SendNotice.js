@@ -60,7 +60,7 @@ const SendNotice = ({fcmToken}) => {
 
       await axios
         .post('/api/sendNotice', {
-          tokens: fcmToken,
+          tokens: [fcmToken],
           writer: displayName,
           teamId,
           teamMember: memberUid,

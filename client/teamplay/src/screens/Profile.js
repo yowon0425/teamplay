@@ -1,5 +1,7 @@
 import {
+  ActionSheetIOS,
   Alert,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -12,6 +14,7 @@ import axios from 'axios';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import Modal from 'react-native-modal';
 import PinkButton from '../components/PinkButton';
+import {useNavigation} from '@react-navigation/native';
 
 const Profile = ({teamId}) => {
   const {uid} = auth().currentUser;
@@ -19,6 +22,7 @@ const Profile = ({teamId}) => {
   const [role, setRole] = useState('아직 역할을 설정하지 않았습니다');
   const [isVisible, setIsVisible] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const navigation = useNavigation();
 
   /* 유저 정보 받아오기 */
   const getUserInfo = async () => {
@@ -67,6 +71,39 @@ const Profile = ({teamId}) => {
       .catch(err => Alert.alert('Error', err));
   };
 
+  /* 로그아웃 함수 */
+  const handleLogOut = () => {
+    if (Platform.OS === 'android') {
+      Alert.alert('Teamplay', '로그아웃 하시겠습니까?', [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '확인',
+          onPress: () => {
+            auth().signOut();
+            navigation.navigate('Main');
+          },
+        },
+      ]);
+    } else {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          options: ['취소', '로그아웃'],
+          destructiveButtonIndex: 1,
+          cancelButtonIndex: 0,
+        },
+        buttonIndex => {
+          if (buttonIndex === 0) {
+          } else {
+            auth().signOut();
+          }
+        },
+      );
+    }
+  };
+
   return (
     <View>
       <View style={styles.top}>
@@ -112,6 +149,9 @@ const Profile = ({teamId}) => {
           </TouchableOpacity>
         </View>
         <View style={[styles.line, {backgroundColor: 'black'}]} />
+        <View style={styles.button}>
+          <PinkButton text="로그아웃" light={true} onPress={handleLogOut} />
+        </View>
       </View>
       <Modal
         isVisible={isVisible}
@@ -205,6 +245,9 @@ const styles = StyleSheet.create({
   role: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  button: {
+    marginTop: 50,
   },
 
   // 모달 스타일

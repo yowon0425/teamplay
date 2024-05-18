@@ -50,7 +50,7 @@ const LogIn = () => {
           setSignedUp(res.data.isSaved);
         } else {
           console.log('save failed.');
-          if (Platform.OS == 'android') {
+          if (Platform.OS === 'android') {
             ToastAndroid.showWithGravity(
               '회원 가입에 실패했습니다.\n다시 시도해주세요.',
               ToastAndroid.SHORT,

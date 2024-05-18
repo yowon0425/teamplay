@@ -37,24 +37,6 @@ app.get("/", (req, res) => {
   res.send("response completed!");
 });
 
-// 서버 토큰 값 받아서 메세지 푸시하기
-/*app.get("/:token", (req, res) => {
-  const message = {
-    data: {},
-    token: req.params.token,
-  };
-
-  admin
-    .messaging()
-    .send(message)
-    .then((res) => {
-      console.log("Successfully sent message:", res);
-    })
-    .catch((err) => {
-      console.log("Error sending message:", err);
-    });
-});*/
-
 // 서버 실행: node server.js
 app.listen(PORT, () => {
   console.log(`Server started on localhost:4000`);

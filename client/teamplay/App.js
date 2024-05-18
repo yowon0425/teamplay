@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {View, Text} from 'react-native';
 import StackNavigator from './src/components/StackNavigator';
 import messaging from '@react-native-firebase/messaging';
+import Profile from './src/screens/Profile';
+import pushNoti from './src/uitls/pushNoti';
 
 const App = () => {
   const [fcmToken, setFcmToken] = useState(null);
@@ -38,15 +40,13 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async remoteMessage => {
       console.log(remoteMessage);
-      pushNoti.displayNoti(remoteMessage);  // 위에서 작성한 함수로 넘겨준다
+      pushNoti.displayNoti(remoteMessage); // 위에서 작성한 함수로 넘겨준다
     });
 
     return unsubscribe;
   }, []);
 
-  return (
-    <StackNavigator fcmToken={fcmToken} />
-  );
+  return <StackNavigator fcmToken={fcmToken} />;
 };
 
 export default App;
