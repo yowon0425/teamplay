@@ -41,19 +41,19 @@ const FileInfoLine = ({file}) => {
               notification: true,
               path: `${dirToSave}/${file.name}`,
             }).fetch('GET', res.data.url);
-            if (Platform.OS === 'android') {
-              ToastAndroid.showWithGravity(
-                '파일 다운로드에 성공했습니다.',
-                ToastAndroid.SHORT,
-                ToastAndroid.BOTTOM,
-              );
-            } else {
-              Alert.alert('Teamplay', '파일 다운로드에 성공했습니다.', [
-                {text: '확인'},
-              ]);
-            }
           } catch {
             Linking.openURL(res.data.url);
+          }
+          if (Platform.OS === 'android') {
+            ToastAndroid.showWithGravity(
+              '파일 다운로드에 성공했습니다.',
+              ToastAndroid.SHORT,
+              ToastAndroid.BOTTOM,
+            );
+          } else {
+            Alert.alert('Teamplay', '파일 다운로드에 성공했습니다.', [
+              {text: '확인'},
+            ]);
           }
         } else {
           if (Platform.OS === 'android') {

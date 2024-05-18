@@ -3,6 +3,7 @@ import React, {useState, useEffect} from 'react';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
+import axios from 'axios';
 
 /* "user" 데이터 내부 정보 예시
 {
@@ -30,6 +31,8 @@ const GoogleLogin = () => {
   const navigation = useNavigation();
   const [loggedIn, setLoggedIn] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
+  const [logInComplete, setLogInComplete] = useState(false);
+  const [isNewComplete, setIsNewComplete] = useState(false);
 
   useEffect(() => {
     googleConfig = GoogleSignin.configure({
@@ -40,36 +43,68 @@ const GoogleLogin = () => {
 
   /* ---------- 로그인 여부 확인 ---------- */
   useEffect(() => {
-    // auth().signOut();
     auth().onAuthStateChanged(user => {
       if (user) {
-        console.log(user);
         setLoggedIn(true);
+        sortUser(user.uid);
+        setLogInComplete(true);
       } else {
         setLoggedIn(false);
+        setLogInComplete(true);
       }
     });
   }, []);
 
   /* ---------- 신규 or 기존 유저 여부에 따라 redirect ---------- */
-  useEffect(() => {
+  const redirect = async () => {
     if (loggedIn) {
-      console.log(isNewUser);
       if (isNewUser) {
         navigation.navigate('LogIn');
       } else {
         navigation.navigate('TeamList');
       }
     }
-  }, [loggedIn, isNewUser]);
+  };
+
+  const onPressLogin = async () => {
+    setIsNewComplete(false);
+    setLogInComplete(false);
+    await handleGoogleLogin();
+    await redirect();
+  };
+
+  const sortUser = async uid => {
+    await axios
+      .post('/api/user', {uid})
+      .then(res => {
+        if (res.data.isCompleted) {
+          setIsNewUser(true);
+        } else {
+          setIsNewUser(false);
+        }
+      })
+      .catch(err => console.log(err));
+    setIsNewComplete(true);
+  };
+
+  useEffect(() => {
+    console.log('네비게이터');
+    console.log(loggedIn, isNewUser, logInComplete, isNewComplete);
+    if (logInComplete && isNewComplete) {
+      redirect();
+    }
+  }, [logInComplete, isNewComplete]);
 
   /* ---------- 구글 로그인 ---------- */
-  const onPressLogin = async () => {
+  const handleGoogleLogin = async () => {
+    console.log('======handleGoogleLogin========');
     await GoogleSignin.hasPlayServices({showPlayServicesUpdateDialog: true});
     const {idToken} = await GoogleSignin.signIn();
     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
     const res = await auth().signInWithCredential(googleCredential);
     setIsNewUser(res.additionalUserInfo.isNewUser); // 새로 가입한 유저인지 체크
+    console.log('새로가입? ' + res.additionalUserInfo.isNewUser);
+    setIsNewComplete(true);
   };
 
   return (

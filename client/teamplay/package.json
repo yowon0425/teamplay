@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@notifee/react-native": "^7.8.2",
     "@react-native-community/datetimepicker": "^7.6.2",
     "@react-native-community/viewpager": "^5.0.11",
     "@react-native-firebase/app": "^18.5.0",
@@ -24,6 +25,7 @@
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/native-stack": "^6.9.13",
     "axios": "^1.5.0",
+    "expo": "^51.0.2",
     "expo-file-system": "^16.0.9",
     "expo-linking": "^6.2.2",
     "react": "18.2.0",

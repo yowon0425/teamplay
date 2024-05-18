@@ -10,7 +10,6 @@ import Profile from '../screens/Profile';
 
 const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
-  const params = JSON.stringify(route);
 
   return (
     <Tab.Navigator
