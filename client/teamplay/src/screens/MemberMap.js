@@ -89,7 +89,7 @@ const MemberMap = ({teamId, memberId, memberObj}) => {
       </View>
       <View style={styles.mapContainer}>
         <View style={styles.maps}>
-          {todos && memObj && memObj.percent != 0 ? (
+          {todos && memObj ? (
             Object.keys(todos).map(key => {
               return (
                 <MemberMapBubble

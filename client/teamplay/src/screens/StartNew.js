@@ -17,8 +17,10 @@ import axios from 'axios';
 import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
 import PinkButton from '../components/PinkButton';
+import {firebase, messaging} from '@react-native-firebase/messaging';
+import {ReactNativeFirebase} from '@react-native-firebase/app';
 
-const StartNew = () => {
+const StartNew = ({fcmToken}) => {
   const [name, setName] = useState('');
   const [lecture, setLecture] = useState('');
   const [description, setDescription] = useState('');
@@ -110,6 +112,7 @@ const StartNew = () => {
         name: eName,
         lecture: eLecture,
         description: eDescription,
+        fcmToken: fcmToken,
       })
       .then(res => {
         if (res.data.isCompleted) {

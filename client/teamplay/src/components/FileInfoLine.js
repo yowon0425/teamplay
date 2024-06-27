@@ -14,8 +14,6 @@ import auth from '@react-native-firebase/auth';
 import RNFetchBlob from 'rn-fetch-blob';
 
 const FileInfoLine = ({file}) => {
-  const {uid} = auth().currentUser;
-
   /* 파일 다운로드 함수 */
   const handleFileDownload = async () => {
     const {dirs} = RNFetchBlob.fs;
@@ -23,7 +21,7 @@ const FileInfoLine = ({file}) => {
       Platform.OS === 'ios' ? dirs.DocumentDir : dirs.DownloadDir;
     await axios
       .post('/api/download', {
-        uid,
+        uid: file.uid,
         name: file.name,
         uploadTime: file.uploadTime,
       })
@@ -40,20 +38,39 @@ const FileInfoLine = ({file}) => {
               useDownloadManager: true,
               notification: true,
               path: `${dirToSave}/${file.name}`,
-            }).fetch('GET', res.data.url);
+            })
+              .fetch('GET', res.data.url)
+              .then(res => {
+                console.log('res: ' + JSON.stringify(res));
+                if (Platform.OS === 'android') {
+                  ToastAndroid.showWithGravity(
+                    '파일 다운로드에 성공했습니다.',
+                    ToastAndroid.SHORT,
+                    ToastAndroid.BOTTOM,
+                  );
+                } else {
+                  Alert.alert('Teamplay', '파일 다운로드에 성공했습니다.', [
+                    {text: '확인'},
+                  ]);
+                }
+              });
           } catch {
-            Linking.openURL(res.data.url);
-          }
-          if (Platform.OS === 'android') {
-            ToastAndroid.showWithGravity(
-              '파일 다운로드에 성공했습니다.',
-              ToastAndroid.SHORT,
-              ToastAndroid.BOTTOM,
-            );
-          } else {
-            Alert.alert('Teamplay', '파일 다운로드에 성공했습니다.', [
-              {text: '확인'},
-            ]);
+            console.log('catch로 들어옴');
+            try {
+              Linking.openURL(res.data.url);
+            } catch {
+              if (Platform.OS === 'android') {
+                ToastAndroid.showWithGravity(
+                  '파일 다운로드에 실패했습니다.',
+                  ToastAndroid.SHORT,
+                  ToastAndroid.BOTTOM,
+                );
+              } else {
+                Alert.alert('Teamplay', '파일 다운로드에 실패했습니다.', [
+                  {text: '확인'},
+                ]);
+              }
+            }
           }
         } else {
           if (Platform.OS === 'android') {
