@@ -66,6 +66,7 @@ const MyUpload = ({teamId, todoData}) => {
         uploadTime: handleAddUploadTime(),
         uri: selectedFile.uri,
         visibleTime: handleAddVisibleTime(),
+        uid: uid,
       };
 
       formData.append('uid', uid);

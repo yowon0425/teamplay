@@ -5,6 +5,8 @@ const axios = require("axios");
 const { db, bucket, admin, storage } = require("./firebase");
 const multer = require("multer");
 const { getDownloadURL } = require("firebase-admin/storage");
+const { error } = require("console");
+const { messaging } = require("firebase-admin");
 const { FieldValue } = admin.firestore;
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -152,8 +154,10 @@ app.post("/api/user", async (req, res) => {
 */
 app.post("/api/createTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, userName, name, teamId, lecture, description } = req.body;
+  const { uid, userName, name, teamId, lecture, description, fcmToken } =
+    req.body;
 
+  console.log(fcmToken);
   try {
     let userObj = {
       uid,
@@ -205,6 +209,19 @@ app.post("/api/createTeam", async (req, res) => {
       .doc(teamId)
       .set({ [uid]: {} });
 
+    // 주제 구독
+    const registrationToken = [fcmToken];
+    console.log(registrationToken);
+
+    messaging()
+      .subscribeToTopic(registrationToken, teamId)
+      .then((res) => {
+        console.log("Successfully subscribed to topic:", res);
+      })
+      .catch((err) => {
+        console.log("Error subscribing to topic:", err);
+      });
+
     res.send({ isCompleted: true });
   } catch (err) {
     res.send({ isCompleted: false });
@@ -226,7 +243,7 @@ app.post("/api/createTeam", async (req, res) => {
 */
 app.post("/api/joinTeam", async (req, res) => {
   // 요청 데이터 받아오기
-  const { uid, teamId, userName } = req.body;
+  const { uid, teamId, userName, fcmToken } = req.body;
 
   let name = "";
   let description = "";
@@ -295,6 +312,19 @@ app.post("/api/joinTeam", async (req, res) => {
       .doc(uid)
       .set({ ...files });
   };
+
+  // 주제 구독
+  const registrationToken = [fcmToken];
+  console.log(registrationToken);
+
+  messaging()
+    .subscribeToTopic(registrationToken, teamId)
+    .then((res) => {
+      console.log("Successfully subscribed to topic:", res);
+    })
+    .catch((err) => {
+      console.log("Error subscribing to topic:", err);
+    });
 
   try {
     await axios
@@ -532,13 +562,16 @@ app.post("/api/upload", upload.any(), async (req, res) => {
     const fileNameWithDate =
       fileName.split(".")[0] +
       "_" +
-      JSON.parse(fileInfo).uploadTime.replace(/:/g, "") +
+      JSON.parse(fileInfo).uploadTime.replace(/:/g, "").replace(" ", "_") +
       "." +
       fileName.split(".")[1];
 
     // file 읽기
     const tempFilePath = `/tmp/${uid}-${fileName}`;
-    await fs.writeFile(tempFilePath, file.buffer);
+    await fs.writeFile(tempFilePath, file.buffer, (error) =>
+      console.log("writeFile Error: ", error)
+    );
+    console.log("tempFilePath: ", tempFilePath);
 
     // firebase storage에 업로드 하기
     await bucket.upload(tempFilePath, {
@@ -594,9 +627,9 @@ app.post("/api/upload", upload.any(), async (req, res) => {
 app.post("/api/download", async (req, res) => {
   const { uid, name, uploadTime } = req.body;
   const fileRef = bucket.file(
-    `${uid}/${name.split(".")[0]}_${uploadTime.replace(/:/g, "")}.${
-      name.split(".")[1]
-    }`
+    `${uid}/${name.split(".")[0]}_${uploadTime
+      .replace(/:/g, "")
+      .replace(" ", "_")}.${name.split(".")[1]}`
   );
   try {
     await getDownloadURL(fileRef).then((url) => {
@@ -1170,20 +1203,20 @@ app.post("/api/sendNotice", async (req, res) => {
 
     // fcm을 통해 푸시알림 보내기
     let message = {
-      tokens,
-      notification: {
+      topic: teamId,
+      data: {
         title,
         body: content,
       },
     };
     await admin
       .messaging()
-      .sendEachForMulticast(message)
+      .send(message)
       .then((res) => {
-        console.log(
-          "Messages were sent successfully:",
-          res.responses[0].success
-        );
+        console.log("Messages were sent successfully:", res);
+      })
+      .catch((err) => {
+        console.log("Error sending message", err);
       });
 
     res.send({ isCompleted: true });

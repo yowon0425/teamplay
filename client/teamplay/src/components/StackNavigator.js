@@ -56,16 +56,12 @@ const StackNavigator = ({fcmToken}) => {
           component={MenuBar}
           options={{headerShown: false}}
         />
-        <Stack.Screen
-          name="StartNew"
-          component={StartNew}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="StartJoin"
-          component={StartJoin}
-          options={{headerShown: false}}
-        />
+        <Stack.Screen name="StartNew" options={{headerShown: false}}>
+          {() => <StartNew fcmToken={fcmToken} />}
+        </Stack.Screen>
+        <Stack.Screen name="StartJoin" options={{headerShown: false}}>
+          {() => <StartJoin fcmToken={fcmToken} />}
+        </Stack.Screen>
         <Stack.Screen
           name="MainNotice"
           component={MainNotice}

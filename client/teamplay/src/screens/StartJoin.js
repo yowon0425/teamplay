@@ -14,7 +14,7 @@ import auth from '@react-native-firebase/auth';
 import {useNavigation} from '@react-navigation/native';
 import PinkButton from '../components/PinkButton';
 
-const StartJoin = () => {
+const StartJoin = ({fcmToken}) => {
   const [teamId, setTeamId] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
@@ -58,6 +58,7 @@ await axios.post('/api/API이름', {
           uid,
           userName: displayName,
           teamId,
+          fcmToken: fcmToken,
         })
         .then(res => {
           if (res.data.isJoined) {
