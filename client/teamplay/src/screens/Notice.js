@@ -14,7 +14,6 @@ import auth from '@react-native-firebase/auth';
 import NoticeCard from '../components/NoticeCard'; // NoticeCard 컴포넌트 불러오기
 
 const Notice = ({teamId}) => {
-  console.log('notice: ' + teamId);
   const [noticeList, setNoticeList] = useState([]);
 
   // 알림 리스트 불러오는 함수

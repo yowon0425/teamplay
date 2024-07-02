@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -18,173 +19,129 @@ import { useRoute } from '@react-navigation/native';
 
 LocaleConfig.locales['ko-KR'] = {
   monthNames: [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
+    '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월',
   ],
   monthNamesShort: [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
+    '1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월',
   ],
   dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
   dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
   today: '오늘',
-  monthNames: [
-    '1월',
-    '2월',
-    '3월',
-    '4월',
-    '5월',
-    '6월',
-    '7월',
-    '8월',
-    '9월',
-    '10월',
-    '11월',
-    '12월',
-  ],
 };
 LocaleConfig.defaultLocale = 'ko-KR';
 
 const CalendarScreen = ({ teamId }) => {
-  const [selectedDate, setSelectedDate] = useState('');
-  const [isTextInputVisible, setIsTextInputVisible] = useState(false);
-  const [eventText, setEventText] = useState('');
-  const [selectedTime, setSelectedTime] = useState(new Date());
-  const [events, setEvents] = useState({});
-  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [state, setState] = useState({
+    selectedDate: '',
+    isTextInputVisible: false,
+    eventText: '',
+    selectedTime: new Date(),
+    events: {},
+    showTimePicker: false,
+  });
 
   const { uid } = auth().currentUser;
 
-  // 이벤트 핸들러 함수들
   const handleDayPress = (day) => {
-    setSelectedDate(day.dateString);
-    setIsTextInputVisible(false);
-    setShowTimePicker(true);
+    setState((prevState) => ({
+      ...prevState,
+      selectedDate: day.dateString,
+      isTextInputVisible: false,
+      showTimePicker: true,
+    }));
   };
 
   const handleAddEvent = async () => {
-    if (selectedDate && eventText) {
-      const updatedEvents = { ...events };
-      const dateTime = `${selectedDate}`;
-      if (!updatedEvents[dateTime]) {
-        updatedEvents[dateTime] = [];
-      }
+    const { selectedDate, eventText, selectedTime, events } = state;
+    if (!selectedDate || !eventText) return;
 
-      const formattedTime = selectedTime.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
+    const formattedTime = selectedTime.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+    const formattedEvent = `${formattedTime} ${eventText}`;
+
+    const updatedEvents = {
+      ...events,
+      [selectedDate]: [
+        ...(events[selectedDate] || []),
+        { text: formattedEvent, time: formattedTime },
+      ],
+    };
+
+    try {
+      const res = await axios.post('/api/addCalender', {
+        uid,
+        teamId,
+        name: eventText,
+        date: selectedDate,
+        time: formattedTime,
       });
 
-      const formattedEvent = `${formattedTime} ${eventText}`;
-
-      updatedEvents[dateTime].push({ text: formattedEvent, time: formattedTime });
-
-      try {
-        const res = await axios.post('/api/addCalender', {
-          uid,
-          teamId,
-          name: eventText,
-          date: selectedDate,
-          time: formattedTime,
-        });
-
-        if (res.data) {
-          console.log('성공');
-          console.log(teamId, uid, eventText);
-          setEvents(updatedEvents);
-          setEventText('');
-          setIsTextInputVisible(false);
-          setShowTimePicker(false);
-        } else {
-          // 실패 시 할 작업
-        }
-      } catch (err) {
-        console.error('Error adding event:', err);
+      if (res.data) {
+        setState((prevState) => ({
+          ...prevState,
+          events: updatedEvents,
+          eventText: '',
+          isTextInputVisible: false,
+          showTimePicker: false,
+        }));
+      } else {
+        // Handle failure
       }
-    }
-  };
-
-  const handleTimeChange = (event, selectedTime) => {
-    if (event.type === 'set') {
-      setSelectedTime(selectedTime);
-      setShowTimePicker(false);
-      setIsTextInputVisible(true);
-    } else {
-      setShowTimePicker(false);
+    } catch (err) {
+      console.error('Error adding event:', err);
     }
   };
 
   const handleDeleteEvent = async (dateTime, index) => {
+    const { events } = state;
     const updatedEvents = { ...events };
     const eventsOnDateTime = updatedEvents[dateTime];
 
-    if (eventsOnDateTime && eventsOnDateTime.length > index && eventsOnDateTime[index]) {
-      const eventToDelete = eventsOnDateTime[index];
+    if (!eventsOnDateTime || index >= eventsOnDateTime.length) return;
 
-      if (eventToDelete && eventToDelete.time) {
-        eventsOnDateTime.splice(index, 1);
+    const eventToDelete = eventsOnDateTime[index];
+    eventsOnDateTime.splice(index, 1);
 
-        if (eventsOnDateTime.length === 0) {
-          delete updatedEvents[dateTime];
-        }
-
-        // 이벤트를 삭제한 후 상태를 업데이트합니다.
-        setEvents(updatedEvents);
-
-        // 현재 사용자의 UID를 가져옵니다.
-        const currentUser = auth().currentUser;
-        if (currentUser) {
-          const uid = currentUser.uid;
-
-          try {
-            console.log(eventToDelete.text.split(' ')[1], dateTime);
-            const res = await axios.post('/api/deleteCalender', {
-              uid,
-              teamId,
-              name: eventToDelete.text.split(' ')[1],
-              date: dateTime,
-              time: eventToDelete.time,
-            });
-
-            if (res.data) {
-              // 성공 시 아무 작업도 하지 않습니다.
-            } else {
-              // 실패 시 할 작업
-            }
-          } catch (err) {
-            // 에러 시 할 작업
-            console.error('이벤트 삭제 중 오류 발생:', err);
-          }
-        } else {
-          console.error('사용자 정보를 가져올 수 없습니다.');
-        }
-      } else {
-        console.error('이벤트 삭제 중 오류 발생: 이벤트 정보가 올바르게 설정되지 않았습니다.');
-      }
-    } else {
-      console.error('이벤트 삭제 중 오류 발생: 이벤트 정보가 유효하지 않습니다.');
+    if (eventsOnDateTime.length === 0) {
+      delete updatedEvents[dateTime];
     }
+
+    try {
+      const res = await axios.post('/api/deleteCalender', {
+        uid,
+        teamId,
+        name: eventToDelete.text.split(' ')[1],
+        date: dateTime,
+        time: eventToDelete.time,
+      });
+
+      if (res.data) {
+        setState((prevState) => ({
+          ...prevState,
+          events: updatedEvents,
+        }));
+      } else {
+        // Handle failure
+      }
+    } catch (err) {
+      console.error('Error deleting event:', err);
+    }
+  };
+
+  const confirmDeleteEvent = (dateTime, index) => {
+    Alert.alert('TeamPlay', '일정을 삭제하시겠습니까?', [
+      {
+        text: '취소',
+        style: 'cancel',
+      },
+      {
+        text: '확인',
+        onPress: () => handleDeleteEvent(dateTime, index),
+      },
+    ]);
   };
 
   const readAlarm = async (uid, teamId) => {
@@ -196,39 +153,40 @@ const CalendarScreen = ({ teamId }) => {
       Object.keys(eventData).forEach((key) => {
         const event = eventData[key];
         const { name, date, time } = event;
-        if (!updatedEvents[date]) {
-          updatedEvents[date] = [];
-        }
-        updatedEvents[date].push({ text: `${time} ${name}`, time: time });
+        updatedEvents[date] = [
+          ...(updatedEvents[date] || []),
+          { text: `${time} ${name}`, time: time },
+        ];
       });
-      setEvents(updatedEvents);
+
+      setState((prevState) => ({
+        ...prevState,
+        events: updatedEvents,
+      }));
     } catch (error) {
       console.log(error);
     }
   };
 
-  readAlarm(uid, teamId);
+  useEffect(() => {
+    readAlarm(uid, teamId);
+  }, []);
 
   const renderDay = (date) => {
+    const { events } = state;
     const eventsOnDate = events[date.dateString];
     const formattedDate = new Date(date.dateString).toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      weekday: 'short', // 요일 추가
+      weekday: 'short',
     });
-  
-    const containerStyle = {
-      backgroundColor: 'transparent',
-    };
-  
+
     return (
       <TouchableOpacity onPress={() => handleDayPress(date)}>
-        <LinearGradient
-          colors={['#FFB8D0', '#FEE5E1']}
-          style={styles.circleContainer}>
-          <View style={[styles.circle, containerStyle]}>
-            <Text style={[styles.dayText, containerStyle]}>
+        <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.circleContainer}>
+          <View style={[styles.circle]}>
+            <Text style={[styles.dayText]}>
               {formattedDate}
             </Text>
           </View>
@@ -237,7 +195,9 @@ const CalendarScreen = ({ teamId }) => {
           eventsOnDate.map((event, index) => (
             <View key={index} style={styles.eventContainer}>
               <TouchableOpacity
-                onPress={() => handleDeleteEvent(date.dateString, index)}>
+                onPress={() => confirmDeleteEvent(date.dateString, index)}
+                style={styles.deleteButtonContainer}
+              >
                 <Text style={styles.deleteText}>X</Text>
               </TouchableOpacity>
               <Text style={styles.eventText}>{`${event.text}`}</Text>
@@ -246,41 +206,38 @@ const CalendarScreen = ({ teamId }) => {
         )}
       </TouchableOpacity>
     );
-  };  
+  };
 
-  // 렌더링
-  const currentDate = new Date();
-  const currentDateString = currentDate.toISOString().split('T')[0];
-
-  const markedDates = Object.keys(events).reduce((acc, dateTime) => {
-    const [date] = dateTime.split(' ');
-    acc[date] = {
-      marked: true,
-      dotColor: '#FFB8D0',
-      selectedColor: '#FFB8D0',
-    };
-    return acc;
-  }, {});
+  const { selectedDate, isTextInputVisible, eventText, selectedTime, showTimePicker, events } = state;
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      enabled>
+      enabled
+    >
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.title}>일정</Text>
         </View>
         <View style={{ flex: 1, justifyContent: 'space-between' }}>
           <Calendar
-            current={currentDateString}
+            current={new Date().toISOString().split('T')[0]}
             monthFormat={'MMMM'}
             onDayPress={handleDayPress}
-            markedDates={markedDates}
+            markedDates={Object.keys(events).reduce((acc, dateTime) => {
+              const [date] = dateTime.split(' ');
+              acc[date] = {
+                marked: true,
+                dotColor: '#FFB8D0',
+                selectedColor: '#FFB8D0',
+              };
+              return acc;
+            }, {})}
             theme={{
               arrowColor: 'gray',
               todayTextColor: 'black',
-              calendarBackground: 'transparent', // Set the background color to transparent
+              calendarBackground: 'transparent',
             }}
             renderDay={renderDay}
             style={{ backgroundColor: 'transparent' }}
@@ -292,7 +249,7 @@ const CalendarScreen = ({ teamId }) => {
                 style={styles.textInput}
                 placeholder="일정을 입력하세요..."
                 value={eventText}
-                onChangeText={(text) => setEventText(text)}
+                onChangeText={(text) => setState((prevState) => ({ ...prevState, eventText: text }))}
                 autoCorrect={false}
                 autoCapitalize="none"
                 keyboardType="default"
@@ -310,10 +267,24 @@ const CalendarScreen = ({ teamId }) => {
               mode="time"
               is24Hour={false}
               display="spinner"
-              onChange={handleTimeChange}
+              onChange={(event, selectedTime) => {
+                if (event.type === 'set') {
+                  setState((prevState) => ({
+                    ...prevState,
+                    selectedTime: selectedTime || new Date(),
+                    showTimePicker: false,
+                    isTextInputVisible: true,
+                  }));
+                } else {
+                  setState((prevState) => ({
+                    ...prevState,
+                    showTimePicker: false,
+                  }));
+                }
+              }}
             />
           )}
-          <EventList events={events} onDeleteEvent={handleDeleteEvent} />
+          <EventList events={events} onDeleteEvent={confirmDeleteEvent} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
