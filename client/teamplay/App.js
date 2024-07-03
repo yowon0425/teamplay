@@ -9,14 +9,6 @@ const App = () => {
   const [fcmToken, setFcmToken] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log(remoteMessage);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
     requestUserPermission();
   }, []);
 
