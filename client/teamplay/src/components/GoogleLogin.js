@@ -35,6 +35,7 @@ const GoogleLogin = () => {
   const [isNewComplete, setIsNewComplete] = useState(false);
 
   useEffect(() => {
+    
     googleConfig = GoogleSignin.configure({
       webClientId:
         '790378980309-58chnk7o3c9fes7r1e4vbpnp69dn1ta2.apps.googleusercontent.com',

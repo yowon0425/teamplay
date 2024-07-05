@@ -22,7 +22,6 @@ const SendNotice = ({fcmToken}) => {
 
   const route = useRoute();
   const {teamId} = route.params;
-  console.log(fcmToken);
 
   const navigation = useNavigation();
 
@@ -73,12 +72,6 @@ const SendNotice = ({fcmToken}) => {
     try {
       PushNotification.getChannels(function (channel_ids) {
         console.log(channel_ids);
-      });
-
-      PushNotification.localNotification({
-        channelId: 'team-channel',
-        title: title,
-        message: notificationText,
       });
     } catch (err) {
       Alert.alert('Error', err);
