@@ -5,7 +5,6 @@ const axios = require("axios");
 const { db, bucket, admin, storage } = require("./firebase");
 const multer = require("multer");
 const { getDownloadURL } = require("firebase-admin/storage");
-const { error } = require("console");
 const { messaging } = require("firebase-admin");
 const { FieldValue } = admin.firestore;
 
@@ -1205,7 +1204,7 @@ app.post("/api/sendNotice", async (req, res) => {
     let message = {
       topic: teamId,
       data: {
-        title,
+        title: title,
         body: content,
       },
     };
