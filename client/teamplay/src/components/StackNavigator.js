@@ -1,14 +1,15 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import LogIn from '../screens/LogIn';
 import TeamList from '../screens/TeamList';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 import Main from '../screens/Main';
 import MenuBar from './TabNavigator';
 import StartNew from '../screens/StartNew';
 import StartJoin from '../screens/StartJoin';
 import SendNotice from '../screens/SendNotice';
 import MainNotice from '../screens/MainNotice';
+import {Alert, Linking} from 'react-native';
 
 /* 메인화면-로그인-팀리스트까지의 stackNavigator */
 
@@ -32,15 +33,15 @@ Stack Navigator
 
 const Stack = createNativeStackNavigator();
 
-const StackNavigator = ({fcmToken}) => {
+const StackNavigator = ({fcmToken, linking, setIsLogIn}) => {
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator initialRouteName="Main">
         <Stack.Screen
           name="Main"
-          component={Main}
-          options={{headerShown: false, gestureEnabled: false}}
-        />
+          options={{headerShown: false, gestureEnabled: false}}>
+          {() => <Main setIsLogIn={setIsLogIn} />}
+        </Stack.Screen>
         <Stack.Screen
           name="LogIn"
           component={LogIn}

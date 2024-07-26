@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Notice from '../screens/Notice';
 import Home from '../screens/Home';
@@ -7,9 +7,14 @@ import Ionic from 'react-native-vector-icons/Ionicons';
 import MyMapStackScreen from './MyMapStackScreen';
 import MemberMapStackScreen from './MemberMapStackScreen';
 import Profile from '../screens/Profile';
+import {useNavigation} from '@react-navigation/native';
+import {Alert, Linking} from 'react-native';
 
 const MenuBar = ({route}) => {
   const Tab = createBottomTabNavigator();
+  console.log(route);
+  console.log(route.params);
+  console.log(route.params.teamId);
 
   return (
     <Tab.Navigator
@@ -50,6 +55,7 @@ const MenuBar = ({route}) => {
         {() =>
           route.params.memberId ? (
             <MemberMapStackScreen
+              name="MemberMapStack"
               teamId={route.params.teamId}
               memberId={route.params.memberId}
               memberName={route.params.memberName}
@@ -58,6 +64,7 @@ const MenuBar = ({route}) => {
             />
           ) : (
             <MyMapStackScreen
+              name="MyMapStack"
               teamId={route.params.teamId}
               todoData={route.params.todoData}
             />
