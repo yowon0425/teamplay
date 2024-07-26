@@ -552,7 +552,7 @@ app.post("/api/upload", upload.any(), async (req, res) => {
     const metadata = {
       metadata: {
         // This line is very important. It's to create a download token.
-        firebaseStorageDownloadTokens: uid,
+        firebaseStorageDownloimportadTokens: uid,
       },
       contentType: file.mimetype,
       cacheControl: "public, max-age=31536000",
@@ -1201,11 +1201,22 @@ app.post("/api/sendNotice", async (req, res) => {
     });
 
     // fcm을 통해 푸시알림 보내기
-    let message = {
+    const message = {
       topic: teamId,
       data: {
+        id: teamId,
+      },
+      notification: {
         title: title,
         body: content,
+      },
+      android: {
+        priority: "high",
+        notification: {
+          title: title,
+          body: content,
+          sound: "default",
+        },
       },
     };
     await admin
