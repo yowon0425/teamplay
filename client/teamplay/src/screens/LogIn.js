@@ -7,6 +7,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   ToastAndroid,
+  ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import PinkButton from '../components/PinkButton';
@@ -72,48 +73,50 @@ const LogIn = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>회원정보</Text>
-      <View style={styles.inputContainer}>
-        <KeyboardAvoidingView style={styles.inputLine}>
-          <Text style={styles.text}>이름</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={text => setName(text)}
-          />
-        </KeyboardAvoidingView>
-        <KeyboardAvoidingView style={styles.inputLine}>
-          <Text style={styles.text}>학교</Text>
-          <TextInput
-            style={styles.input}
-            value={organization}
-            onChangeText={text => setOrganization(text)}
-          />
-        </KeyboardAvoidingView>
-        <KeyboardAvoidingView style={styles.inputLine}>
-          <Text style={styles.text}>학번</Text>
-          <TextInput
-            style={styles.input}
-            value={studentId}
-            onChangeText={text => setStudentId(text)}
-          />
-        </KeyboardAvoidingView>
-        <KeyboardAvoidingView style={styles.inputLine}>
-          <Text style={styles.text}>전공</Text>
-          <TextInput
-            style={styles.input}
-            value={major}
-            onChangeText={text => setMajor(text)}
-          />
-        </KeyboardAvoidingView>
+    <ScrollView>
+      <View style={styles.container}>
+        <Text style={styles.title}>회원정보</Text>
+        <View style={styles.inputContainer}>
+          <KeyboardAvoidingView style={styles.inputLine}>
+            <Text style={styles.text}>이름</Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={text => setName(text)}
+            />
+          </KeyboardAvoidingView>
+          <KeyboardAvoidingView style={styles.inputLine}>
+            <Text style={styles.text}>학교</Text>
+            <TextInput
+              style={styles.input}
+              value={organization}
+              onChangeText={text => setOrganization(text)}
+            />
+          </KeyboardAvoidingView>
+          <KeyboardAvoidingView style={styles.inputLine}>
+            <Text style={styles.text}>학번</Text>
+            <TextInput
+              style={styles.input}
+              value={studentId}
+              onChangeText={text => setStudentId(text)}
+            />
+          </KeyboardAvoidingView>
+          <KeyboardAvoidingView style={styles.inputLine}>
+            <Text style={styles.text}>전공</Text>
+            <TextInput
+              style={styles.input}
+              value={major}
+              onChangeText={text => setMajor(text)}
+            />
+          </KeyboardAvoidingView>
+        </View>
+        <View style={styles.button}>
+          <PinkButton text="시작하기" light={true} onPress={onClickSignUp} />
+        </View>
       </View>
-      <PinkButton text="시작하기" light={true} onPress={onClickSignUp} />
-    </View>
+    </ScrollView>
   );
 };
-
-// 키보드에 인풋박스 가리는거 해결하기
 
 export default LogIn;
 
@@ -126,7 +129,8 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: 'black',
-    margin: 50,
+    marginTop: 54,
+    marginBottom: 30,
   },
   inputContainer: {
     alignItems: 'center',
@@ -150,5 +154,8 @@ const styles = StyleSheet.create({
     height: 30,
     fontSize: 16,
     padding: 5,
+  },
+  button: {
+    margin: 40,
   },
 });
