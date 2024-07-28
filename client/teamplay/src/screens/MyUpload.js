@@ -8,11 +8,12 @@ import {
   KeyboardAvoidingView,
   Keyboard,
   Alert,
+  Animated,
 } from 'react-native';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Ionic from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import DocumentPicker from 'react-native-document-picker';
 import axios from 'axios';
 import FileInfoLine from '../components/FileInfoLine';
@@ -26,20 +27,21 @@ const MyUpload = ({teamId, todoData}) => {
   const [comments, setComments] = useState();
   const [clicked, setClicked] = useState(false);
   const [commentUpdated, setCommentUpdated] = useState(false);
+  const [percent, setPercent] = useState(0);
+  const [fileUploaded, setFileUploaded] = useState(false);
   const {uid} = auth().currentUser;
   const userName = auth().currentUser.displayName;
   const todoId = todoData.number;
 
   /* 파일 선택, 업로드 함수 */
-  console.log('MyUpload : ' + uid, teamId, todoData);
   const handleFileSelect = async () => {
+    setPercent(0);
     try {
       const result = await DocumentPicker.pick({
         type: [DocumentPicker.types.allFiles],
       });
 
       setSelectedFile(result[0]);
-      console.log('result' + JSON.stringify(result));
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
         // User canceled the picker
@@ -75,6 +77,7 @@ const MyUpload = ({teamId, todoData}) => {
       formData.append('todoId', todoData.number);
       // JSON으로 저장되어서 문자열 형태로 저장되어 문제 -> 서버에서 parse해서 객체 형태로 바꿈
 
+      setPercent(100);
       try {
         const response = await axios.post('/api/upload', formData, {
           headers: {
@@ -82,15 +85,41 @@ const MyUpload = ({teamId, todoData}) => {
           },
         });
         console.log('Server response:', response.data);
+        setFileUploaded(response.data.uploaded);
         setSelectedFile(null);
         getFileInfo();
       } catch (error) {
-        console.error('Error uploading file to server:', error);
-        Alert.alert('Error', error);
+        console.error('Error uploading file to server');
+        Alert.alert(
+          'Teamplay',
+          '파일을 업로드하지 못했습니다.\n다시 시도해주십시오.',
+        );
       }
     }
   };
 
+  /* 파일 업로드 애니메이션 */
+  const loaderValue = useRef(new Animated.Value(0)).current;
+
+  const load = percent => {
+    Animated.timing(loaderValue, {
+      toValue: percent,
+      duration: 4000,
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const width = loaderValue.interpolate({
+    inputRange: [0, 100],
+    outputRange: ['0%', '100%'],
+    extrapolate: 'clamp',
+  });
+
+  useEffect(() => {
+    load(percent);
+  }, [percent]);
+
+  /* 업로드 시간 구하기 */
   const handleAddUploadTime = () => {
     const date = new Date();
     const uploadTime =
@@ -115,6 +144,7 @@ const MyUpload = ({teamId, todoData}) => {
     return uploadTime;
   };
 
+  /* 표기 업로드 시간 구하기 */
   const handleAddVisibleTime = () => {
     const date = new Date();
     const uploadTime =
@@ -196,7 +226,6 @@ const MyUpload = ({teamId, todoData}) => {
         .post('/api/teamData/comment', {teamId, memberId: uid, todoId})
         .then(res => {
           if (res.data) {
-            console.log(res.data);
             setComments(res.data);
             setCommentUpdated(false);
           } else {
@@ -245,16 +274,21 @@ const MyUpload = ({teamId, todoData}) => {
               />
             ) : (
               <>
-                <View style={styles.selectedFileBlock}>
-                  <Text style={styles.selectedFileName}>
-                    {selectedFile.name}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setSelectedFile(null);
-                    }}>
-                    <Text>X</Text>
-                  </TouchableOpacity>
+                <View style={styles.selectedFileBlockContainer}>
+                  {percent !== 0 ? (
+                    <Animated.View style={[styles.uploadingBar, {width}]} />
+                  ) : null}
+                  <View style={styles.selectedFileBlock}>
+                    <Text style={styles.selectedFileName}>
+                      {selectedFile.name}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setSelectedFile(null);
+                      }}>
+                      <Text>X</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <PinkButton
                   text="파일 업로드하기"
@@ -366,15 +400,26 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     alignItems: 'center',
   },
-  selectedFileBlock: {
+  selectedFileBlockContainer: {
     width: 330,
+    backgroundColor: '#E9E9E9',
+    marginBottom: 20,
+    borderRadius: 20,
+  },
+  selectedFileBlock: {
     padding: 10,
     borderRadius: 20,
-    backgroundColor: '#F2F2F2',
+    backgroundColor: 'transparent',
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 20,
+  },
+  uploadingBar: {
+    position: 'absolute',
+    borderRadius: 20,
+    backgroundColor: '#FFFBD3',
+    padding: 10,
+    height: '100%',
   },
   selectedFileName: {
     fontSize: 12,
