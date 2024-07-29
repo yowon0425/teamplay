@@ -189,6 +189,11 @@ app.post("/api/createTeam", async (req, res) => {
         [teamId]: {},
       });
 
+    await db
+      .collection("calender")
+      .doc(teamId)
+      .set({ [uid]: {} });
+
     let teamObj = {
       teamId,
       name,
@@ -281,6 +286,19 @@ app.post("/api/joinTeam", async (req, res) => {
       .update({
         member: FieldValue.arrayUnion(userObj),
       });
+
+    const calDoc = await db.collection("calender").doc(teamId).get();
+    const calData = calDoc.data();
+
+    const calender = {
+      ...calData,
+      [uid]: {},
+    };
+
+    await db
+      .collection("calender")
+      .doc(teamId)
+      .set({ ...calender });
 
     console.log("teamData");
     const teamDoc = await db.collection("comment").doc(teamId).get();
@@ -1059,9 +1077,9 @@ app.post("/api/addCalender", async (req, res) => {
     // firestore에 저장
     await db
       .collection("calender")
-      .doc(uid)
+      .doc(teamId)
       .update({
-        [teamId]: FieldValue.arrayUnion(calObj),
+        [uid]: FieldValue.arrayUnion(calObj),
       });
 
     res.send({ isCompleted: true });
@@ -1086,9 +1104,9 @@ app.post("/api/deleteCalender", async (req, res) => {
     // firestore에 저장
     await db
       .collection("calender")
-      .doc(uid)
+      .doc(teamId)
       .update({
-        [teamId]: FieldValue.arrayRemove(deleteCal),
+        [uid]: FieldValue.arrayRemove(deleteCal),
       });
 
     res.send({ isCompleted: true });
@@ -1120,12 +1138,12 @@ app.post("/api/calender", async (req, res) => {
     // firestore에서 가져오기
     await db
       .collection("calender")
-      .doc(uid)
+      .doc(teamId)
       .get()
       .then((snapshot) => {
         // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
         var calenderData = snapshot.data();
-        return res.json(calenderData[teamId]);
+        return res.json(calenderData);
       });
   } catch (err) {
     res.send({ isCompleted: false });
