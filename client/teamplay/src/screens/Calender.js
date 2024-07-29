@@ -150,9 +150,8 @@ const CalendarScreen = ({ teamId }) => {
       const eventData = response.data;
 
       const updatedEvents = {};
-      Object.keys(eventData).forEach((key) => {
-        const event = eventData[key];
-        const { name, date, time } = event;
+      eventData.calender.forEach((event) => {
+        const { date, time, name } = event;
         updatedEvents[date] = [
           ...(updatedEvents[date] || []),
           { text: `${time} ${name}`, time: time },
@@ -166,7 +165,8 @@ const CalendarScreen = ({ teamId }) => {
     } catch (error) {
       console.log(error);
     }
-  };
+};
+
 
   useEffect(() => {
     readAlarm(uid, teamId);

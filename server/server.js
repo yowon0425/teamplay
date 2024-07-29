@@ -1131,23 +1131,33 @@ app.post("/api/deleteCalender", async (req, res) => {
   실패 -> isCompleted: false
 */
 app.post("/api/calender", async (req, res) => {
-  // 요청 데이터 받아오기
   const { uid, teamId } = req.body;
 
+  console.log(`Received request with uid: ${uid}, teamId: ${teamId}`);
+
   try {
-    // firestore에서 가져오기
-    await db
-      .collection("calender")
-      .doc(teamId)
-      .get()
-      .then((snapshot) => {
-        // 찾은 문서에서 데이터를 JSON 형식으로 얻어옴
-        var calenderData = snapshot.data();
-        return res.json(calenderData);
-      });
+    const docRef = db.collection("calender").doc(teamId);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      console.log(`No document found for teamId: ${teamId}`);
+      return res.status(404).json({ isCompleted: false, message: "No such document!" });
+    }
+
+    const calendarData = doc.data();
+    console.log(`Document data: ${JSON.stringify(calendarData)}`);
+
+    // 모든 팀원 일정 포함하기
+    const allEvents = Object.values(calendarData).flat();
+
+    const responseData = {
+      calender: allEvents,
+    };
+
+    return res.json(responseData);
   } catch (err) {
-    res.send({ isCompleted: false });
-    console.log(err);
+    console.error(err);
+    return res.status(500).json({ isCompleted: false, message: "Server error" });
   }
 });
 
