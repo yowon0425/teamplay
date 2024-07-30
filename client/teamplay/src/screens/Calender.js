@@ -54,22 +54,22 @@ const CalendarScreen = ({ teamId }) => {
   const handleAddEvent = async () => {
     const { selectedDate, eventText, selectedTime, events } = state;
     if (!selectedDate || !eventText) return;
-
+  
     const formattedTime = selectedTime.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
       hour12: false,
     });
     const formattedEvent = `${formattedTime} ${eventText}`;
-
+  
     const updatedEvents = {
       ...events,
       [selectedDate]: [
         ...(events[selectedDate] || []),
-        { text: formattedEvent, time: formattedTime },
+        { text: formattedEvent, time: formattedTime, uid: uid }, // UID 포함
       ],
     };
-
+  
     try {
       const res = await axios.post('/api/addCalender', {
         uid,
@@ -78,7 +78,7 @@ const CalendarScreen = ({ teamId }) => {
         date: selectedDate,
         time: formattedTime,
       });
-
+  
       if (res.data) {
         setState((prevState) => ({
           ...prevState,
@@ -88,12 +88,12 @@ const CalendarScreen = ({ teamId }) => {
           showTimePicker: false,
         }));
       } else {
-        // Handle failure
+        // 실패 처리
       }
     } catch (err) {
       console.error('Error adding event:', err);
     }
-  };
+  };  
 
   const handleDeleteEvent = async (dateTime, index) => {
     const { events } = state;
@@ -151,10 +151,10 @@ const CalendarScreen = ({ teamId }) => {
 
       const updatedEvents = {};
       eventData.calender.forEach((event) => {
-        const { date, time, name } = event;
+        const { date, time, name, uid: eventUid } = event; // 서버에서 UID 가져옴
         updatedEvents[date] = [
           ...(updatedEvents[date] || []),
-          { text: `${time} ${name}`, time: time },
+          { text: `${time} ${name}`, time: time, uid: eventUid }, // 이벤트 객체에 UID 추가
         ];
       });
 
@@ -165,48 +165,11 @@ const CalendarScreen = ({ teamId }) => {
     } catch (error) {
       console.log(error);
     }
-};
-
+  };
 
   useEffect(() => {
     readAlarm(uid, teamId);
   }, []);
-
-  const renderDay = (date) => {
-    const { events } = state;
-    const eventsOnDate = events[date.dateString];
-    const formattedDate = new Date(date.dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'short',
-    });
-
-    return (
-      <TouchableOpacity onPress={() => handleDayPress(date)}>
-        <LinearGradient colors={['#FFB8D0', '#FEE5E1']} style={styles.circleContainer}>
-          <View style={[styles.circle]}>
-            <Text style={[styles.dayText]}>
-              {formattedDate}
-            </Text>
-          </View>
-        </LinearGradient>
-        {eventsOnDate && eventsOnDate.length > 0 && (
-          eventsOnDate.map((event, index) => (
-            <View key={index} style={styles.eventContainer}>
-              <TouchableOpacity
-                onPress={() => confirmDeleteEvent(date.dateString, index)}
-                style={styles.deleteButtonContainer}
-              >
-                <Text style={styles.deleteText}>X</Text>
-              </TouchableOpacity>
-              <Text style={styles.eventText}>{`${event.text}`}</Text>
-            </View>
-          ))
-        )}
-      </TouchableOpacity>
-    );
-  };
 
   const { selectedDate, isTextInputVisible, eventText, selectedTime, showTimePicker, events } = state;
 
@@ -226,8 +189,7 @@ const CalendarScreen = ({ teamId }) => {
             monthFormat={'MMMM'}
             onDayPress={handleDayPress}
             markedDates={Object.keys(events).reduce((acc, dateTime) => {
-              const [date] = dateTime.split(' ');
-              acc[date] = {
+              acc[dateTime] = {
                 marked: true,
                 dotColor: '#FFB8D0',
                 selectedColor: '#FFB8D0',
@@ -239,8 +201,6 @@ const CalendarScreen = ({ teamId }) => {
               todayTextColor: 'black',
               calendarBackground: 'transparent',
             }}
-            renderDay={renderDay}
-            style={{ backgroundColor: 'transparent' }}
           />
 
           {isTextInputVisible && (
@@ -284,19 +244,19 @@ const CalendarScreen = ({ teamId }) => {
               }}
             />
           )}
-          <EventList events={events} onDeleteEvent={confirmDeleteEvent} />
+          <EventList events={events} onDeleteEvent={confirmDeleteEvent} currentUid={uid} />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
-const EventList = ({ events, onDeleteEvent }) => {
+const EventList = ({ events, onDeleteEvent, currentUid }) => {
   const sortedDateTimes = Object.keys(events).sort();
 
   return (
     <View style={styles.eventListContainer}>
-      {sortedDateTimes.map((dateTime, index) => (
+      {sortedDateTimes.map((dateTime) => (
         <View key={dateTime}>
           <View style={styles.dayTop}>
             <Text style={styles.dayText}>
@@ -309,18 +269,18 @@ const EventList = ({ events, onDeleteEvent }) => {
             <View style={styles.separator} />
           </View>
           {events[dateTime].map((event, eventIndex) => (
-            <View
-              key={`${dateTime}_${eventIndex}`}
-              style={styles.eventContainer}>
+            <View key={`${dateTime}_${eventIndex}`} style={styles.eventContainer}>
               <View style={styles.eventTextContainer}>
                 <Text style={styles.Text1}>{`${event.text.split(' ')[0]}`}</Text>
                 <Text style={styles.Text2}>{`${event.text.split(' ')[1]}`}</Text>
               </View>
-              <TouchableOpacity
-                onPress={() => onDeleteEvent(dateTime, eventIndex)}
-                style={styles.deleteButton}>
-                <Text style={styles.deleteText}>X</Text>
-              </TouchableOpacity>
+              {event.uid === currentUid && (
+                <TouchableOpacity
+                  onPress={() => onDeleteEvent(dateTime, eventIndex)}
+                  style={styles.deleteButton}>
+                  <Text style={styles.deleteText}>X</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ))}
         </View>
